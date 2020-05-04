@@ -4,15 +4,15 @@
   "description": "Deterministic BNF compiler/parser",
   "main": "index.js",
   "scripts": {
-    "test": "test.js"
+    "test": "node build.js"
   },
   "repository": {
     "type": "git",
     "url": "https://github.io/ajanibilby/bnf-parser"
   },
   "keywords": [
-    "bnf;",
-    "compile;",
+    "bnf",
+    "compile",
     "parse"
   ],
   "author": "Ajani Bilby",
