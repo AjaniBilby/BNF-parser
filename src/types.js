@@ -55,6 +55,14 @@ class BNF_Tree {
 	constructor(terms = {}) {
 		this.terms = terms;
 	}
+
+	/**
+	 * Creates a BNF_Tree based off a JSON input
+	 * @param {Object} jsonObj A parsed JSON file
+	 */
+	static fromJSON(jsonObj) {
+		return new BNF_Tree(jsonObj.terms);
+	}
 }
 
 /**
