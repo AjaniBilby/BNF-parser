@@ -4,7 +4,7 @@ let types = require('./src/types.js');
 
 const fs = require('fs');
 
-let syntax = BNF_Tree.fromJSON(
+let syntax = types.BNF_Tree.fromJSON(
   JSON.parse(fs.readFileSync('./bnf.json', 'utf8'))
 );
 
