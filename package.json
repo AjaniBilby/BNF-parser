@@ -1,0 +1,20 @@
+{
+  "name": "bnf-parser",
+  "version": "1.0.0",
+  "description": "Deterministic BNF compiler/parser",
+  "main": "index.js",
+  "scripts": {
+    "test": "test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.io/ajanibilby/bnf-parser"
+  },
+  "keywords": [
+    "bnf;",
+    "compile;",
+    "parse"
+  ],
+  "author": "Ajani Bilby",
+  "license": "ISC"
+}

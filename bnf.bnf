@@ -1,0 +1,32 @@
+program ::= w ( stmt w )+
+stmt ::= def | comment
+
+
+comment ::= "#" !"\n" "\n"
+
+
+
+whitespace ::= " " | "\t" | "\n" | "\r" | "\n"
+w ::= whitespace*
+
+
+letter ::= "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z" | "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z"
+digit ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
+
+name ::= ( letter | "_" ) ( letter | digit | "_" )*
+
+
+# Starts with " and consume anything until " - with behaviour for parsing escaped characters
+constant ::= "\"" ( "\\\"" | "\\t" | "\\n" | "\\r" | "\\\\" | !( "\"" | "\\" ) )+ "\""
+
+def ::= name " " w "::= " expr
+expr ::= expr_p2 ( " " w expr_p2 )*
+expr_opperand ::= name | constant | brackets
+brackets      ::= "( " w expr " " w ")"
+expr_p1     ::= expr_p1_not | expr_p1_opt | expr_p1_orm | expr_p1_zrm | expr_opperand
+expr_p1_not ::= "!" expr_opperand
+expr_p1_opt ::= expr_opperand "?"
+expr_p1_zrm ::= expr_opperand "*"
+expr_p1_orm ::= expr_opperand "+"
+expr_p2     ::= expr_p2_or | expr_p1
+expr_p2_or  ::= expr_p1 " " w "| " w expr_p2
