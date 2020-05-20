@@ -14,7 +14,7 @@ if (res.hasError || res.isPartial) {
 
 // Compile the parsed result into a new tree
 let syntax = BNF.Compile(res.tree);
-fs.writeFileSync('bnf.json', JSON.stringify(syntax, null, 2));
+fs.writeFileSync('bnf.json', JSON.stringify(syntax));
 
 // Print success
 console.log('BNF syntax building completed');
