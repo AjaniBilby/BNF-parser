@@ -140,7 +140,7 @@ class BNF_Tree {
  */
 class BNF_Parse {
 	constructor(res, dataLen) {
-		this.hasError  = res instanceof SyntaxError;
+		this.hasError  = res instanceof BNF_SyntaxError;
 		this.isPartial = res.consumed != dataLen;
 		this.tree      = res;
 	}
