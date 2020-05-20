@@ -8,8 +8,43 @@ const fs = require('fs');
 
 let file = path.join(__dirname, './bnf.json');
 
-let syntax = types.BNF_Tree.fromJSON(
+const syntax = types.BNF_Tree.fromJSON(
   JSON.parse(fs.readFileSync(file, 'utf8'))
 );
 
-module.exports = {Compile, Parse, types, syntax, Message};
+
+function Build (data, filename){
+  // Parse the file and check for errors
+  let parse;
+  try {
+    parse = Parse(data, syntax)
+  } catch(e) {
+    throw new Error(`An internal error occured when attempting to parse the data;\n  ${e}`)
+  }
+
+  if (parse.hasError || parse.isPartial) {	
+    let ref = null;
+    if (parse.tree instanceof types.BNF_SyntaxError) {
+      ref = parse.tree.ref;
+    } else {
+      ref = parse.tree.ref.end;
+    }
+
+    let msg = filename ? `${filename}: ` : "";
+    msg += `BNF did not parse correctly due to a syntax error at ${ref.toString()}\n`;
+    msg += "  " + Message.HighlightArea(data, ref).split('\n').join('\n  ');
+    throw new SyntaxError(msg);
+  }
+
+  // Compile the parsed result into a new tree
+  let output;
+  try {
+    output = Compile(parse.tree);
+  } catch(e) {
+    throw new InternalError(`Compile Error: An internal error occured when attempting to compile the BNF tree;\n  ${e}`);
+  }
+
+  return output;
+}
+
+module.exports = {Compile, Parse, Build, types, syntax, Message};

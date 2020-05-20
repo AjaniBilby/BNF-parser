@@ -27,5 +27,8 @@ The BNF used by this application is a dilect of regular extensions for BNF. Most
 
 The BNF outlining the syntax of BNFs used by this system can be found [here](./bnf.bnf).
 
+# BNF: Build
+Provided with BNF data, this will return a BNF_Tree with error handling.
+
 ## BNF Opperator: Not
 The not opperator will be consuming tokens until the operation fails. Note that a not operator with no tokens it counted as a valid not operations.
