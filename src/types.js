@@ -4,13 +4,62 @@
  * @public
  * @property {Number} line
  * @property {Number} col
- * @property {String} internal
+ * @property {String} index
  */
 class BNF_Reference {
-	constructor(line, col, internal) {
-		this.line = line;
-		this.col = col
-		this.internal = internal;
+	constructor(line = 1, col = 1, index = 0) {
+		this.line  = line;
+		this.col   = col
+		this.index = index;
+	}
+
+	/**
+	 * Creates an exact duplicate object of this reference
+	 */
+	duplicate() {
+		return new BNF_Reference(this.line, this.col, this.index);
+	}
+
+	/**
+	 * Shift the reference forward by one character
+	 */
+	shiftCol() {
+		this.index++;
+		this.col++;
+
+		return this;
+	}
+	/**
+	 * Shift the reference forward one line
+	 */
+	shiftLine(){
+		this.index++;
+		this.line++;
+		this.col = 1;
+
+		return this;
+	}
+	/**
+	 * Shift the reference based on the string data
+	 * @param {String} str 
+	 */
+	shiftByString(str) {
+		for (let i=0; i<str.length; i++) {
+			if (str[i] == "\n") {
+				this.shiftLine();
+			} else {
+				this.shiftCol();
+			}
+		}
+
+		return this;
+	}
+
+	/**
+	 * Converts the reference to a string
+	 */
+	toString() {
+		return `(${this.line}:${this.col})`;
 	}
 };
 
@@ -39,10 +88,27 @@ class BNF_SyntaxError {
  * @property {Number} consumed
  */
 class BNF_SyntaxNode {
-	constructor(type, tokens, consumed) {
+	constructor(type, tokens, consumed, refStart, refEnd) {
+		if (!(refStart instanceof BNF_Reference)) {
+			throw new TypeError("refStart must be of type BNF_Reference");
+		}
+		if (!(refEnd instanceof BNF_Reference)) {
+			throw new TypeError("refEnd must be of type BNF_Reference");
+		}
+		if (isNaN(consumed) || consumed < 0) {
+			throw new TypeError("consumed must be a valid number")
+		}
+
 		this.type     = type;
 		this.tokens   = tokens;
-		this.consumed = consumed;
+		this.ref = {
+			start: refStart,
+			end: refEnd
+		};
+	}
+
+	get consumed(){
+		return this.ref.end.index - this.ref.start.index;
 	}
 }
 

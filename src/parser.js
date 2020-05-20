@@ -9,49 +9,62 @@ function Process_Literal_String (string) {
 	.replace(/\\\\/g, "\\");
 }
 
-function Process_Select   (input, tree, branch, stack = [], level = 0){
-
+function Process_Select   (input, tree, branch, stack = [], ref){
 	for (let target of branch.match) {
 		if (target.type == "literal") {
 			if (input.slice(0, target.val.length) == target.val) {
-				return new BNF_SyntaxNode (branch.term, Process_Literal_String(target.val), target.val.length);
+				return new BNF_SyntaxNode (
+					branch.term,
+					Process_Literal_String(target.val),
+					target.val.length,
+					ref,
+					ref.duplicate().shiftByString(target.val)
+				);
 			}
 		} else if (target.type == "ref") {
-			let res = Process(input, tree, target.val, [...stack], level+1);
+			let res = Process(input, tree, target.val, [...stack], ref);
 			if (res instanceof BNF_SyntaxNode) {
-				return new BNF_SyntaxNode(branch.term, [res], res.consumed);
+				return new BNF_SyntaxNode(branch.term, [res], res.consumed, ref, res.ref.end);
 			}
 		} else {
 			throw new Error(`Malformed tree: Invalid match type ${target.type}`);
 		}
 	}
 
-	return new BNF_SyntaxError(new BNF_Reference(0,0), input, branch, "PSL_1");
+	return new BNF_SyntaxError(ref, input, branch, "PSL_1");
 }
-function Process_Sequence(input, tree, branch, stack = [], level = 0) {
+function Process_Sequence(input, tree, branch, stack = [], localRef) {
+	let startRef = localRef.duplicate();
 
-	function MatchOne(target, string) {
+	function MatchOne(target, string, localRef) {		
 		if (target.type == "literal") {
 			if (string.slice(0, target.val.length) == target.val) {
-				return new BNF_SyntaxNode("literal", [Process_Literal_String(target.val)], target.val.length);
+				return new BNF_SyntaxNode(
+					"literal",
+					[ Process_Literal_String(target.val) ],
+					target.val.length,
+					localRef,
+					localRef.duplicate().shiftByString(target.val)
+				);
 			} else {
-				return new BNF_SyntaxError(new BNF_Reference(0, 0), string, branch, "PSQ_O_1");
+				return new BNF_SyntaxError(localRef, string, branch, "PSQ_O_1");
 			}
 		} else if (target.type == "ref") {
-			return Process(string, tree, target.val, [...stack], level + 1);
+			return Process(string, tree, target.val, [...stack], localRef);
 		}
 
 		throw new Error(`Malformed tree: Invalid selector match type ${target.type}`);
 	}
 
-	function MatchZeroToMany(target, string) {
+	function MatchZeroToMany(target, string, localRef) {
 		let sub = [];
 		let res;
 
 		while (!(res instanceof BNF_SyntaxError)) {
-			res = MatchOne(target, string);
+			res = MatchOne(target, string, localRef.duplicate());
 
 			if (res instanceof BNF_SyntaxNode) {
+				localRef = res.ref.end;
 				string = string.slice(res.consumed);
 				sub.push(res);
 
@@ -74,24 +87,26 @@ function Process_Sequence(input, tree, branch, stack = [], level = 0) {
 
 		// Match tokens
 		if (target.count == "?" || target.count == "1") {
-			let res = MatchOne(target, input);
+			let res = MatchOne(target, input, localRef.duplicate());
 			if (res instanceof BNF_SyntaxNode) {
 				sub = [res];
 			} else {
 				sub = [];
 			}
 		} else if (target.count == "*" || target.count == "+") {
-			sub = MatchZeroToMany(target, input);
+			sub = MatchZeroToMany(target, input, localRef.duplicate());
 		}
 
 		// Check number of tokens
 		if (sub.length == 0 && ( target.count == "+" || target.count == "1" )) {
-			return new BNF_SyntaxError(new BNF_Reference(0, 0), input, {...branch, stage: target}, "PSQ_1");
+			return new BNF_SyntaxError(localRef, input, {...branch, stage: target}, "PSQ_1");
 		}
 
 		// Shift the search point forwards to not search consumed tokens
 		let shift = 0;
 		if (sub.length > 0) {
+			localRef = sub[sub.length-1].ref.end;
+
 			shift = sub.reduce((prev, curr) => {
 				return ( prev instanceof BNF_SyntaxNode ? prev.consumed : prev ) + curr.consumed;
 			});
@@ -106,34 +121,38 @@ function Process_Sequence(input, tree, branch, stack = [], level = 0) {
 		stack = [];
 	}
 
-	return new BNF_SyntaxNode(branch.term, out, consumed);
+	return new BNF_SyntaxNode(branch.term, out, consumed, startRef, localRef);
 }
-function Process_Not(input, tree, branch, stack = [], level = 0) {
+function Process_Not(input, tree, branch, stack = [], localRef) {
 	let ran = false;
 	let res = false;
 	let out = "";
+
+	let startRef = localRef.duplicate();
 
 	while (!(res instanceof BNF_SyntaxNode)) {
 		if (input.length == 0) {
 			break;
 		}
 
-		res = Process(input, tree, branch.match, [...stack], level + 1);
+		res = Process(input, tree, branch.match, [...stack], localRef);
 
 		if (res instanceof BNF_SyntaxError) {
 			ran = true;
 			out += input[0];
+			localRef.shiftByString(input[0]);
+
 			input = input.slice(1);
 			stack = [];
 		}
 
 	}
 
-	return new BNF_SyntaxNode(branch.term, out, out.length);
+	return new BNF_SyntaxNode(branch.term, out, out.length, startRef, localRef);
 }
 
 
-function Process (input, tree, term, stack = [], level = 0) {
+function Process (input, tree, term, stack = [], ref) {
 	let branch = tree.terms[term];
 	if (!branch) {
 		console.error(term);
@@ -156,12 +175,19 @@ function Process (input, tree, term, stack = [], level = 0) {
 		throw new Error(`Invalid tree term "${term}"`);
 	}
 
+	if (!(ref instanceof BNF_Reference)) {
+		ref = new BNF_Reference();
+	}
+
+	// Duplicate the reference so the following functions won't modify the original
+	let forwardRef = ref.duplicate();
+
 	if (branch.type == "select") {
-		return Process_Select(input, tree, branch, stack, level);
+		return Process_Select(input, tree, branch, stack, forwardRef);
 	} else if (branch.type == "sequence") {
-		return Process_Sequence(input, tree, branch, stack, level);
+		return Process_Sequence(input, tree, branch, stack, forwardRef);
 	} else if (branch.type == "not") {
-		return Process_Not(input, tree, branch, stack, level);
+		return Process_Not(input, tree, branch, stack, forwardRef);
 	} else {
 		throw new Error(`Malformed tree: Invalid term type ${branch.type}`);
 	}
@@ -181,7 +207,9 @@ function Process (input, tree, term, stack = [], level = 0) {
  * @returns {BNF_Parse}
  */
 function Parse(data, tree, entry="program") {
-	let res = Process(data, tree, entry);
+	let ref = new BNF_Reference();
+
+	let res = Process(data, tree, entry, [], ref);
 	return new BNF_Parse(res, data.length);
 }
 
