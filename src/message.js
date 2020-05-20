@@ -17,10 +17,20 @@ function HighlightArea(input, fromRef, toRef){
 
   // Get the previous newline
   let begin;
-  for (begin=index; begin>0 && input[begin] != "\n"; begin--) {}
+  for (begin=index; 0<begin; begin--) {
+    if (input[begin] == "\n") {
+      begin++;
+      break;
+    }
+  }
   // Get the next newline
   let end;
-  for (end=index; end<input.length && input[end] != "\n"; end++) {}
+  for (end=index; end<input.length; end++) {
+    if (input[end] == "\n") {
+      end--;
+      break;
+    }
+  }
 
   let snippet = input.slice(begin, end);
   let area = "";

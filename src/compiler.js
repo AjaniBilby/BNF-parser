@@ -18,7 +18,7 @@ function SimplifyProgram(node) {
 		} else if (token.type == "comment") {
 			continue;
 		} else {
-			throw new Error("BNF Compile Error: Unknown top level data type");
+			throw new ReferenceError("BNF Compile Error: Unknown top level data type");
 		}
 	}
 
@@ -74,7 +74,7 @@ function SimplifyExprP2(node) {
 			return SimplifyExprOr(node.tokens[0]);
 	}
 
-	throw new Error(`BNF Compile Error: Unknown expr_p2 expression ${node.type}`);
+	throw new ReferenceError(`BNF Compile Error: Unknown expr_p2 expression ${node.type}`);
 }
 function SimplifyExprOr(node) {
 
@@ -101,7 +101,7 @@ function SimplifyExprP1(node) {
 			return SimplifyExprOpperand(node.tokens[0]);
 	}
 
-	throw new Error(`BNF Compile Error: Unknown expr_p2 expression ${node.tokens[0].type}`);
+	throw new ReferenceError(`BNF Compile Error: Unknown expr_p1 expression ${node.tokens[0].type}`);
 }
 function SimplifyP1Not (node) {
 	node.tokens = [SimplifyExprOpperand(node.tokens[1][0])];
@@ -121,7 +121,7 @@ function SimplifyExprOpperand(node){
 			return SimplifyBrackets(node.tokens[0]);
 	}
 
-	throw new Error(`BNF Compile Error: Unknown expr_opperand expression ${node.tokens[0].type}`);
+	throw new ReferenceError(`BNF Compile Error: Unknown expr_opperand expression ${node.tokens[0].type}`);
 }
 function SimplifyConstant(node) {
 	let str = "";
@@ -155,7 +155,7 @@ function Compile(tree) {
 
 	function GenerateTerminal(name, expr) {
 		if (out[name]) {
-			throw new Error(`BNF Compilation: Multiple occurances of term name ${name}`);
+			throw new ReferenceError(`BNF Compilation: Multiple occurances of term name ${name}`);
 		}
 
 		if (expr.type == "expr_p2_or") { // Select

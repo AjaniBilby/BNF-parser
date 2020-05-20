@@ -6,7 +6,14 @@ const fs = require('fs');
 let data = fs.readFileSync('./bnf.bnf', 'utf8');
 
 // Parse the file and check for errors
-let res = BNF.Parse(data, BNF.syntax);
+let res;
+try {
+	res = BNF.Parse(data, BNF.syntax)
+} catch(e) {
+	console.error(`Parse Error: An internal error occured when attempting to parse the data\n${e}`);
+	process.exit(1);
+}
+
 if (res.hasError || res.isPartial) {	
 	let ref = null;
 	if (res.tree instanceof BNF.types.BNF_SyntaxError) {
@@ -23,8 +30,15 @@ if (res.hasError || res.isPartial) {
 }
 
 // Compile the parsed result into a new tree
-let syntax = BNF.Compile(res.tree);
-fs.writeFileSync('bnf.json', JSON.stringify(syntax, null, 2));
+let syntax;
+try {
+	syntax = BNF.Compile(res.tree);
+} catch(e) {
+	console.error(`Compile Error: An internal error occured when attempting to compile the BNF tree\n${e}`);
+	process.exit(1);
+}
+
+fs.writeFileSync('bnf.json', JSON.stringify(syntax));
 
 // Print success
 console.log('BNF syntax building completed');

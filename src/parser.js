@@ -27,7 +27,7 @@ function Process_Select   (input, tree, branch, stack = [], ref){
 				return new BNF_SyntaxNode(branch.term, [res], res.consumed, ref, res.ref.end);
 			}
 		} else {
-			throw new Error(`Malformed tree: Invalid match type ${target.type}`);
+			throw new InternalError(`Malformed tree: Invalid match type ${target.type}`);
 		}
 	}
 
@@ -53,7 +53,7 @@ function Process_Sequence(input, tree, branch, stack = [], localRef) {
 			return Process(string, tree, target.val, [...stack], localRef);
 		}
 
-		throw new Error(`Malformed tree: Invalid selector match type ${target.type}`);
+		throw new ReferenceError(`Malformed tree: Invalid selector match type ${target.type}`);
 	}
 
 	function MatchZeroToMany(target, string, localRef) {
@@ -156,7 +156,7 @@ function Process (input, tree, term, stack = [], ref) {
 	let branch = tree.terms[term];
 	if (!branch) {
 		console.error(term);
-		throw new Error(`Malformed Tree: Unknown branch name ${term} of tree`);
+		throw new ReferenceError(`Malformed Tree: Unknown branch name ${term} of tree`);
 	}
 
 	branch.term = term;
@@ -166,13 +166,13 @@ function Process (input, tree, term, stack = [], ref) {
 	if (i != -1) {
 		// Allow one layer of recursion
 		if (stack.slice(i+1).indexOf(term) != -1) {
-			throw new Error("Malformed BNF: BNF is not deterministic")
+			throw new EvalError("Malformed BNF: BNF is not deterministic")
 		}
 	}
 	stack.push(term);
 
 	if (branch === undefined) {
-		throw new Error(`Invalid tree term "${term}"`);
+		throw new ReferenceError(`Invalid tree term "${term}"`);
 	}
 
 	if (!(ref instanceof BNF_Reference)) {
@@ -189,7 +189,7 @@ function Process (input, tree, term, stack = [], ref) {
 	} else if (branch.type == "not") {
 		return Process_Not(input, tree, branch, stack, forwardRef);
 	} else {
-		throw new Error(`Malformed tree: Invalid term type ${branch.type}`);
+		throw new ReferenceError(`Malformed tree: Invalid term type ${branch.type}`);
 	}
 
 	throw new Error("Unknown run time error");
