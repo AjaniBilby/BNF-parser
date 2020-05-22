@@ -27,7 +27,7 @@ function Process_Select   (input, tree, branch, stack = [], ref){
 				return new BNF_SyntaxNode(branch.term, [res], res.consumed, ref, res.ref.end);
 			}
 		} else {
-			throw new InternalError(`Malformed tree: Invalid match type ${target.type}`);
+			throw new TypeError(`Malformed tree: Invalid match type ${target.type}`);
 		}
 	}
 
