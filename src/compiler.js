@@ -104,7 +104,20 @@ function SimplifyExprP1(node) {
 	throw new ReferenceError(`BNF Compile Error: Unknown expr_p1 expression ${node.tokens[0].type}`);
 }
 function SimplifyP1Not (node) {
-	node.tokens = [SimplifyExprOpperand(node.tokens[1][0])];
+	let inner = node.tokens[1][0].tokens[0];	
+	switch (inner.type) {
+		case "expr_brackets":
+			node.tokens = [SimplifyBrackets(inner)];
+			break;
+			case "expr_p1_opt":
+			case "expr_p1_orm":
+			case "expr_p1_zrm":
+				node.tokens = [SimplifyP1(inner)];
+				break;
+			default:
+				throw new ReferenceError(`BNF Compile Error: Unexpected not of "${inner.type}"`);
+	}
+
 	return node;
 }
 function SimplifyP1 (node) {
@@ -117,7 +130,8 @@ function SimplifyExprOpperand(node){
 			return SimplifyName(node.tokens[0]);
 		case "constant":
 			return SimplifyConstant(node.tokens[0]);
-		case "brackets":
+		case "brackets": // legacy
+		case "expr_brackets":
 			return SimplifyBrackets(node.tokens[0]);
 	}
 
@@ -187,17 +201,40 @@ function Compile(tree) {
 			}
 		} else if (expr.type == "expr_p1_not") {
 			let inner = expr.tokens[0];
-			if (expr.tokens[0].type != "brackets" && expr.tokens[0].type != "expr_p2_or") {
-				inner = {
-					type: "brackets",
-					tokens: expr.tokens
-				};
+			let count = "1";
+
+			switch (inner.type) {
+				case "expr_p1_opt":
+					inner = inner.tokens;
+					count = "?";
+					break;
+				case "expr_p1_orm":
+					inner = inner.tokens;
+					count = "+";
+					break;
+				case "expr_p1_zrm":
+					inner = inner.tokens;
+					count = "*";
+					break;
 			}
 
+			// If the not is just a single reference then there is no point creating a new temp namespace
+			if (inner.type == "expr" &&
+				inner.tokens.length == 1 && inner.tokens[0].type == "name"
+			) {
+				out[name] = {
+					"type": "not",
+					match: inner.tokens[0].tokens,
+					count: count
+				};
+				return out;
+			}
+			
 			let temp = `#t${tempNo++}`;
 			out[name] = {
 				type: "not",
-				match: temp
+				match: temp,
+				count: count
 			};
 			GenerateTerminal(temp, inner);
 		} else {                         // Sequence

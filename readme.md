@@ -21,14 +21,14 @@ let tree = BNF.fromJSON(
 # Parsing
 Running parse will return a ``BNF_Parse`` object, which contains a tree structure of ``BNF_SyntaxNode``s. How these nodes are structured depends on the compiled BNF used to parse the syntax.
 
+# BNF: Build
+Provided with BNF data, this will return a BNF_Tree with error handling.
 
 # BNF: Syntax
 The BNF used by this application is a dilect of regular extensions for BNF. Most noteably it adds the not (``!``) opperator.
 
 The BNF outlining the syntax of BNFs used by this system can be found [here](./bnf.bnf).
 
-# BNF: Build
-Provided with BNF data, this will return a BNF_Tree with error handling.
-
 ## BNF Opperator: Not
-The not opperator will be consuming tokens until the operation fails. Note that a not operator with no tokens it counted as a valid not operations.
+The not operator must be before a set of brackets, and will consume characters until either the quota is met, or the pattern within the brackets successfully matches.  
+The quota of the not operation can be defined the same was as constants and terms via the use of ``+``, ``*``, ``?`` operators.

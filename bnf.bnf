@@ -1,8 +1,7 @@
 program ::= w ( stmt w )+
 stmt ::= def | comment
 
-
-comment ::= "#" !"\n" "\n"
+comment ::= "#" !( "\n" )* "\n"
 
 
 
@@ -17,16 +16,16 @@ name ::= ( letter | "_" ) ( letter | digit | "_" )*
 
 
 # Starts with " and consume anything until " - with behaviour for parsing escaped characters
-constant ::= "\"" ( "\\\"" | "\\t" | "\\n" | "\\r" | "\\\\" | !( "\"" | "\\" ) )+ "\""
+constant ::= "\"" ( "\\\"" | "\\t" | "\\n" | "\\r" | "\\\\" | !( "\"" | "\\" )+ )+ "\""
 
 def ::= name " " w "::= " expr
 expr ::= expr_p2 ( " " w expr_p2 )*
-expr_opperand ::= name | constant | brackets
-brackets      ::= "( " w expr " " w ")"
+  expr_brackets ::= "( " w expr " " w ")"
+  expr_opperand ::= name | constant | expr_brackets
 expr_p1     ::= expr_p1_not | expr_p1_opt | expr_p1_orm | expr_p1_zrm | expr_opperand
-expr_p1_not ::= "!" expr_opperand
-expr_p1_opt ::= expr_opperand "?"
-expr_p1_zrm ::= expr_opperand "*"
-expr_p1_orm ::= expr_opperand "+"
+  expr_p1_not ::= "!" ( expr_p1_opt | expr_p1_zrm | expr_p1_orm | expr_brackets )
+  expr_p1_opt ::= expr_opperand "?"
+  expr_p1_zrm ::= expr_opperand "*"
+  expr_p1_orm ::= expr_opperand "+"
 expr_p2     ::= expr_p2_or | expr_p1
-expr_p2_or  ::= expr_p1 " " w "| " w expr_p2
+  expr_p2_or  ::= expr_p1 " " w "| " w expr_p2

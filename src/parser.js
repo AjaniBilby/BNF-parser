@@ -27,7 +27,7 @@ function Process_Select   (input, tree, branch, stack = [], ref){
 				return new BNF_SyntaxNode(branch.term, [res], res.consumed, ref, res.ref.end);
 			}
 		} else {
-			throw new InternalError(`Malformed tree: Invalid match type ${target.type}`);
+			throw new TypeError(`Malformed tree: Invalid match type ${target.type}`);
 		}
 	}
 
@@ -98,7 +98,10 @@ function Process_Sequence(input, tree, branch, stack = [], localRef) {
 		}
 
 		// Check number of tokens
-		if (sub.length == 0 && ( target.count == "+" || target.count == "1" )) {
+		if (
+			sub.length == 0 ? ( target.count == "+" || target.count == "1" ) : false ||
+			sub.length > 1  ? ( target.count == "1" || target.count == "?" ) : false
+		) {
 			return new BNF_SyntaxError(localRef, input, {...branch, stage: target}, "PSQ_1");
 		}
 
@@ -130,8 +133,16 @@ function Process_Not(input, tree, branch, stack = [], localRef) {
 
 	let startRef = localRef.duplicate();
 
+	let atLeastOne = branch.count == "+" || branch.count == "1";
+	let atMostOne = branch.count == "?" || branch.count == "1";
+
 	while (!(res instanceof BNF_SyntaxNode)) {
 		if (input.length == 0) {
+			break;
+		}
+
+		// Stop at one
+		if (atMostOne && out.length >= 1) {
 			break;
 		}
 
@@ -148,7 +159,14 @@ function Process_Not(input, tree, branch, stack = [], localRef) {
 
 	}
 
-	return new BNF_SyntaxNode(branch.term, out, out.length, startRef, localRef);
+	if (
+		(atMostOne ? (out.length <= 1) : true) &&
+		(atLeastOne ? (1 <= out.length) : true)
+	) {
+		return new BNF_SyntaxNode(branch.term, out, out.length, startRef, localRef);
+	} else {
+		return new BNF_SyntaxError(localRef, input, {...branch, stage: branch.term}, "PN_1");
+	}
 }
 
 
