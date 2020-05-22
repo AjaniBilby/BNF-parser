@@ -130,8 +130,16 @@ function Process_Not(input, tree, branch, stack = [], localRef) {
 
 	let startRef = localRef.duplicate();
 
+	let atLeastOne = branch.count == "+" || branch.count == "1";
+	let atMostOne = branch.count == "?" || branch.count == "1";
+
 	while (!(res instanceof BNF_SyntaxNode)) {
 		if (input.length == 0) {
+			break;
+		}
+
+		// Stop at one
+		if (atMostOne && out.length >= 1) {
 			break;
 		}
 
@@ -148,7 +156,14 @@ function Process_Not(input, tree, branch, stack = [], localRef) {
 
 	}
 
-	return new BNF_SyntaxNode(branch.term, out, out.length, startRef, localRef);
+	if (
+		(atMostOne ? (out.length <= 1) : true) &&
+		(atLeastOne ? (1 <= out.length) : true)
+	) {
+		return new BNF_SyntaxNode(branch.term, out, out.length, startRef, localRef);
+	} else {
+		return new BNF_SyntaxError(localRef, input, {...branch, stage: branch.term}, "PN_1");
+	}
 }
 
 
