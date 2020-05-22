@@ -4,7 +4,8 @@
   "description": "Deterministic BNF compiler/parser",
   "main": "index.js",
   "scripts": {
-    "test": "node build.js"
+    "test": "node test.js",
+    "build": "node build.js"
   },
   "repository": {
     "type": "git",
