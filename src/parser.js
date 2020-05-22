@@ -98,7 +98,10 @@ function Process_Sequence(input, tree, branch, stack = [], localRef) {
 		}
 
 		// Check number of tokens
-		if (sub.length == 0 && ( target.count == "+" || target.count == "1" )) {
+		if (
+			sub.length == 0 ? ( target.count == "+" || target.count == "1" ) : false ||
+			sub.length > 1  ? ( target.count == "1" || target.count == "?" ) : false
+		) {
 			return new BNF_SyntaxError(localRef, input, {...branch, stage: target}, "PSQ_1");
 		}
 
