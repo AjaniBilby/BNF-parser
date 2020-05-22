@@ -203,7 +203,6 @@ function Compile(tree) {
 			let inner = expr.tokens[0];
 			let count = "1";
 
-			// switch (expr.token[0])
 			switch (inner.type) {
 				case "expr_p1_opt":
 					inner = inner.tokens;
@@ -235,7 +234,7 @@ function Compile(tree) {
 			out[name] = {
 				type: "not",
 				match: temp,
-				count: "1"
+				count: count
 			};
 			GenerateTerminal(temp, inner);
 		} else {                         // Sequence

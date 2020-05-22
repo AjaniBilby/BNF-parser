@@ -1,8 +1,6 @@
 program ::= w ( stmt w )+
 stmt ::= def | comment
 
-test ::= !( "w" )*
-
 comment ::= "#" !( "\n" )* "\n"
 
 
