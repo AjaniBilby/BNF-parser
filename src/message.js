@@ -23,11 +23,21 @@ function HighlightArea(input, fromRef, toRef){
       break;
     }
   }
+  // Move backforward past whitespace
+  let colShift = 0;
+  for (; begin<input.length; begin++){
+    if (input[begin] == " " | input[begin] == "\t") {
+      colShift++;
+      continue;
+    } else {
+      break;
+    }
+  }
+
   // Get the next newline
   let end;
   for (end=index; end<input.length; end++) {
     if (input[end] == "\n") {
-      end--;
       break;
     }
   }
@@ -35,8 +45,8 @@ function HighlightArea(input, fromRef, toRef){
   let snippet = input.slice(begin, end);
   let area = "";
   let lineLen = end-begin;
-  for (let col=1; col<lineLen; col++) {
-    area += IsInBound(col) ? "^" : " ";
+  for (let col=1+colShift; col<lineLen+colShift; col++) {
+    area += col == fromRef.col ? "^" : ( IsInBound(col) ? "~" : " ");
   }
 
   return snippet + "\n" + area;

@@ -56,6 +56,21 @@ class BNF_Reference {
 	}
 
 	/**
+	 * this > other
+	 * @param {BNF_Reference} other 
+	 */
+	isGreater(other) {
+		if (this.line > other.line) {
+			return true;
+		}
+		if (this.line == other.line && this.col > other.col) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
 	 * Converts the reference to a string
 	 */
 	toString() {
@@ -88,7 +103,7 @@ class BNF_SyntaxError {
  * @property {Number} consumed
  */
 class BNF_SyntaxNode {
-	constructor(type, tokens, consumed, refStart, refEnd) {
+	constructor(type, tokens, consumed, refStart, refEnd, reached = null) {
 		if (!(refStart instanceof BNF_Reference)) {
 			throw new TypeError("refStart must be of type BNF_Reference");
 		}
@@ -103,7 +118,8 @@ class BNF_SyntaxNode {
 		this.tokens   = tokens;
 		this.ref = {
 			start: refStart,
-			end: refEnd
+			end: refEnd,
+			reached: reached
 		};
 	}
 
