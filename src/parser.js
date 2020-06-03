@@ -107,11 +107,15 @@ function Process_Sequence(input, tree, branch, stack = [], localRef) {
 			if (res instanceof BNF_SyntaxNode) {
 				sub = [res];
 			} else if (res instanceof BNF_SyntaxError) {
-				prevErr = res;
+				if (prevErr === null || res.getReach().isGreater(prevErr.getReach())) {
+					prevErr = res;
+				}
 			}
 		} else if (target.count == "*" || target.count == "+") {
 			let res = MatchZeroToMany(target, input, localRef.duplicate());
-			prevErr = res.reached;
+			if (prevErr === null || res.reached.getReach().isGreater(prevErr.getReach())) {
+				prevErr = res.reached;
+			}
 			sub = res.data;
 		}
 
@@ -130,6 +134,19 @@ function Process_Sequence(input, tree, branch, stack = [], localRef) {
 		input = input.slice(shift);
 		consumed += shift;
 
+		// Get reach
+		let last = sub[sub.length-1];
+		if (last instanceof BNF_SyntaxNode) {
+			if (last.reached &&
+				(
+					prevErr === null ||
+					last.reached.getReach().isGreater(prevErr.getReach())
+				)
+			) {
+				prevErr = last.reached;
+			}
+		}
+
 		// Check number of tokens
 		if (
 			sub.length == 0 ? ( target.count == "+" || target.count == "1" ) : false ||
@@ -143,6 +160,9 @@ function Process_Sequence(input, tree, branch, stack = [], localRef) {
 		stack = [];
 	}
 
+	if (branch.term == "class_body" || branch.term == "class") {
+		console.log("  val", branch.term, `${prevErr.ref.toString()}->${prevErr.getReach().toString()}`);
+	}
 	return new BNF_SyntaxNode(branch.term, out, consumed, startRef, localRef, prevErr);
 }
 function Process_Not(input, tree, branch, stack = [], localRef) {
