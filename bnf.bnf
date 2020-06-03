@@ -6,6 +6,7 @@ comment ::= "#" !( "\n" )* "\n"
 
 
 whitespace ::= " " | "\t" | "\n" | "\r" | "\n"
+nl ::= "\r\n" | "\n"
 w ::= whitespace*
 
 
