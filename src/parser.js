@@ -27,7 +27,7 @@ function Process_Select   (input, tree, branch, stack = [], ref){
 			let res = Process(input, tree, target.val, [...stack], ref);
 			if (res instanceof BNF_SyntaxNode) {
 				return new BNF_SyntaxNode(branch.term, [res], res.consumed, ref, res.ref.end);
-			} if (best === null || best.ref.index < res.ref.index) {
+			} if (best === null || res.getReach().isGreater( best.getReach() )) {
 				best = res;
 			}
 		} else {
@@ -36,7 +36,7 @@ function Process_Select   (input, tree, branch, stack = [], ref){
 	}
 
 	if (best) {
-		return new BNF_SyntaxError(best.ref, best.remaining, branch, "PSL_1_Best");
+		return new BNF_SyntaxError(ref, best.remaining, branch, "PSL_1_Best").setCause(best);
 	}
 
 	return new BNF_SyntaxError(ref, input, branch, "PSL_1");
@@ -55,7 +55,10 @@ function Process_Sequence(input, tree, branch, stack = [], localRef) {
 					localRef.duplicate().shiftByString(target.val)
 				);
 			} else {
-				return new BNF_SyntaxError(localRef, string, branch, "PSQ_O_1");
+				return new BNF_SyntaxError(localRef, string, {
+					term: `"${target.val}"`,
+					type: target.type
+				}, "PSQ_O_1");
 			}
 		} else if (target.type == "ref") {
 			return Process(string, tree, target.val, [...stack], localRef);
@@ -84,7 +87,11 @@ function Process_Sequence(input, tree, branch, stack = [], localRef) {
 			}
 		}
 
-		return {data: sub, reached: res.ref};
+		return {
+			data: sub,
+			reached: new BNF_SyntaxError(localRef, string, branch, "SEQ_ZME")
+				.setCause(res)
+		};
 	}
 
 	let prevErr = null;
@@ -99,14 +106,8 @@ function Process_Sequence(input, tree, branch, stack = [], localRef) {
 			let res = MatchOne(target, input, localRef.duplicate());
 			if (res instanceof BNF_SyntaxNode) {
 				sub = [res];
-			} else if (res instanceof BNF_SyntaxError && target.count == 1) {
-				if (prevErr && prevErr.isGreater(res.ref)) {
-					res.ref = prevErr;
-				}
-
-				return res;
-			} else {
-				sub = [];
+			} else if (res instanceof BNF_SyntaxError) {
+				prevErr = res;
 			}
 		} else if (target.count == "*" || target.count == "+") {
 			let res = MatchZeroToMany(target, input, localRef.duplicate());
@@ -134,11 +135,8 @@ function Process_Sequence(input, tree, branch, stack = [], localRef) {
 			sub.length == 0 ? ( target.count == "+" || target.count == "1" ) : false ||
 			sub.length > 1  ? ( target.count == "1" || target.count == "?" ) : false
 		) {
-			if (prevErr.isGreater(localRef)){
-				localRef = prevErr;
-			}
-
-			return new BNF_SyntaxError(localRef, input, {...branch, stage: target}, "PSQ_1");
+			return new BNF_SyntaxError(startRef, input, {...branch, stage: target}, "PSQ_1")
+				.setCause(prevErr);
 		}
 
 		out.push(sub);
@@ -186,7 +184,8 @@ function Process_Not(input, tree, branch, stack = [], localRef) {
 	) {
 		return new BNF_SyntaxNode(branch.term, out, out.length, startRef, localRef);
 	} else {
-		return new BNF_SyntaxError(localRef, input, {...branch, stage: branch.term}, "PN_1");
+		return new BNF_SyntaxError(startRef, input, branch, "PN_1")
+			.setCause(new BNF_SyntaxError(localRef, input, branch.term, "PN_I"));
 	}
 }
 
@@ -221,17 +220,22 @@ function Process (input, tree, term, stack = [], ref) {
 	// Duplicate the reference so the following functions won't modify the original
 	let forwardRef = ref.duplicate();
 
+	let out = null;
 	if (branch.type == "select") {
-		return Process_Select(input, tree, branch, stack, forwardRef);
+		out = Process_Select(input, tree, branch, stack, forwardRef);
 	} else if (branch.type == "sequence") {
-		return Process_Sequence(input, tree, branch, stack, forwardRef);
+		out = Process_Sequence(input, tree, branch, stack, forwardRef);
 	} else if (branch.type == "not") {
-		return Process_Not(input, tree, branch, stack, forwardRef);
+		out = Process_Not(input, tree, branch, stack, forwardRef);
 	} else {
 		throw new ReferenceError(`Malformed tree: Invalid term type ${branch.type}`);
 	}
 
-	throw new Error("Unknown run time error");
+	if (out instanceof BNF_SyntaxError || out instanceof BNF_SyntaxNode) {
+		return out;
+	}
+
+	throw new TypeError(`Invalid return type of internal component from ${branch.term}:${branch.type}`);
 }
 
 

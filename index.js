@@ -19,7 +19,9 @@ function Build (data, filename, syntax = BNF_SYNTAX){
   try {
     parse = Parse(data, syntax);
   } catch(e) {
-    throw new Error(`An internal error occured when attempting to parse the data;\n  ${e}`)
+    let forward = new Error(`An internal error occured when attempting to parse the data;\n ${e.message}`);
+    forward.stack = e.stack;
+    throw forward;
   }
 
   if (parse.hasError || parse.isPartial) {	

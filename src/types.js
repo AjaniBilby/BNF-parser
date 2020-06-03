@@ -92,6 +92,51 @@ class BNF_SyntaxError {
 		this.remaining = remaining;
 		this.branch = branch;
 		this.code = code;
+		this.cause = null;
+	}
+
+	/**
+	 * Change the cause of the error
+	 * @param {BNF_SyntaxError} other 
+	 * @returns {BNF_SyntaxError}
+	 */
+	setCause(other) {
+		if (other === null) {                             // Remove the cause
+			this.cause = null;
+		} else if (!(other instanceof BNF_SyntaxError)) { // Invalid cause
+			console.error(other);
+			throw new TypeError(`Invalid type "${typeof(other)}" parsed as BNF_SyntaxError cause`);
+		} else {                                          // Update cause
+			this.cause = other;
+		}
+		
+		return this;
+	}
+
+	getCausation(){
+		// Ignore temporary types if possible
+		if (this.branch.term.slice(0,2) == "#t"){
+			if (this.cause) {
+				return this.cause.getCausation();
+			} else {
+				return `${this.branch.term}:${this.branch.type.slice(0,3)} ${this.ref.toString()}`;
+			}
+		}
+
+		let out = `${this.branch.term}:${this.branch.type.slice(0,3)} ${this.ref.toString()}`
+		if (this.cause) {
+			out += " -> " + this.cause.getCausation();
+		}
+
+		return out;
+	}
+
+	getReach() {
+		if (this.cause) {
+			return this.cause.getReach();
+		} else {
+			return this.ref;
+		}
 	}
 }
 
@@ -121,6 +166,7 @@ class BNF_SyntaxNode {
 			end: refEnd,
 			reached: reached
 		};
+		this.reached = reached;
 	}
 
 	get consumed(){
