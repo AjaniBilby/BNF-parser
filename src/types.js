@@ -89,7 +89,7 @@ class BNF_Reference {
 class BNF_SyntaxError {
 	constructor(ref, remaining, branch, code=null){
 		this.ref = ref;
-		this.remaining = remaining;
+		// this.remaining = remaining;
 		this.branch = branch;
 		this.code = code;
 		this.cause = null;
