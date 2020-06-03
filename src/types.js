@@ -105,7 +105,7 @@ class BNF_SyntaxError {
 			this.cause = null;
 		} else if (!(other instanceof BNF_SyntaxError)) { // Invalid cause
 			console.error(other);
-			throw new TypeError(`Invalid type "${typeof(other)}" parsed as BNF_SyntaxError cause`);
+			throw new TypeError(`Invalid type "${other.constuctor.name}" parsed as BNF_SyntaxError cause`);
 		} else {                                          // Update cause
 			this.cause = other;
 		}
