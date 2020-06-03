@@ -160,9 +160,6 @@ function Process_Sequence(input, tree, branch, stack = [], localRef) {
 		stack = [];
 	}
 
-	if (branch.term == "class_body" || branch.term == "class") {
-		console.log("  val", branch.term, `${prevErr.ref.toString()}->${prevErr.getReach().toString()}`);
-	}
 	return new BNF_SyntaxNode(branch.term, out, consumed, startRef, localRef, prevErr);
 }
 function Process_Not(input, tree, branch, stack = [], localRef) {
