@@ -87,10 +87,14 @@ function Process_Sequence(input, tree, branch, stack = [], localRef) {
 			}
 		}
 
+		let reach = new BNF_SyntaxError(localRef, string, branch, "SEQ_ZME");
+		if (res instanceof BNF_SyntaxError) {
+			reach.setCause(res);
+		}
+
 		return {
 			data: sub,
-			reached: new BNF_SyntaxError(localRef, string, branch, "SEQ_ZME")
-				.setCause(res)
+			reached: reach
 		};
 	}
 
