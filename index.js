@@ -1,7 +1,8 @@
-let Compile = require('./src/compiler.js');
-let Parse = require('./src/parser.js');
-let Message = require('./src/message.js');
-let types = require('./src/types.js');
+const GenerateTM = require('./src/tm-gen.js');
+const Compile = require('./src/compiler.js');
+const Message = require('./src/message.js');
+const Parse = require('./src/parser.js');
+const types = require('./src/types.js');
 
 const path = require('path');
 const fs = require('fs');
@@ -47,4 +48,4 @@ function Build (data, filename, syntax = BNF_SYNTAX){
   return output;
 }
 
-module.exports = {Compile, Parse, Build, types, BNF_SYNTAX, Message};
+module.exports = { Compile, Parse, Build, types, BNF_SYNTAX, Message, GenerateTM };

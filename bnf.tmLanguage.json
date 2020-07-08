@@ -1,0 +1,201 @@
+{
+  "name": "Qupa",
+  "patterns": [
+    "#def",
+    "#comment"
+  ],
+  "repository": {
+    "def": {
+      "patterns": [
+        {
+          "match": "(.*?)( )(.*?)(::= )(.*?)",
+          "capture": {
+            "0": {
+              "patterns": [
+                {
+                  "include": "#name"
+                }
+              ]
+            },
+            "2": {
+              "patterns": [
+                {
+                  "include": "#w"
+                }
+              ]
+            },
+            "4": {
+              "patterns": [
+                {
+                  "include": "#expr"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "name": {
+      "patterns": [
+        {
+          "name": "entity.name.class.bnf",
+          "match": "(.*?)(.*?)",
+          "capture": {
+            "0": {
+              "patterns": [
+                {
+                  "include": "##t3"
+                }
+              ]
+            },
+            "1": {
+              "patterns": [
+                {
+                  "include": "##t4"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "#t3": {
+      "patterns": [
+        {
+          "include": "#letter"
+        },
+        {
+          "match": "_"
+        }
+      ]
+    },
+    "#t4": {
+      "patterns": [
+        {
+          "include": "#letter"
+        },
+        {
+          "include": "#digit"
+        },
+        {
+          "match": "_"
+        }
+      ]
+    },
+    "w": {
+      "patterns": [
+        {
+          "match": "(.*?)",
+          "capture": {
+            "0": {
+              "patterns": [
+                {
+                  "include": "#whitespace"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "whitespace": {
+      "patterns": [
+        {
+          "match": " "
+        },
+        {
+          "match": "\t"
+        },
+        {
+          "match": "\n"
+        },
+        {
+          "match": "\r"
+        },
+        {
+          "match": "\n"
+        }
+      ]
+    },
+    "expr": {
+      "patterns": [
+        {
+          "match": "(.*?)(.*?)",
+          "capture": {
+            "0": {
+              "patterns": [
+                {
+                  "include": "#expr_p2"
+                }
+              ]
+            },
+            "1": {
+              "patterns": [
+                {
+                  "include": "##t8"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "expr_p2": {
+      "patterns": [
+        {
+          "include": "#expr_p2_or"
+        },
+        {
+          "include": "#expr_p1"
+        }
+      ]
+    },
+    "#t8": {
+      "patterns": [
+        {
+          "match": "( )(.*?)(.*?)",
+          "capture": {
+            "1": {
+              "patterns": [
+                {
+                  "include": "#w"
+                }
+              ]
+            },
+            "2": {
+              "patterns": [
+                {
+                  "include": "#expr_p2"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "comment": {
+      "patterns": [
+        {
+          "name": "comment.line.bnf",
+          "match": "(#)(.*?)(\n)",
+          "capture": {
+            "1": {
+              "patterns": [
+                {
+                  "include": "##t1"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "#t1": {
+      "patterns": [
+        {
+          "match": "?!(.*?)*"
+        }
+      ]
+    }
+  }
+}

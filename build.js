@@ -11,11 +11,18 @@ try {
 	syntax = BNF.Build(data);
 } catch (e) {
 	console.error(e);
-	process.exit();
+	process.exit(1);
 } finally {
 	fs.writeFileSync('bnf.json', JSON.stringify(syntax));	
 
 	// Print success
 	console.log('BNF syntax building completed');
-	process.exit(0);
 }
+
+fs.writeFileSync("bnf.tmLanguage.json", JSON.stringify(
+	BNF.GenerateTM(syntax, "stmt", "Qupa", {
+		comment: "comment.line.bnf",
+		name: "entity.name.class.bnf",
+		constant: "constant.string.quoted.double.bnf"
+	}), null, 2
+));
