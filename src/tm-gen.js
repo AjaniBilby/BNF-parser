@@ -3,7 +3,7 @@ const { GenerateTM } = require('../index.js');
 
 
 
-function GenerateTextMate (tree, topLevel, langName, means) {
+function GenerateTextMate (tree, topLevel, langName, langExt, means) {
 	if (topLevel === undefined) {
 		throw new Error("Must specify top level name argument");
 	}
@@ -12,7 +12,7 @@ function GenerateTextMate (tree, topLevel, langName, means) {
 	}
 
 	// Cache generated regex for certain terms
-	let cache = {};
+	// let cache = {};
 	function GenerateRegex(term) {
 		function CountStr(str) {
 			switch (str) {
@@ -131,7 +131,7 @@ function GenerateTextMate (tree, topLevel, langName, means) {
 
 	// Generate the pattern match for all required patterns
 	for (let node of tree.terms[topLevel].match) {
-		out.patterns.push(`#${node.val}`);
+		out.patterns.push({ include: `#${node.val}`});
 		GenerateRepo(node.val);
 	}
 
