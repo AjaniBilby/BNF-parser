@@ -56,6 +56,21 @@ class BNF_Reference {
 	}
 
 	/**
+	 * this > other
+	 * @param {BNF_Reference} other 
+	 */
+	isGreater(other) {
+		if (this.line > other.line) {
+			return true;
+		}
+		if (this.line == other.line && this.col > other.col) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
 	 * Converts the reference to a string
 	 */
 	toString() {
@@ -74,9 +89,57 @@ class BNF_Reference {
 class BNF_SyntaxError {
 	constructor(ref, remaining, branch, code=null){
 		this.ref = ref;
-		this.remaining = remaining;
+		// this.remaining = remaining;
 		this.branch = branch;
 		this.code = code;
+		this.cause = null;
+	}
+
+	/**
+	 * Change the cause of the error
+	 * @param {BNF_SyntaxError} other 
+	 * @returns {BNF_SyntaxError}
+	 */
+	setCause(other) {
+		if (other === null) {                             // Remove the cause
+			this.cause = null;
+		} else if (!(other instanceof BNF_SyntaxError)) { // Invalid cause
+			console.error(other);
+			throw new TypeError(`Invalid type "${other.constuctor.name}" parsed as BNF_SyntaxError cause`);
+		} else {                                          // Update cause
+			this.cause = other;
+		}
+		
+		return this;
+	}
+
+	getCausation(simple = false){
+		// Ignore temporary types if possible
+		if (this.branch.term.slice(0,2) == "#t"){
+			if (this.cause) {
+				return this.cause.getCausation(simple);
+			} else if (!simple) {
+				return `${this.branch.term}:${this.branch.type.slice(0,3)} ${this.ref.toString()}`;
+			}
+		}
+
+		let out = `${this.branch.term}`;
+		if (!simple) {
+			out += `:${this.branch.type.slice(0,3)} ${this.ref.toString()}`;
+		}
+		if (this.cause) {
+			out += " -> " + this.cause.getCausation(simple);
+		}
+
+		return out;
+	}
+
+	getReach() {
+		if (this.cause) {
+			return this.cause.getReach();
+		} else {
+			return this.ref;
+		}
 	}
 }
 
@@ -88,7 +151,7 @@ class BNF_SyntaxError {
  * @property {Number} consumed
  */
 class BNF_SyntaxNode {
-	constructor(type, tokens, consumed, refStart, refEnd) {
+	constructor(type, tokens, consumed, refStart, refEnd, reached = null) {
 		if (!(refStart instanceof BNF_Reference)) {
 			throw new TypeError("refStart must be of type BNF_Reference");
 		}
@@ -103,8 +166,10 @@ class BNF_SyntaxNode {
 		this.tokens   = tokens;
 		this.ref = {
 			start: refStart,
-			end: refEnd
+			end: refEnd,
+			reached: reached
 		};
+		this.reached = reached;
 	}
 
 	get consumed(){
