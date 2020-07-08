@@ -70,6 +70,7 @@ function GenerateTextMate (tree, topLevel, langName, langExt, means) {
 
 	let out = {
 		name: langName,
+		scopeName: `source.${langExt}`,
 		patterns: [],
 		repository: {}
 	};
