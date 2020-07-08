@@ -113,19 +113,22 @@ class BNF_SyntaxError {
 		return this;
 	}
 
-	getCausation(){
+	getCausation(simple = false){
 		// Ignore temporary types if possible
 		if (this.branch.term.slice(0,2) == "#t"){
 			if (this.cause) {
-				return this.cause.getCausation();
-			} else {
+				return this.cause.getCausation(simple);
+			} else if (!simple) {
 				return `${this.branch.term}:${this.branch.type.slice(0,3)} ${this.ref.toString()}`;
 			}
 		}
 
-		let out = `${this.branch.term}:${this.branch.type.slice(0,3)} ${this.ref.toString()}`
+		let out = `${this.branch.term}`;
+		if (!simple) {
+			out += `:${this.branch.type.slice(0,3)} ${this.ref.toString()}`;
+		}
 		if (this.cause) {
-			out += " -> " + this.cause.getCausation();
+			out += " -> " + this.cause.getCausation(simple);
 		}
 
 		return out;
