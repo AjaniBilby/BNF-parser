@@ -18,11 +18,3 @@ try {
 	// Print success
 	console.log('BNF syntax building completed');
 }
-
-fs.writeFileSync("bnf.tmLanguage.json", JSON.stringify(
-	BNF.GenerateTM(syntax, "stmt_top", "BNF", "bnf", {
-		comment: "comment.line.bnf",
-		name: "entity.name.class.bnf",
-		constant: "constant.string.quoted.double.bnf"
-	}), null, 2
-));

@@ -218,8 +218,6 @@ function Process (input, tree, term, stack = [], ref) {
 		throw new ReferenceError(`Malformed Tree: Unknown branch name ${term} of tree`);
 	}
 
-	branch.term = term;
-
 	// Infinite loop detection
 	let i = stack.indexOf(term);
 	if (i != -1) {
