@@ -174,6 +174,7 @@ function Compile(tree) {
 
 		if (expr.type == "expr_p2_or") { // Select
 			out[name] = {
+				term: name,
 				type: "select",
 				match: []
 			};
@@ -223,7 +224,8 @@ function Compile(tree) {
 				inner.tokens.length == 1 && inner.tokens[0].type == "name"
 			) {
 				out[name] = {
-					"type": "not",
+					type: "not",
+					term: name,
 					match: inner.tokens[0].tokens,
 					count: count
 				};
@@ -240,6 +242,7 @@ function Compile(tree) {
 		} else {                         // Sequence
 			out[name] = {
 				type: "sequence",
+				term: name,
 				match: []
 			};
 
@@ -286,7 +289,10 @@ function Compile(tree) {
 		GenerateTerminal(term.tokens[0].tokens, term.tokens[1]);
 	}
 
-	return new BNF_Tree(out);
+	let out_tree = new BNF_Tree(out);
+	out_tree.check();
+
+	return out_tree;
 };
 
 

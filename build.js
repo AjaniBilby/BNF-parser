@@ -11,11 +11,10 @@ try {
 	syntax = BNF.Build(data);
 } catch (e) {
 	console.error(e);
-	process.exit();
+	process.exit(1);
 } finally {
 	fs.writeFileSync('bnf.json', JSON.stringify(syntax));	
 
 	// Print success
 	console.log('BNF syntax building completed');
-	process.exit(0);
 }

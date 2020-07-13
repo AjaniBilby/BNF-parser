@@ -169,7 +169,6 @@ class BNF_SyntaxNode {
 			end: refEnd,
 			reached: reached
 		};
-		this.reached = reached;
 	}
 
 	get consumed(){
@@ -185,6 +184,27 @@ class BNF_SyntaxNode {
 class BNF_Tree {
 	constructor(terms = {}) {
 		this.terms = terms;
+	}
+
+	check() {
+		let risk = 0;
+
+		for (let name in this.terms) {
+			let valid = false;
+			for (let match of this.terms[name].match) {
+				if (match.count !== "*") {
+					valid = true;
+					break;
+				}
+			}
+
+			if (!valid) {
+				risk++;
+				console.warn(`Attempting to compile tree where branch ${name} are all zero to many`);
+			}
+		}
+
+		return risk;
 	}
 
 	/**
