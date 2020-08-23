@@ -17,7 +17,7 @@ name ::= ( letter | "_" ) ( letter | digit | "_" )*
 
 
 # Starts with " and consume anything until " - with behaviour for parsing escaped characters
-constant ::= "\"" ( "\\\"" | "\\t" | "\\n" | "\\r" | "\\\\" | !( "\"" | "\\" )+ )+ "\""
+constant ::= "\"" ( "\\\"" | "\\t" | "\\n" | "\\r" | "\\\\" | !( "\"" | "\\" )+ )* "\""
 
 def ::= name " " w "::= " expr
 expr ::= expr_p2 ( " " w expr_p2 )*
