@@ -1,4 +1,3 @@
-const GenerateTM = require('./src/tm-gen.js');
 const Compile = require('./src/compiler.js');
 const Message = require('./src/message.js');
 const Parse = require('./src/parser.js');
@@ -25,7 +24,7 @@ function Build (data, filename, syntax = BNF_SYNTAX){
     throw forward;
   }
 
-  if (parse.hasError || parse.isPartial) {	
+  if (parse.hasError || parse.isPartial) {
     let ref = null;
     if (parse.tree instanceof types.BNF_SyntaxError) {
       ref = parse.tree.ref;
@@ -50,4 +49,4 @@ function Build (data, filename, syntax = BNF_SYNTAX){
   return output;
 }
 
-module.exports = { Compile, Parse, Build, types, BNF_SYNTAX, Message, GenerateTM };
+module.exports = { Compile, Parse, Build, types, BNF_SYNTAX, Message };
