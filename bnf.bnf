@@ -1,32 +1,24 @@
-program ::= w ( stmt w )+
-stmt ::= def | comment
+program ::= %w* ( def %w* )+ ;
 
-comment ::= "#" !( "\n" )* "\n"
+any ::= !"" ;
 
+# White space characters
+w ::= " " | "\t" | %comment | "\n" | "\r" ;
+  comment ::= "#" !"\n"* "\n" ;
 
+name ::= ...( letter | digit | "_" )+ ;
+  letter ::= "a"->"z" | "A"->"Z" ;
+  digit ::= "0"->"9" ;
 
-whitespace ::= " " | "\t" | "\n" | "\r" | "\n"
-nl ::= "\r\n" | "\n"
-w ::= whitespace*
+constant ::= ...( single | double ) ;
+  double ::= %"\"" ...( ( "\\" any  ) | !"\"" )* %"\"" ;
+  single ::= %"\'" ...( ( "\\" any  ) | !"\'" )* %"\'" ;
 
+def ::= ...name %w+ %"::=" %w* expr %w* %";" ;
 
-letter ::= "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z" | "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z"
-digit ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
-
-name ::= ( letter | "_" ) ( letter | digit | "_" )*
-
-
-# Starts with " and consume anything until " - with behaviour for parsing escaped characters
-constant ::= "\"" ( "\\\"" | "\\t" | "\\n" | "\\r" | "\\\\" | !( "\"" | "\\" )+ )* "\""
-
-def ::= name " " w "::= " expr
-expr ::= expr_p2 ( " " w expr_p2 )*
-  expr_brackets ::= "( " w expr " " w ")"
-  expr_opperand ::= name | constant | expr_brackets
-expr_p1     ::= expr_p1_not | expr_p1_opt | expr_p1_orm | expr_p1_zrm | expr_opperand
-  expr_p1_not ::= "!" ( expr_p1_opt | expr_p1_zrm | expr_p1_orm | expr_brackets )
-  expr_p1_opt ::= expr_opperand "?"
-  expr_p1_zrm ::= expr_opperand "*"
-  expr_p1_orm ::= expr_opperand "+"
-expr_p2     ::= expr_p2_or | expr_p1
-  expr_p2_or  ::= expr_p1 " " w "| " w expr_p2
+expr ::= expr_arg %w* ( ...expr_infix? %w* expr_arg %w* )* ;
+  expr_arg ::= expr_prefix ( ...constant | expr_brackets | ...name ) ...expr_suffix? ;
+  expr_prefix ::= "%"? "..."? "!"? ;
+  expr_infix  ::= "->" | "|" ;
+  expr_suffix ::= "*" | "?" | "+" ;
+  expr_brackets ::= %"(" %w* expr %w* %")" ;

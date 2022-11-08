@@ -26,16 +26,18 @@ function BuildExpr(expr: SyntaxNode): any {
 			case "|":
 				let desire = operator.value == "|" ? "select" : "sequence";
 				if (base.type != desire) {
-					if (base.exprs?.length != 1) {
+					if (base.type == "range" || base.exprs?.length != 1) {
 						base = {
 							type: desire,
 							count: "1",
 							exprs: [base, operand]
 						};
 						continue;
+					} else {
+						base.type = desire;
+						base.exprs.push(operand);
+						continue;
 					}
-
-					base.type = desire;
 				}
 
 				base.exprs.push(operand);

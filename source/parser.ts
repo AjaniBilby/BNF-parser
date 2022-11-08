@@ -245,8 +245,8 @@ export class Not {
 	serialize(): any {
 		return {
 			type: "not",
-			expr: this.expr.serialize(),
-			count: this.count
+			count: this.count,
+			expr: this.expr.serialize()
 		};
 	}
 }
@@ -388,8 +388,8 @@ export class Select {
 	serialize(): any {
 		return {
 			type: "select",
-			exprs: this.exprs.map(x => x.serialize()),
-			count: this.count
+			count: this.count,
+			exprs: this.exprs.map(x => x.serialize())
 		};
 	}
 }
