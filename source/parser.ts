@@ -1,6 +1,6 @@
 import {SyntaxNode, ParseError, Reference, ReferenceRange} from "./syntax";
 
-type Expression = Literal | CharRange | Term | Not | Omit | Gather | Select | Sequence;
+export type Expression = Literal | CharRange | Term | Not | Omit | Gather | Select | Sequence;
 
 function ParseExpression(json: any): Expression {
 	switch (json['type'] as string) {
@@ -19,13 +19,13 @@ function ParseExpression(json: any): Expression {
 
 
 
-enum Count {
+export enum Count {
 	One = "1",
 	ZeroToOne = "?",
 	ZeroToMany = "*",
 	OneToMany = "+"
 };
-function ParseCount(count: string): Count {
+export function ParseCount(count: string): Count {
 	switch(count) {
 		case "1":	return Count.One;
 		case "?":	return Count.ZeroToOne;
@@ -55,7 +55,7 @@ function CountCheck(count: Number, mode: Count): boolean {
 
 
 
-class Literal {
+export class Literal {
 	value: string;
 	count: Count;
 
@@ -108,9 +108,17 @@ class Literal {
 
 		return true;
 	}
+
+	serialize(): any {
+		return {
+			type: "literal",
+			value: this.value,
+			count: this.count
+		};
+	}
 }
 
-class CharRange extends Literal {
+export class CharRange extends Literal {
 	to: string;
 
 	constructor(json: any) {
@@ -134,13 +142,21 @@ class CharRange extends Literal {
 	matchChar(char: string, offset: number): boolean {
 		return this.value <= char && char <= this.to;
 	}
+
+	serialize(): any {
+		let out = super.serialize();
+		out.type = "range";
+		out.to = this.to;
+
+		return out;
+	}
 }
 
 
 
 
 
-class Gather {
+export class Gather {
 	expr: Expression;
 
 	constructor(json: any) {
@@ -156,9 +172,16 @@ class Gather {
 		res.value = res.flat();
 		return res;
 	}
+
+	serialize(): any {
+		return {
+			type: "gather",
+			expr: this.expr.serialize()
+		};
+	}
 }
 
-class Omit extends Gather {
+export class Omit extends Gather {
 	parse(input: string, ctx: Parser, cursor: Reference): SyntaxNode | ParseError {
 		let res = this.expr.parse(input, ctx, cursor);
 		if (res instanceof ParseError) {
@@ -167,13 +190,20 @@ class Omit extends Gather {
 
 		return new SyntaxNode("omit", "", res.ref);
 	}
+
+	serialize(): any {
+		let out = super.serialize();
+		out.type = "omit";
+
+		return out;
+	}
 }
 
 
 
 
 
-class Not {
+export class Not {
 	expr: Expression;
 	count: Count;
 
@@ -211,9 +241,17 @@ class Not {
 
 		return new SyntaxNode("literal", input.slice(start.index, cursor.index), range);
 	}
+
+	serialize(): any {
+		return {
+			type: "not",
+			expr: this.expr.serialize(),
+			count: this.count
+		};
+	}
 }
 
-class Term {
+export class Term {
 	value: string;
 	count: Count
 
@@ -265,13 +303,21 @@ class Term {
 
 		return new SyntaxNode(this.value, nodes, range);
 	}
+
+	serialize(): any {
+		return {
+			type: "term",
+			value: this.value,
+			count: this.count
+		};
+	}
 }
 
 
 
 
 
-class Select {
+export class Select {
 	exprs: Expression[];
 	count: Count;
 
@@ -317,7 +363,7 @@ class Select {
 		if (this.count == Count.One) {
 			return nodes[0];
 		} else {
-			return new SyntaxNode(this.count, nodes, range);
+			return new SyntaxNode(`(...)${this.count}`, nodes, range);
 		}
 	}
 
@@ -338,10 +384,18 @@ class Select {
 
 		return new ParseError("No valid option found", new ReferenceRange(cursor, cursor));
 	}
+
+	serialize(): any {
+		return {
+			type: "select",
+			exprs: this.exprs.map(x => x.serialize()),
+			count: this.count
+		};
+	}
 }
 
 
-class Sequence extends Select {
+export class Sequence extends Select {
 	constructor(json: any) {
 		super(json);
 	}
@@ -364,7 +418,12 @@ class Sequence extends Select {
 			}
 		}
 
-		let out = new SyntaxNode('()', nodes, new ReferenceRange(start, cursor));
+		return new SyntaxNode('seq[]', nodes, new ReferenceRange(start, cursor));
+	}
+
+	serialize(): any {
+		let out = super.serialize();
+		out.type = "sequence";
 
 		return out;
 	}
@@ -373,7 +432,7 @@ class Sequence extends Select {
 
 
 
-class Rule {
+export class Rule {
 	name: string;
 	seq: Expression;
 
@@ -390,6 +449,10 @@ class Rule {
 
 		return res;
 	}
+
+	serialize (): any {
+		return this.seq.serialize();
+	}
 }
 
 export class Parser {
@@ -398,7 +461,7 @@ export class Parser {
 	constructor(json: any) {
 		this.terms = new Map();
 		for (let key in json) {
-			this.terms.set(key, new Rule(key, json[key]));
+			this.addRule(key, new Rule(key, json[key]));
 		}
 	}
 
@@ -411,9 +474,13 @@ export class Parser {
 		return rule;
 	}
 
+	addRule(name: string, rule: Rule) {
+		this.terms.set(name, rule);
+	}
+
 	parse(input: string, partial = false, entry = "program"): SyntaxNode | ParseError {
 		let entryTerm = this.getRule(entry);
-		let res = entryTerm.parse(input, this, new Reference(0,0,0));
+		let res = entryTerm.parse(input, this, new Reference(1,1,0));
 		if (res instanceof ParseError) {
 			return res;
 		}
@@ -426,5 +493,15 @@ export class Parser {
 		}
 
 		return res;
+	}
+
+	serialize(): any {
+		let blob: any = {};
+
+		for (let [key, rule] of this.terms) {
+			blob[key] = rule.serialize();
+		}
+
+		return blob;
 	}
 }

@@ -11,7 +11,7 @@ export class Reference {
 
 	advance(newline: boolean = false) {
 		if (newline) {
-			this.col = 0;
+			this.col = 1;
 			this.line++;
 			this.index++;
 		} else {
