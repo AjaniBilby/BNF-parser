@@ -3,16 +3,22 @@
 - [BNF-Parser](#bnf-parser)
 - [Example](#example)
   - [API](#api)
+    - [BNF](#bnf)
+    - [Parser](#parser)
+    - [Compile](#compile)
   - [BNF Syntax](#bnf-syntax)
-    - [Repetition](#repetition)
+    - [Repetition `?`, `+`, `*`](#repetition---)
     - [Omit `%`](#omit-)
     - [Range `!`](#range-)
     - [Range `->`](#range--)
 
 A simple library for generate syntax pasers based BNF syntax descriptions.  
 There are a few changes from standard BNF forms to help produce cleaner syntax tree outputs that BNFs normally provide.
+
 # Example
+
 First of all provide the BNF representation of you language, and parse that into a syntax tree. This tree can then be compiled down into a representation ready to parse syntax trees for the compiled language.
+
 ```ts
 import { BNF, Parse, Compile } from "bnf-parser";
 
@@ -21,7 +27,9 @@ let tree = Compile(tree);
 
 let syntax = tree.parse(file);
 ```
+
 A compiled BNF can be saved as a JSON file and reloaded later
+
 ```ts
 // Save the syntax tree
 fs.writeFileSync(path, JSON.stringify(tree.serialize();));
@@ -32,8 +40,56 @@ let tree = Parse(
 );
 ```
 
-
 ## API
+
+### BNF
+
+This is a pre-initalised BNF parser, which can be given a BNF string input.
+
+```ts
+const BNF: Parser;
+```
+
+### Parser
+
+Is initialised with a built syntax tree. Once initalized it can be given input strings to generate output syntax trees for a given language.
+
+```ts
+class Parser {
+  constructor(blob: any) 
+  parse(input: string, partial = false, entry = "program"): SyntaxNode | ParseError
+}
+```
+
+### Compile
+
+Given a `SyntaxNode` tree generated from the BNF pre-initialized parser it can generate a new parser.
+
+```ts
+function Compile(tree: SyntaxNode): Parser
+```
+
+```ts
+class Reference {
+  clone(): Reference
+  toString(): string
+}
+```
+
+```ts
+class ReferenceRange {
+  constructor(from: Reference, to: Reference)
+  clone(): ReferenceRange
+  toString(): string
+}
+```
+
+```ts
+class ParseError {
+  constructor(msg: string, ref: ReferenceRange)
+  toString(): string
+}
+```
 
 ## BNF Syntax
 
@@ -66,7 +122,7 @@ expr ::= expr_arg %w* ( ...expr_infix? %w* expr_arg %w* )* ;
   expr_brackets ::= %"(" %w* expr %w* %")" ;
 ```
 
-### Repetition
+### Repetition `?`, `+`, `*`
 
 Only one repetition mark should exist per argument.
 ```bnf

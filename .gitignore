@@ -1,3 +1,4 @@
 *.tmLanguage.json
 
 node_modules/*
+bin/*
