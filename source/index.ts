@@ -1,25 +1,16 @@
-const path = require('path');
-const fs = require('fs');
+import * as path from "path";
+import * as fs from "fs";
 
+import { SyntaxNode, ParseError, Reference, ReferenceRange } from "./syntax";
 import { Compile } from "./compiler";
 import { Parser } from "./parser";
-import { SyntaxNode } from "./syntax";
 
-const BNF_SYNTAX = new Parser(
+const BNF = new Parser(
 	JSON.parse(fs.readFileSync(
-		path.join(__dirname, '../dump.json'),
+		path.join(__dirname, '../bnf.json'),
 		'utf8'
 	))
 );
 
 
-let input = fs.readFileSync(path.join(__dirname, '../bnf-v2.bnf'), 'utf8');
-
-console.log("Parse 1");
-let res = BNF_SYNTAX.parse(input);
-if (res instanceof SyntaxNode) {
-	let syntax = Compile(res);
-	// fs.writeFileSync('dump.json', JSON.stringify(syntax.serialize()));
-} else {
-	console.log(res.toString());
-}
+export { BNF, Compile, Parser, SyntaxNode, ParseError, Reference, ReferenceRange };

@@ -1,34 +1,105 @@
-A simple library to parse input strings into token trees based on a BNF's description.
+# BNF-Parser <!-- no toc -->
 
-BNF trees must first be compiled before they can be used to parse syntax trees.
+- [BNF-Parser](#bnf-parser)
+- [Example](#example)
+  - [API](#api)
+  - [BNF Syntax](#bnf-syntax)
+    - [Repetition](#repetition)
+    - [Omit `%`](#omit-)
+    - [Range `!`](#range-)
+    - [Range `->`](#range--)
 
-# Compilation
-```js
-let result = BNF.parse(file, BNF.syntax);
-let tree = BNF.compile(result.tree);
+A simple library for generate syntax pasers based BNF syntax descriptions.  
+There are a few changes from standard BNF forms to help produce cleaner syntax tree outputs that BNFs normally provide.
+# Example
+First of all provide the BNF representation of you language, and parse that into a syntax tree. This tree can then be compiled down into a representation ready to parse syntax trees for the compiled language.
+```ts
+import { BNF, Parse, Compile } from "bnf-parser";
+
+let result: SyntaxNode = BNF.parse(language_syntax);
+let tree = Compile(tree);
+
+let syntax = tree.parse(file);
 ```
 A compiled BNF can be saved as a JSON file and reloaded later
-```js
-// Store the compiled result for later use
-fs.writeFileSync(path, JSON.stringify(tree));
+```ts
+// Save the syntax tree
+fs.writeFileSync(path, JSON.stringify(tree.serialize();));
 
-// Load the compiled BNF
-let tree = BNF.fromJSON(
+// Load the compiled syntax tree
+let tree = Parse(
   JSON.parse( fs.readFileSync(path, 'utf8') )
 );
 ```
 
-# Parsing
-Running parse will return a ``BNF_Parse`` object, which contains a tree structure of ``BNF_SyntaxNode``s. How these nodes are structured depends on the compiled BNF used to parse the syntax.
 
-# BNF: Build
-Provided with BNF data, this will return a BNF_Tree with error handling.
+## API
 
-# BNF: Syntax
-The BNF used by this application is a dilect of regular extensions for BNF. Most noteably it adds the not (``!``) opperator.
+## BNF Syntax
 
-The BNF outlining the syntax of BNFs used by this system can be found [here](./bnf.bnf).
+```bnf
+program ::= %w* ( def %w* )+ ;
 
-## BNF Opperator: Not
-The not operator must be before a set of brackets, and will consume characters until either the quota is met, or the pattern within the brackets successfully matches.  
-The quota of the not operation can be defined the same was as constants and terms via the use of ``+``, ``*``, ``?`` operators.
+# Consume a single wild character
+any ::= !"" ;
+
+# White space characters
+w ::= " " | "\t" | %comment | "\n" | "\r" ;
+  comment ::= "#" !"\n"* "\n" ;
+
+name ::= ...( letter | digit | "_" )+ ;
+  letter ::= "a"->"z" | "A"->"Z" ;
+  digit ::= "0"->"9" ;
+
+# String literals
+constant ::= ...( single | double ) ;
+  double ::= %"\"" ...( ( "\\" any  ) | !"\"" )* %"\"" ;
+  single ::= %"\'" ...( ( "\\" any  ) | !"\'" )* %"\'" ;
+
+def ::= ...name %w+ %"::=" %w* expr %w* %";" ;
+
+expr ::= expr_arg %w* ( ...expr_infix? %w* expr_arg %w* )* ;
+  expr_arg ::= expr_prefix ( ...constant | expr_brackets | ...name ) ...expr_suffix? ;
+  expr_prefix ::= "%"? "..."? "!"? ;
+  expr_infix  ::= "->" | "|" ;
+  expr_suffix ::= "*" | "?" | "+" ;
+  expr_brackets ::= %"(" %w* expr %w* %")" ;
+```
+
+### Repetition
+
+Only one repetition mark should exist per argument.
+```bnf
+term # once
+term? # one or zero
+term+ # at least once
+term* # zero or more
+```
+
+### Omit `%`
+
+```bnf
+%term
+```
+
+This operator will lead to the syntax under this operator being removed from the final syntax tree, however still remain as part of syntax validation. For instance in the BNF syntax above...
+
+The omit character goes in front af a single term, and must be the front most operator placing it in from of any `not` or `gather` operators.
+
+### Range `!`
+
+```bnf
+!term
+```
+
+This operator must be between two single length constants, this will accept all characters within the range of the two bounds (inclusive).  
+
+### Range `->`
+
+```bnf
+"a"->"z" # will consume a single character
+"a"->"z"* # will consume as many characters as are in the range
+```
+
+This operator must be between two single length constants, this will accept all characters within the range of the two bounds (inclusive). Until the repetition count is reached.  
+The first operand must have no repetitions, however the repetition markers on the last operand will apply to the whole group.

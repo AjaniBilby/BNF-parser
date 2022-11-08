@@ -1,6 +1,6 @@
 {
   "name": "bnf-parser",
-  "version": "2.2.5",
+  "version": "3.0.0",
   "description": "Deterministic BNF compiler/parser",
   "main": "index.js",
   "scripts": {
@@ -14,7 +14,8 @@
   "keywords": [
     "bnf",
     "compile",
-    "parse"
+    "parse",
+    "typescript"
   ],
   "author": "Ajani Bilby",
   "license": "ISC",
