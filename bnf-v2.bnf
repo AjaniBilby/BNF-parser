@@ -1,0 +1,28 @@
+program ::= w_nl* ( def w_nl* )+ ;
+
+w ::= whitespace | comment ;
+  whitespace ::= " " | "\t" ;
+  comment ::= "#" !"\n"* "\n";
+  nl ::= "\r\n" | "\n" ;
+w_nl ::= whitespace | nl ;
+
+
+letter ::= "a".."z" | "A".."Z" ;
+digit ::= "0".."9" ;
+
+name ::= ( letter | digit | "_" )+ ;
+
+
+# Starts with " and consume anything until " - with behaviour for parsing escaped characters
+constant ::= constant_single | constant_double ;
+  constant_single ::= %"\'" ( ( "\\" !"" ) | !"\'" )* %"\'"
+  constant_double ::= %"\"" ( ( "\\" !"" ) | !"\"" )* %"\""
+
+def ::= ...name w+ "::=" w* expr %";" ;
+
+expr ::= expr_arg %w* ( expr_infix? %w* expr_arg w* )* ;
+  expr_prefix ::= "%"? "..."? "!"? ;
+  expr_infix  ::= ".." | "|" ;
+  expr_suffix ::= "*" | "?" | "+" ;
+  expr_brackets ::= %"(" %w* expr %w* %")" ;
+  expr_arg ::= expr_prefix ( ...name | ...constant | expr_brackets ) expr_suffix? ;

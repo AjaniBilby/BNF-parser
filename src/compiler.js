@@ -11,13 +11,16 @@ function Simplify (node) {
 function SimplifyProgram(node) {
 	let out = [];
 
+	console.log(4, node.tokens[1].map( x => x.tokens[0]));
+
 	for (let token of node.tokens[1]){
-		token = token.tokens[0][0].tokens[0];
+		token = token.tokens[0][0];
 		if (token.type == "def") {
 			out.push(SimplifyDef(token));
 		} else if (token.type == "comment") {
 			continue;
 		} else {
+			console.log(23, token);
 			throw new ReferenceError("BNF Compile Error: Unknown top level data type");
 		}
 	}
@@ -104,7 +107,7 @@ function SimplifyExprP1(node) {
 	throw new ReferenceError(`BNF Compile Error: Unknown expr_p1 expression ${node.tokens[0].type}`);
 }
 function SimplifyP1Not (node) {
-	let inner = node.tokens[1][0].tokens[0];	
+	let inner = node.tokens[1][0].tokens[0];
 	switch (inner.type) {
 		case "expr_brackets":
 			node.tokens = [SimplifyBrackets(inner)];
@@ -158,10 +161,11 @@ function SimplifyBrackets(node) {
 
 /**
  * Compiles a parsed BNF into a BNF tree
- * @param {BNF_SyntaxNode} tree 
+ * @param {BNF_SyntaxNode} tree
  * @returns {BNF_Tree} BNF tree
  */
 function Compile(tree) {
+	console.log(166, "COMPILE");
 	tree = Simplify(tree);
 
 	let tempNo = 0;
@@ -231,7 +235,7 @@ function Compile(tree) {
 				};
 				return out;
 			}
-			
+
 			let temp = `#t${tempNo++}`;
 			out[name] = {
 				type: "not",
