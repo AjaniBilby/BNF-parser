@@ -8,7 +8,7 @@ import * as getopts from "getopts";
 
 let opt = getopts(process.argv.slice(2), {
 	alias: {
-		verify: "v",
+		verify: "v"
 	}
 });
 
@@ -17,6 +17,7 @@ let input = fs.readFileSync(path.join(__dirname, '../bnf.bnf'), 'utf8');
 let res = BNF.parse(input);
 if (res instanceof SyntaxNode) {
 	let syntax = Compile(res);
+	syntax.setVerbose(opt.verbose);
 
 	if (opt['verify']) {
 		let test = syntax.parse(input);

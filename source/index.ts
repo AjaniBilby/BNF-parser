@@ -13,4 +13,12 @@ const BNF = new Parser(
 );
 
 
-export { BNF, Compile, Parser, SyntaxNode, ParseError, Reference, ReferenceRange };
+export {
+	BNF,
+	Parser,
+	Compile,
+	SyntaxNode,
+	ParseError,
+	Reference,
+	ReferenceRange,
+};

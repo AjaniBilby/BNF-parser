@@ -435,19 +435,29 @@ export class Sequence extends Select {
 export class Rule {
 	name: string;
 	seq: Expression;
+	verbose: boolean;
 
 	constructor(name: string, json: any){
 		this.name = name;
 		this.seq = ParseExpression(json);
+		this.verbose = false;
 	}
 
 	parse(input: string, ctx: Parser, cursor: Reference): SyntaxNode | ParseError {
+		if (this.verbose) {
+			console.log(`Parsing rule "${this.name}" at ${cursor.toString()}`);
+		}
+
 		let res = this.seq.parse(input, ctx, cursor);
 		if (res instanceof SyntaxNode) {
 			res.type = this.name;
 		}
 
 		return res;
+	}
+
+	setVerbose(mode: boolean) {
+		this.verbose = mode;
 	}
 
 	serialize (): any {
@@ -487,12 +497,18 @@ export class Parser {
 
 		if (!partial && res.ref.end.index != input.length) {
 			return new ParseError(
-				"Didn't consume the entire string",
-				new ReferenceRange(res.ref.end, new Reference(0, 0, input.length))
+				"Unexpected syntax at ",
+				new ReferenceRange(res.ref.end.clone(), res.ref.end)
 			);
 		}
 
 		return res;
+	}
+
+	setVerbose(mode: boolean) {
+		for (let key of this.terms.keys()) {
+			this.terms.get(key)?.setVerbose(mode);
+		}
 	}
 
 	serialize(): any {
