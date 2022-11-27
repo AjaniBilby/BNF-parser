@@ -1,11 +1,11 @@
 {
 	"name": "bnf-parser",
-	"version": "3.0.1",
+	"version": "3.0.2",
 	"description": "Deterministic BNF compiler/parser",
 	"main": "./bin/index.js",
 	"scripts": {
-		"test": "node ./bin/build.js --verify",
-		"build": "tsc & node ./bin/build.js"
+		"test": "node ./bin/build.js --verify --verbose",
+		"build": "tsc & node ./bin/build.js --verbose"
 	},
 	"repository": {
 		"type": "git",
