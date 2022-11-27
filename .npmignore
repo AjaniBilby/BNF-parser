@@ -1,6 +1,5 @@
+!bin/*
 node_modules/*
 source/*
 
 tsconfig.json
-
-!bin/*
