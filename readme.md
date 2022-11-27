@@ -1,15 +1,19 @@
 # BNF-Parser <!-- no toc -->
 
-- [BNF-Parser](#bnf-parser)
+- [BNF-Parser ](#bnf-parser-)
 - [Example](#example)
   - [API](#api)
     - [BNF](#bnf)
     - [Parser](#parser)
     - [Compile](#compile)
+    - [SyntaxNode](#syntaxnode)
+    - [ParseError](#parseerror)
+    - [Reference](#reference)
+    - [Reference Range](#reference-range)
   - [BNF Syntax](#bnf-syntax)
     - [Repetition `?`, `+`, `*`](#repetition---)
     - [Omit `%`](#omit-)
-    - [Range `!`](#range-)
+    - [Not `!`](#not-)
     - [Range `->`](#range--)
 
 A simple library for generate syntax pasers based BNF syntax descriptions.  
@@ -35,7 +39,7 @@ A compiled BNF can be saved as a JSON file and reloaded later
 fs.writeFileSync(path, JSON.stringify(tree.serialize();));
 
 // Load the compiled syntax tree
-let tree = Parse(
+let tree = new Parser(
   JSON.parse( fs.readFileSync(path, 'utf8') )
 );
 ```
@@ -58,6 +62,7 @@ Is initialised with a built syntax tree. Once initalized it can be given input s
 class Parser {
   constructor(blob: any) 
   parse(input: string, partial = false, entry = "program"): SyntaxNode | ParseError
+  setVerbose(mode: boolean) { }
 }
 ```
 
@@ -90,6 +95,65 @@ class ParseError {
   toString(): string
 }
 ```
+
+### SyntaxNode
+
+```ts
+class SyntaxNode {
+	type: string;
+	value: SyntaxValue;
+	ref: ReferenceRange;
+
+	constructor(type: string, value: SyntaxValue, ref: ReferenceRange) {};
+	flat(): string {};
+}
+```
+
+### ParseError
+
+```ts
+class ParseError {
+	stack: string[]
+	msg: string
+	ref: ReferenceRange
+
+	constructor(msg: string, ref: ReferenceRange) { }
+
+	add_stack(elm: string) { }
+	hasStack(): boolean { }
+	toString() { }
+}
+```
+
+### Reference
+
+```ts
+class Reference {
+	line: number;
+	col: number;
+	index: number;
+
+	constructor(line: number, col: number, index: number) { }
+	advance(newline: boolean = false) { }
+	clone(): Reference { }
+	toString(): string { }
+}
+```
+
+### Reference Range
+
+```ts
+class ReferenceRange {
+	start: Reference;
+	end: Reference;
+
+	constructor(from: Reference, to: Reference) { }
+	span(other: ReferenceRange) { }
+	clone(): ReferenceRange { }
+	toString(): string { }
+}
+```
+
 
 ## BNF Syntax
 
@@ -142,7 +206,7 @@ This operator will lead to the syntax under this operator being removed from the
 
 The omit character goes in front af a single term, and must be the front most operator placing it in from of any `not` or `gather` operators.
 
-### Range `!`
+### Not `!`
 
 ```bnf
 !term
