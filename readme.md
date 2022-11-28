@@ -26,17 +26,17 @@ First of all provide the BNF representation of you language, and parse that into
 ```ts
 import { BNF, Parse, Compile } from "bnf-parser";
 
-let result: SyntaxNode = BNF.parse(language_syntax);
-let tree = Compile(tree);
+let result = BNF.parse(LANGUAGE_BNF);
+let tree = Compile(result);
 
-let syntax = tree.parse(file);
+let syntax = tree.parse(FILE);
 ```
 
 A compiled BNF can be saved as a JSON file and reloaded later
 
 ```ts
 // Save the syntax tree
-fs.writeFileSync(path, JSON.stringify(tree.serialize();));
+fs.writeFileSync(path, JSON.stringify(tree.serialize()));
 
 // Load the compiled syntax tree
 let tree = new Parser(
@@ -48,7 +48,7 @@ let tree = new Parser(
 
 ### BNF
 
-This is a pre-initalised BNF parser, which can be given a BNF string input.
+This is a pre-initialised BNF parser, which can be given a BNF string input.
 
 ```ts
 const BNF: Parser;
@@ -56,12 +56,18 @@ const BNF: Parser;
 
 ### Parser
 
-Is initialised with a built syntax tree. Once initalized it can be given input strings to generate output syntax trees for a given language.
+Is initialised with a built syntax tree. Once initialized it can be given input strings to generate output syntax trees for a given language.
 
 ```ts
 class Parser {
   constructor(blob: any) 
-  parse(input: string, partial = false, entry = "program"): SyntaxNode | ParseError
+
+  // Attempts to parse a language into a syntax tree
+  parse(
+    input: string,    // The text to be parsed
+    partial = false,  // Whether the entire string needs to be consucanmed
+    entry = "program" // Where parsing should start from in the BNF definition
+  ): SyntaxNode | ParseError
   setVerbose(mode: boolean) { }
 }
 ```
@@ -76,7 +82,11 @@ function Compile(tree: SyntaxNode): Parser
 
 ```ts
 class Reference {
+
+  // Returns a deep copy of itself
   clone(): Reference
+
+  // Stringifies itself for printing/debug
   toString(): string
 }
 ```
@@ -84,7 +94,11 @@ class Reference {
 ```ts
 class ReferenceRange {
   constructor(from: Reference, to: Reference)
+
+  // Returns a deep copy of itself
   clone(): ReferenceRange
+
+  // Stringifies itself for printing/debug
   toString(): string
 }
 ```
@@ -92,6 +106,8 @@ class ReferenceRange {
 ```ts
 class ParseError {
   constructor(msg: string, ref: ReferenceRange)
+
+  // Stringifies itself for printing/debug
   toString(): string
 }
 ```
@@ -100,12 +116,14 @@ class ParseError {
 
 ```ts
 class SyntaxNode {
-	type: string;
-	value: SyntaxValue;
-	ref: ReferenceRange;
+  type: string;
+  value: SyntaxValue;
+  ref: ReferenceRange;
 
-	constructor(type: string, value: SyntaxValue, ref: ReferenceRange) {};
-	flat(): string {};
+  constructor(type: string, value: SyntaxValue, ref: ReferenceRange) {};
+
+  // Merges all of it's child syntax node values into a single string
+  flat(): string {};
 }
 ```
 
@@ -113,15 +131,22 @@ class SyntaxNode {
 
 ```ts
 class ParseError {
-	stack: string[]
-	msg: string
-	ref: ReferenceRange
+  stack: string[]
+  msg: string
+  ref: ReferenceRange
 
-	constructor(msg: string, ref: ReferenceRange) { }
+  constructor(msg: string, ref: ReferenceRange) { }
 
-	add_stack(elm: string) { }
-	hasStack(): boolean { }
-	toString() { }
+  // Adds a string to the top of the call stack
+  //   (for internal use)
+  add_stack(elm: string) { }
+
+  // If this error contains a pass stack
+  //   (for internal use)
+  hasStack(): boolean { }
+
+  // Stringifies itself for printing/debug
+  toString() { }
 }
 ```
 
@@ -129,14 +154,20 @@ class ParseError {
 
 ```ts
 class Reference {
-	line: number;
-	col: number;
-	index: number;
+  line: number;
+  col: number;
+  index: number;
 
-	constructor(line: number, col: number, index: number) { }
-	advance(newline: boolean = false) { }
-	clone(): Reference { }
-	toString(): string { }
+  constructor(line: number, col: number, index: number) { }
+
+  // Will shift the reference one position forwards
+  advance(newline: boolean = false) { }
+
+  // Returns a deep copy of itself
+  clone(): Reference { }
+
+  // Stringifies itself for printing/debug
+  toString(): string { }
 }
 ```
 
@@ -144,13 +175,20 @@ class Reference {
 
 ```ts
 class ReferenceRange {
-	start: Reference;
-	end: Reference;
+  start: Reference;
+  end: Reference;
 
-	constructor(from: Reference, to: Reference) { }
-	span(other: ReferenceRange) { }
-	clone(): ReferenceRange { }
-	toString(): string { }
+  constructor(from: Reference, to: Reference) { }
+
+  // Alters itself so the rang supplied now fits within the range of itself
+  //  Basically takes the min from, and the max to references and applies them to itself
+  span(other: ReferenceRange) { }
+
+  // Returns a deep copy of itself
+  clone(): ReferenceRange { }
+
+  // Stringifies itself for printing/debug
+  toString(): string { }
 }
 ```
 
