@@ -4,7 +4,8 @@
 
 - [BNF-Parser ](#bnf-parser-)
 - [Example](#example)
-  - [API](#api)
+- [API](#api)
+  - [Imports](#imports)
     - [BNF](#bnf)
     - [Parser](#parser)
     - [Compile](#compile)
@@ -46,7 +47,9 @@ let tree = new Parser(
 );
 ```
 
-## API
+# API
+
+## Imports
 
 ### BNF
 
