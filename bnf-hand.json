@@ -61,19 +61,28 @@
 
 
 	"constant": {
+		"type": "select",
+		"count": "1",
+		"exprs": [
+			{"type": "term", "value": "double", "count": "1"},
+			{"type": "term", "value": "double", "count": "1"}
+		]
+	},
+
+	"double": {
 		"type": "sequence",
 		"count": "1",
 		"exprs": [
 			{"type": "omit", "expr": {"type": "literal", "value": "\"", "count": "1"}},
-			{"type": "gather", "expr":
-				{"type": "select", "count": "*", "exprs": [
-					{"type": "sequence", "count": "1", "exprs": [
-						{"type": "literal", "value": "\\", "count": "1"},
-						{"type": "term", "value": "any", "count": "1"}
-					]},
-					{"type": "not", "count": "1", "expr": {"type": "literal", "value": "\"", "count": "1"}}
-				]}
-			},
+
+			{"type": "select", "count": "*", "exprs": [
+				{"type": "sequence", "count": "1", "exprs": [
+					{"type": "literal", "value": "\\", "count": "1"},
+					{"type": "gather", "expr": {"type": "term", "value": "any", "count": "1"}}
+				]},
+				{"type": "not", "count": "+", "expr": {"type": "literal", "value": "\"", "count": "1"}}
+			]},
+
 			{"type": "omit", "expr": {"type": "literal", "value": "\"", "count": "1"}}
 		]
 	},
@@ -112,7 +121,7 @@
 		"exprs": [
 			{"type": "term", "value": "expr_prefix", "count": "1"},
 			{"type": "select", "count": "1", "exprs": [
-				{"type": "gather", "expr": {"type": "term", "value": "constant", "count": "1"}},
+				{"type": "term", "value": "constant", "count": "1"},
 				{"type": "term", "value": "expr_brackets", "count": "1"},
 				{"type": "gather", "expr": {"type": "term", "value": "name", "count": "1"}}
 			]},
