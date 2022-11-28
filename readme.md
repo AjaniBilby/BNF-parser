@@ -5,6 +5,12 @@
 - [BNF-Parser ](#bnf-parser-)
 - [Example](#example)
 - [API](#api)
+  - [BNF Syntax](#bnf-syntax)
+    - [Escape Codes](#escape-codes)
+    - [Repetition `?`, `+`, `*`](#repetition---)
+    - [Omit `%`](#omit-)
+    - [Not `!`](#not-)
+    - [Range `->`](#range--)
   - [Imports](#imports)
     - [BNF](#bnf)
     - [Parser](#parser)
@@ -13,12 +19,6 @@
     - [ParseError](#parseerror)
     - [Reference](#reference)
     - [Reference Range](#reference-range)
-  - [BNF Syntax](#bnf-syntax)
-    - [Escape Codes](#escape-codes)
-    - [Repetition `?`, `+`, `*`](#repetition---)
-    - [Omit `%`](#omit-)
-    - [Not `!`](#not-)
-    - [Range `->`](#range--)
 
 A simple library for generate syntax pasers based BNF syntax descriptions.  
 There are a few changes from standard BNF forms to help produce cleaner syntax tree outputs that BNFs normally provide.
@@ -49,6 +49,86 @@ let tree = new Parser(
 ```
 
 # API
+
+## BNF Syntax
+
+```bnf
+program ::= %w* ( def %w* )+ ;
+
+# Consumes a single wild character
+any ::= !"" ;
+
+# Whitespace
+w ::= comment | " " | "\t" | "\n" | "\r" ;
+	comment ::= "#" !"\n"* "\n" ;
+
+name ::= ...( letter | digit | "_" )+ ;
+	letter ::= "a"->"z" | "A"->"Z" ;
+	digit ::= "0"->"9" ;
+
+constant ::= single | double ;
+	double ::= %"\"" ( ( "\\" ...any  ) | !"\""+ )* %"\"" ;
+	single ::= %"\'" ( ( "\\" ...any  ) | !"\'"+ )* %"\'" ;
+
+def ::= ...name %w+ %"::=" %w* expr %w* %";" ;
+
+expr ::= expr_arg %w* ( ...expr_infix? %w* expr_arg %w* )* ;
+	expr_arg ::= expr_prefix ( constant | expr_brackets | ...name ) ...expr_suffix? ;
+	expr_prefix ::= "%"? "..."? "!"? ;
+	expr_infix  ::= "->" | "|" ;
+	expr_suffix ::= "*" | "?" | "+" ;
+	expr_brackets ::= %"(" %w* expr %w* %")" ;
+```
+
+### Escape Codes
+
+| Code | Result |
+| :-: | :- |
+| `\b` | Backspace |
+| `\f` | Form Feed |
+| `\n` | New Line |
+| `\r` | Carriage Return |
+| `\t` | Horizontal Tab |
+| `\v` | Vertical Tab |
+| - | Unrecognised escapes will result in just the character after the slash |
+
+### Repetition `?`, `+`, `*`
+
+Only one repetition mark should exist per argument.
+```bnf
+term # once
+term? # one or zero
+term+ # at least once
+term* # zero or more
+```
+
+### Omit `%`
+
+```bnf
+%term
+```
+
+This operator will lead to the syntax under this operator being removed from the final syntax tree, however still remain as part of syntax validation. For instance in the BNF syntax above...
+
+The omit character goes in front af a single term, and must be the front most operator placing it in from of any `not` or `gather` operators.
+
+### Not `!`
+
+```bnf
+!term
+```
+
+This operator must be between two single length constants, this will accept all characters within the range of the two bounds (inclusive).  
+
+### Range `->`
+
+```bnf
+"a"->"z" # will consume a single character
+"a"->"z"* # will consume as many characters as are in the range
+```
+
+This operator must be between two single length constants, this will accept all characters within the range of the two bounds (inclusive). Until the repetition count is reached.  
+The first operand must have no repetitions, however the repetition markers on the last operand will apply to the whole group.
 
 ## Imports
 
@@ -197,84 +277,3 @@ class ReferenceRange {
   toString(): string { }
 }
 ```
-
-
-## BNF Syntax
-
-```bnf
-program ::= %w* ( def %w* )+ ;
-
-# Consumes a single wild character
-any ::= !"" ;
-
-# Whitespace
-w ::= comment | " " | "\t" | "\n" | "\r" ;
-	comment ::= "#" !"\n"* "\n" ;
-
-name ::= ...( letter | digit | "_" )+ ;
-	letter ::= "a"->"z" | "A"->"Z" ;
-	digit ::= "0"->"9" ;
-
-constant ::= single | double ;
-	double ::= %"\"" ( ( "\\" ...any  ) | !"\""+ )* %"\"" ;
-	single ::= %"\'" ( ( "\\" ...any  ) | !"\'"+ )* %"\'" ;
-
-def ::= ...name %w+ %"::=" %w* expr %w* %";" ;
-
-expr ::= expr_arg %w* ( ...expr_infix? %w* expr_arg %w* )* ;
-	expr_arg ::= expr_prefix ( constant | expr_brackets | ...name ) ...expr_suffix? ;
-	expr_prefix ::= "%"? "..."? "!"? ;
-	expr_infix  ::= "->" | "|" ;
-	expr_suffix ::= "*" | "?" | "+" ;
-	expr_brackets ::= %"(" %w* expr %w* %")" ;
-```
-
-### Escape Codes
-
-| Code | Result |
-| :-: | :- |
-| `\b` | Backspace |
-| `\f` | Form Feed |
-| `\n` | New Line |
-| `\r` | Carriage Return |
-| `\t` | Horizontal Tab |
-| `\v` | Vertical Tab |
-| - | Unrecognised escapes will result in just the character after the slash |
-
-### Repetition `?`, `+`, `*`
-
-Only one repetition mark should exist per argument.
-```bnf
-term # once
-term? # one or zero
-term+ # at least once
-term* # zero or more
-```
-
-### Omit `%`
-
-```bnf
-%term
-```
-
-This operator will lead to the syntax under this operator being removed from the final syntax tree, however still remain as part of syntax validation. For instance in the BNF syntax above...
-
-The omit character goes in front af a single term, and must be the front most operator placing it in from of any `not` or `gather` operators.
-
-### Not `!`
-
-```bnf
-!term
-```
-
-This operator must be between two single length constants, this will accept all characters within the range of the two bounds (inclusive).  
-
-### Range `->`
-
-```bnf
-"a"->"z" # will consume a single character
-"a"->"z"* # will consume as many characters as are in the range
-```
-
-This operator must be between two single length constants, this will accept all characters within the range of the two bounds (inclusive). Until the repetition count is reached.  
-The first operand must have no repetitions, however the repetition markers on the last operand will apply to the whole group.
