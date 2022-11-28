@@ -72,6 +72,35 @@ function BuildExpr(expr: SyntaxNode): any {
 	return base;
 }
 
+function FlatternConstant(expr: SyntaxNode): string {
+	let inner = expr.value[0] as SyntaxNode;
+	let out = "";
+
+	if (!Array.isArray(inner.value)) {
+		throw new TypeError("Internal logic failure. Unexpected string");
+	}
+
+	for (let charNode of inner.value) {
+		if (charNode.type == "literal") {
+			out += charNode.value;
+		} else {
+
+			let esc = charNode.value as SyntaxNode[];
+			switch (esc[1].value) {
+				case "b": out += "\b"; break;
+				case "f": out += "\f"; break;
+				case "n": out += "\n"; break;
+				case "r": out += "\r"; break;
+				case "t": out += "\t"; break;
+				case "v": out += "\v"; break;
+				default: out += esc[1].value;
+			}
+		}
+	}
+
+	return out;
+}
+
 function BuildOperand(expr: SyntaxNode): any {
 	let component = expr.value as SyntaxNode[];
 	let prefixes = component[0].value as SyntaxNode[];
@@ -83,13 +112,7 @@ function BuildOperand(expr: SyntaxNode): any {
 
 	switch (component[1].type) {
 		case "constant":
-			component[1].value = (component[1].value as string)
-				.replace(/\\t/g, "\t")
-				.replace(/\\n/g, "\n")
-				.replace(/\\r/g, "\r")
-				.replace(/\\"/g, "\"")
-				.replace(/\\'/g, "\'")
-				.replace(/\\\\/g, "\\");
+			component[1].value = FlatternConstant(component[1] as SyntaxNode);
 		case "name":
 			base.type = component[1].type == "constant" ? "literal" : "term";
 			base.value = component[1].value;

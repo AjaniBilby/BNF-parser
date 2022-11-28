@@ -14,6 +14,7 @@
     - [Reference](#reference)
     - [Reference Range](#reference-range)
   - [BNF Syntax](#bnf-syntax)
+    - [Escape Codes](#escape-codes)
     - [Repetition `?`, `+`, `*`](#repetition---)
     - [Omit `%`](#omit-)
     - [Not `!`](#not-)
@@ -203,31 +204,42 @@ class ReferenceRange {
 ```bnf
 program ::= %w* ( def %w* )+ ;
 
-# Consume a single wild character
+# Consumes a single wild character
 any ::= !"" ;
 
-# White space characters
-w ::= " " | "\t" | %comment | "\n" | "\r" ;
-  comment ::= "#" !"\n"* "\n" ;
+# Whitespace
+w ::= comment | " " | "\t" | "\n" | "\r" ;
+	comment ::= "#" !"\n"* "\n" ;
 
 name ::= ...( letter | digit | "_" )+ ;
-  letter ::= "a"->"z" | "A"->"Z" ;
-  digit ::= "0"->"9" ;
+	letter ::= "a"->"z" | "A"->"Z" ;
+	digit ::= "0"->"9" ;
 
-# String literals
-constant ::= ...( single | double ) ;
-  double ::= %"\"" ...( ( "\\" any  ) | !"\"" )* %"\"" ;
-  single ::= %"\'" ...( ( "\\" any  ) | !"\'" )* %"\'" ;
+constant ::= single | double ;
+	double ::= %"\"" ( ( "\\" ...any  ) | !"\""+ )* %"\"" ;
+	single ::= %"\'" ( ( "\\" ...any  ) | !"\'"+ )* %"\'" ;
 
 def ::= ...name %w+ %"::=" %w* expr %w* %";" ;
 
 expr ::= expr_arg %w* ( ...expr_infix? %w* expr_arg %w* )* ;
-  expr_arg ::= expr_prefix ( ...constant | expr_brackets | ...name ) ...expr_suffix? ;
-  expr_prefix ::= "%"? "..."? "!"? ;
-  expr_infix  ::= "->" | "|" ;
-  expr_suffix ::= "*" | "?" | "+" ;
-  expr_brackets ::= %"(" %w* expr %w* %")" ;
+	expr_arg ::= expr_prefix ( constant | expr_brackets | ...name ) ...expr_suffix? ;
+	expr_prefix ::= "%"? "..."? "!"? ;
+	expr_infix  ::= "->" | "|" ;
+	expr_suffix ::= "*" | "?" | "+" ;
+	expr_brackets ::= %"(" %w* expr %w* %")" ;
 ```
+
+### Escape Codes
+
+| Code | Result |
+| :-: | :- |
+| `\b` | Backspace |
+| `\f` | Form Feed |
+| `\n` | New Line |
+| `\r` | Carriage Return |
+| `\t` | Horizontal Tab |
+| `\v` | Vertical Tab |
+| - | Unrecognised escapes will result in just the character after the slash |
 
 ### Repetition `?`, `+`, `*`
 
