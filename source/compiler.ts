@@ -151,6 +151,10 @@ function BuildOperand(expr: SyntaxNode): any {
 }
 
 export function Compile(tree: SyntaxNode): Parser {
+	if (!(tree instanceof SyntaxNode)) {
+		throw new TypeError("Cannot compile syntax tree, as Syntax node is not provided");
+	}
+
 	let syntax = new Parser({});
 
 	for (let node of (tree.value[0] as SyntaxNode).value) {
