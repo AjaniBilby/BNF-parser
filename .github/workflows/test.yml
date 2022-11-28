@@ -24,7 +24,7 @@ jobs:
         run: npm install
 
       - name: Automated tests
-        run: npm run tests
+        run: npm run test
 
   run-win:
     if: ${{ false }}  # disable for now
@@ -43,4 +43,4 @@ jobs:
         run: npm install
 
       - name: Automated tests
-        run: npm run tests
+        run: npm run test
