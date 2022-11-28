@@ -1,6 +1,6 @@
 {
 	"name": "bnf-parser",
-	"version": "3.0.2",
+	"version": "3.0.3",
 	"description": "Deterministic BNF compiler/parser",
 	"main": "./bin/index.js",
 	"scripts": {
