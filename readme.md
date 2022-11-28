@@ -1,5 +1,7 @@
 # BNF-Parser <!-- no toc -->
 
+[![Test](https://github.com/AjaniBilby/BNF-parser/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/AjaniBilby/BNF-parser/actions/workflows/test.yml)
+
 - [BNF-Parser ](#bnf-parser-)
 - [Example](#example)
   - [API](#api)
