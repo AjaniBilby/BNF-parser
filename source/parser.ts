@@ -301,7 +301,7 @@ export class Term {
 			return nodes[0];
 		}
 
-		return new SyntaxNode(this.value, nodes, range);
+		return new SyntaxNode(this.value+this.count, nodes, range);
 	}
 
 	serialize(): any {
@@ -362,9 +362,9 @@ export class Select {
 
 		if (this.count == Count.One) {
 			return nodes[0];
-		} else {
-			return new SyntaxNode(`(...)${this.count}`, nodes, range);
 		}
+
+		return new SyntaxNode(`(...)${this.count}`, nodes, range);
 	}
 
 	parseSingle(input: string, ctx: Parser, cursor: Reference): SyntaxNode | ParseError {
@@ -413,7 +413,9 @@ export class Sequence extends Select {
 
 			cursor = res.ref.end;
 
-			if (res.type != "omit") {
+			if (rule instanceof Omit) {
+				continue; // skip omitted operands
+			} else {
 				nodes.push(res);
 			}
 		}
@@ -485,6 +487,10 @@ export class Parser {
 	}
 
 	addRule(name: string, rule: Rule) {
+		if (this.terms.has(name)) {
+			throw new Error(`Attempting to add rule "${name}" to a parser which already has a rule of that name`);
+		}
+
 		this.terms.set(name, rule);
 	}
 
