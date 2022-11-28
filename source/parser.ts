@@ -458,6 +458,10 @@ export class Rule {
 		return res;
 	}
 
+	random(): string {
+		return "";
+	}
+
 	setVerbose(mode: boolean) {
 		this.verbose = mode;
 	}
@@ -509,6 +513,11 @@ export class Parser {
 		}
 
 		return res;
+	}
+
+	random(entry = "program"): string {
+		let entryTerm = this.getRule(entry);
+		return entryTerm.random();
 	}
 
 	setVerbose(mode: boolean) {
