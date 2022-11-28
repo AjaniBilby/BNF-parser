@@ -5,11 +5,9 @@
 	"main": "./bin/index.js",
 	"scripts": {
 		"test": "node ./test",
-
 		"build": "npm run build-ts & npm run build-syntax",
 		"build-ts": "tsc",
 		"build-syntax": "node ./bin/build.js --verbose"
-
 	},
 	"repository": {
 		"type": "git",

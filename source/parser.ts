@@ -1,9 +1,9 @@
-import {SyntaxNode, ParseError, Reference, ReferenceRange} from "./syntax";
+import { SyntaxNode, ParseError, Reference, ReferenceRange } from "./syntax";
 
 export type Expression = Literal | CharRange | Term | Not | Omit | Gather | Select | Sequence;
 
 function ParseExpression(json: any): Expression {
-	switch (json['type'] as string) {
+	switch (<string> json['type']) {
 		case "literal": return new Literal(json);
 		case "range": return new CharRange(json);
 		case "term": return new Term(json);
@@ -52,6 +52,27 @@ function CountCheck(count: Number, mode: Count): boolean {
 }
 
 
+function RandInt(min: number, max: number): number {
+	return Math.round( Math.random()*(max-min) + min )
+}
+
+function RandomFromCount(limit: Count, min = 1, max = 5) {
+	switch (limit) {
+		case Count.One:
+			return 1;
+		case Count.ZeroToOne:
+			return Math.round(Math.random());
+		case Count.OneToMany:
+			min = Math.max(min, 1);
+			// continue to next case
+		case Count.ZeroToMany:
+			return RandInt(min, max);
+		default:
+			throw new Error(`Unknown count type ${limit}`);
+	}
+}
+
+
 
 
 
@@ -64,7 +85,7 @@ export class Literal {
 		this.count = ParseCount(json['count']);
 	}
 
-	parse(input: string, ctx: Parser, cursor: Reference): SyntaxNode | ParseError {
+	parse(input: string, cursor: Reference): SyntaxNode | ParseError {
 		let start = cursor.clone();
 		let consumption = 0;
 
@@ -109,6 +130,22 @@ export class Literal {
 		return true;
 	}
 
+	link(ctx: Parser) { }
+
+	random(depth: number): string {
+		let ittr = RandomFromCount(this.count, 1, depth*0.5 + 10);
+		let out = "";
+		for (let i=0; i<ittr; i++) {
+			out += this.randomSingle();
+		}
+
+		return out;
+	}
+
+	randomSingle(): string {
+		return this.value;
+	}
+
 	serialize(): any {
 		return {
 			type: "literal",
@@ -143,6 +180,13 @@ export class CharRange extends Literal {
 		return this.value <= char && char <= this.to;
 	}
 
+	randomSingle(): string {
+		return String.fromCharCode(RandInt(
+			this.value.charCodeAt(0),
+			this.to.charCodeAt(0)
+		));
+	}
+
 	serialize(): any {
 		let out = super.serialize();
 		out.type = "range";
@@ -163,14 +207,22 @@ export class Gather {
 		this.expr = ParseExpression(json['expr']);
 	}
 
-	parse(input: string, ctx: Parser, cursor: Reference): SyntaxNode | ParseError {
-		let res = this.expr.parse(input, ctx, cursor);
+	parse(input: string, cursor: Reference): SyntaxNode | ParseError {
+		let res = this.expr.parse(input, cursor);
 		if (res instanceof ParseError) {
 			return res;
 		}
 
 		res.value = res.flat();
 		return res;
+	}
+
+	link(ctx: Parser) {
+		this.expr.link(ctx);
+	}
+
+	random(depth: number): string {
+		return this.expr.random(depth);
 	}
 
 	serialize(): any {
@@ -182,8 +234,8 @@ export class Gather {
 }
 
 export class Omit extends Gather {
-	parse(input: string, ctx: Parser, cursor: Reference): SyntaxNode | ParseError {
-		let res = this.expr.parse(input, ctx, cursor);
+	parse(input: string, cursor: Reference): SyntaxNode | ParseError {
+		let res = this.expr.parse(input, cursor);
 		if (res instanceof ParseError) {
 			return res;
 		}
@@ -212,7 +264,7 @@ export class Not {
 		this.count = ParseCount(json['count']);
 	}
 
-	parse(input: string, ctx: Parser, cursor: Reference): SyntaxNode | ParseError {
+	parse(input: string, cursor: Reference): SyntaxNode | ParseError {
 		let start = cursor.clone();
 		let consumption = 0;
 
@@ -224,7 +276,7 @@ export class Not {
 				break;
 			}
 
-			let check = this.expr.parse(input, ctx, cursor.clone());
+			let check = this.expr.parse(input, cursor.clone());
 			if (check instanceof ParseError) {
 				cursor.advance(input[cursor.index] == "\n");
 				consumption++;
@@ -242,6 +294,14 @@ export class Not {
 		return new SyntaxNode("literal", input.slice(start.index, cursor.index), range);
 	}
 
+	link(ctx: Parser) {
+		this.expr.link(ctx);
+	}
+
+	random(depth: number): string {
+		return "{{NOT}}";
+	}
+
 	serialize(): any {
 		return {
 			type: "not",
@@ -252,21 +312,26 @@ export class Not {
 }
 
 export class Term {
+	expr: Rule | null
 	value: string;
 	count: Count
 
 	constructor(json: any) {
 		this.value = json['value'];
 		this.count = ParseCount(json['count']);
+		this.expr = null;
 	}
 
-	parse(input: string, ctx: Parser, cursor: Reference): SyntaxNode | ParseError {
-		let expr = ctx.getRule(this.value);
+	parse(input: string, cursor: Reference): SyntaxNode | ParseError {
 		let start = cursor.clone();
 		let consumption = 0;
 
 		let err: ParseError | null = null;
 		let nodes: SyntaxNode[] = [];
+
+		if (!(this.expr instanceof Rule)) {
+			throw new TypeError("Attempting ot parse with unlinked Term");
+		}
 
 		while (true) {
 			if (consumption >= 1 && (this.count == Count.One || this.count == Count.ZeroToOne)) {
@@ -276,7 +341,7 @@ export class Term {
 				break;
 			}
 
-			let res = expr.parse(input, ctx, cursor.clone());
+			let res = this.expr?.parse(input, cursor.clone());
 			if (res instanceof ParseError) {
 				err = res;
 				break;
@@ -302,6 +367,14 @@ export class Term {
 		}
 
 		return new SyntaxNode(this.value+this.count, nodes, range);
+	}
+
+	link(ctx: Parser) {
+		this.expr = ctx.getRule(this.value);
+	}
+
+	random(depth: number): string {
+		return (this.expr as Rule).random(depth-1);
 	}
 
 	serialize(): any {
@@ -330,7 +403,7 @@ export class Select {
 		}
 	}
 
-	parse(input: string, ctx: Parser, cursor: Reference): SyntaxNode | ParseError {
+	parse(input: string, cursor: Reference): SyntaxNode | ParseError {
 		let count = 0;
 		let start = cursor.clone();
 
@@ -342,7 +415,7 @@ export class Select {
 				break;
 			}
 
-			let res = this.parseSingle(input, ctx, cursor.clone());
+			let res = this.parseSingle(input, cursor.clone());
 			if (res instanceof ParseError) {
 				err = res;
 				break;
@@ -367,12 +440,12 @@ export class Select {
 		return new SyntaxNode(`(...)${this.count}`, nodes, range);
 	}
 
-	parseSingle(input: string, ctx: Parser, cursor: Reference): SyntaxNode | ParseError {
+	parseSingle(input: string, cursor: Reference): SyntaxNode | ParseError {
 		let span = new ReferenceRange(cursor.clone(), cursor.clone());
 		let err: string = "";
 
 		for (let opt of this.exprs) {
-			let res = opt.parse(input, ctx, cursor.clone());
+			let res = opt.parse(input, cursor.clone());
 			if (res instanceof ParseError) {
 				span.span(res.ref);
 				err = res.msg;
@@ -383,6 +456,30 @@ export class Select {
 		}
 
 		return new ParseError("No valid option found", new ReferenceRange(cursor, cursor));
+	}
+
+	link(ctx: Parser) {
+		for (let expr of this.exprs) {
+			expr.link(ctx);
+		}
+	}
+
+	random(depth: number): string {
+		let iter = RandomFromCount(
+			this.count,
+			0, 5
+		);
+		let out = "";
+		for (let i=0; i<iter; i++) {
+			out += this.randomSingle(depth-1);
+		}
+
+		return out;
+	}
+
+	randomSingle(depth: number): string {
+		let index = RandInt(0, this.exprs.length-1);
+		return this.exprs[index].random(depth-1);
 	}
 
 	serialize(): any {
@@ -400,12 +497,12 @@ export class Sequence extends Select {
 		super(json);
 	}
 
-	parseSingle(input: string, ctx: Parser, cursor: Reference): SyntaxNode | ParseError {
+	parseSingle(input: string, cursor: Reference): SyntaxNode | ParseError {
 		let start = cursor.clone();
 		let nodes: SyntaxNode[] = [];
 
 		for (let rule of this.exprs) {
-			let res = rule.parse(input, ctx, cursor.clone());
+			let res = rule.parse(input, cursor.clone());
 			if (res instanceof ParseError) {
 				res.ref.span(new ReferenceRange(start, cursor));
 				return res;
@@ -423,6 +520,14 @@ export class Sequence extends Select {
 		return new SyntaxNode('seq[]', nodes, new ReferenceRange(start, cursor));
 	}
 
+	randomSingle(depth: number): string {
+		let out = "";
+		for (let expr of this.exprs) {
+			out += expr.random(depth);
+		}
+		return out;
+	}
+
 	serialize(): any {
 		let out = super.serialize();
 		out.type = "sequence";
@@ -436,21 +541,21 @@ export class Sequence extends Select {
 
 export class Rule {
 	name: string;
-	seq: Expression;
+	expr: Expression;
 	verbose: boolean;
 
 	constructor(name: string, json: any){
 		this.name = name;
-		this.seq = ParseExpression(json);
+		this.expr = ParseExpression(json);
 		this.verbose = false;
 	}
 
-	parse(input: string, ctx: Parser, cursor: Reference): SyntaxNode | ParseError {
+	parse(input: string, cursor: Reference): SyntaxNode | ParseError {
 		if (this.verbose) {
 			console.log(`Parsing rule "${this.name}" at ${cursor.toString()}`);
 		}
 
-		let res = this.seq.parse(input, ctx, cursor);
+		let res = this.expr.parse(input, cursor);
 		if (res instanceof SyntaxNode) {
 			res.type = this.name;
 		}
@@ -458,8 +563,16 @@ export class Rule {
 		return res;
 	}
 
-	random(): string {
-		return "";
+	link(ctx: Parser) {
+		this.expr.link(ctx);
+	}
+
+	random(depth: number): string {
+		if (depth <= 0) {
+			return "{{CAP}}";
+		}
+
+		return this.expr.random(depth-1);
 	}
 
 	setVerbose(mode: boolean) {
@@ -467,7 +580,7 @@ export class Rule {
 	}
 
 	serialize (): any {
-		return this.seq.serialize();
+		return this.expr.serialize();
 	}
 }
 
@@ -479,6 +592,8 @@ export class Parser {
 		for (let key in json) {
 			this.addRule(key, new Rule(key, json[key]));
 		}
+
+		this.link();
 	}
 
 	getRule(name: string): Rule {
@@ -500,7 +615,7 @@ export class Parser {
 
 	parse(input: string, partial = false, entry = "program"): SyntaxNode | ParseError {
 		let entryTerm = this.getRule(entry);
-		let res = entryTerm.parse(input, this, new Reference(1,1,0));
+		let res = entryTerm.parse(input, new Reference(1,1,0));
 		if (res instanceof ParseError) {
 			return res;
 		}
@@ -515,9 +630,15 @@ export class Parser {
 		return res;
 	}
 
+	link() {
+		for (let key of this.terms.keys()) {
+			this.terms.get(key)?.link(this);
+		}
+	}
+
 	random(entry = "program"): string {
 		let entryTerm = this.getRule(entry);
-		return entryTerm.random();
+		return entryTerm.random(50);
 	}
 
 	setVerbose(mode: boolean) {

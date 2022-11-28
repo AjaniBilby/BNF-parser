@@ -1,0 +1,26 @@
+program ::= ( stmt "\n" )+ ;
+	stmt ::= def | def ;
+
+
+# Consumes a single wild character
+any ::= !"" ;
+
+# Whitespace
+comment ::= "#" ( name " " )* "\n" ;
+
+name ::= ( letter | "_" ) ( letter | digit | "_" )+ ;
+	letter ::= "a"->"z" | "A"->"Z" ;
+	digit ::= "0"->"9" ;
+
+constant ::= single | double ;
+	double ::= %"\"" ( ( "\\" ...any  ) | !"\""+ )* %"\"" ;
+	single ::= %"\'" ( ( "\\" ...any  ) | !"\'"+ )* %"\'" ;
+
+def ::= name %" ::= " expr %" ;" ;
+
+expr ::= expr_arg ( " " (expr_infix " ")? expr_arg )* ;
+	expr_arg ::= expr_prefix ( constant | expr_brackets | ...name ) ...expr_suffix? ;
+	expr_prefix ::= "%"? "..."? "!"? ;
+	expr_infix  ::= "->" | "|" ;
+	expr_suffix ::= "*" | "?" | "+" ;
+	expr_brackets ::= %"( " expr %" )" ;

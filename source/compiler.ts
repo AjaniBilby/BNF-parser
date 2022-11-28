@@ -164,5 +164,7 @@ export function Compile(tree: SyntaxNode): Parser {
 		}
 	}
 
+	syntax.link();
+
 	return syntax;
 }
