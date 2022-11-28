@@ -21,6 +21,7 @@ for (let test of tests) {
 	let res;
 	try {
 		res = execSync(test[0], test[1]);
+		console.log("  Passed\n");
 	} catch (e) {
 		console.error("  "+
 			e.stderr
@@ -30,8 +31,6 @@ for (let test of tests) {
 
 		console.log('  Failed\n');
 		failed = true;
-	} finally {
-		console.log("  Passed\n");
 	}
 }
 
