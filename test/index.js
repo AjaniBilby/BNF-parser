@@ -6,7 +6,7 @@ let tests = [
 	['node double-parse.js', {
 		cwd: __dirname
 	}],
-	['node run.js', {
+	['ts-node run.js', {
 		cwd: path.join(__dirname, "/uv")
 	}]
 ];

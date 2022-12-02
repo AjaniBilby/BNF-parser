@@ -5,11 +5,9 @@
 	"main": "./bin/index.js",
 	"scripts": {
 		"test": "node ./test",
-
 		"build": "npm run build-ts & npm run build-syntax",
 		"build-ts": "tsc",
 		"build-syntax": "node ./bin/build.js --verbose"
-
 	},
 	"repository": {
 		"type": "git",
@@ -24,8 +22,8 @@
 	],
 	"author": "Ajani Bilby",
 	"license": "ISC",
-	"dependencies": {	},
 	"devDependencies": {
+		"@types/node": "^18.11.10",
 		"getopts": "^2.3.0",
 		"ts-node": "^10.9.1",
 		"typescript": "^4.8.4"
