@@ -19,6 +19,14 @@
     - [ParseError](#parseerror)
     - [Reference](#reference)
     - [Reference Range](#reference-range)
+- [Syntax Tree](#syntax-tree)
+  - [Sequences](#sequences)
+  - [Select](#select)
+  - [Omit](#omit)
+  - [Gather](#gather)
+  - [Not](#not)
+  - [Range](#range)
+  - [Literal](#literal)
 
 A simple library for generate syntax pasers based BNF syntax descriptions.  
 There are a few changes from standard BNF forms to help produce cleaner syntax tree outputs that BNFs normally provide.
@@ -277,3 +285,36 @@ class ReferenceRange {
   toString(): string { }
 }
 ```
+
+# Syntax Tree
+
+There are two main core abstractions for how the syntax trees are generated from a BNF, sequences and selects.
+
+## Sequences
+
+A sequence is a linear list of elements that make up a match. A top level sequence (right side of the `::=`) will resolve with the `.type` of the matching name (the name on the left of the `::=`), any sub-sequences `()` will appear as a syntax node with the name `(...)` with subsequent values being evaluated the same as the top level.
+
+If there is a repetition marker such as `name+` there will be an extra noded added with the type `(...)+` of whom's children will be the number of times the pattern was matched.
+
+## Select
+
+Will resolve as the syntax tree of the first matching option. For instance if you have the select statement `variable | number`, if the parser matches a variable it would be the same as having a `variable` at that point in the sequence.
+
+## Omit
+
+Any omit statement within a sequence will be removed, and then looking at the outputted syntax tree it is like they never existed, however they are still critical to a successful match. In the case that they are within a select, they will still be visible with `.type` of `omit`, with no child nodes.
+## Gather
+
+This does not alter the outputted syntax tree form in relation to the sequence or select it is within, however it will squash all of it's child nodes back down into a single string. Node that this will reflect the affects of any omit operations which occurred within the child nodes.
+
+## Not
+
+It's `.values` will be a single string of all characters it could consume until it matched with the target expression.
+
+## Range
+
+Ranges will appear with the `.type` of `range` with `.value` being a single string with the characters consumed by this expression, inclusing any repetition markers (so a range with `+` will be a string of length at least one).
+
+## Literal
+
+Ranges will appear with the `.type` of `literal` with `.value` being a copy of the exact literal as a string.

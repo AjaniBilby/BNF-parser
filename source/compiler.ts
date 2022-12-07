@@ -4,6 +4,10 @@ import { SyntaxNode } from "./syntax";
 
 
 function BuildRule(rule: SyntaxNode): Rule {
+	if (rule.type != "def") {
+		throw new Error(`Unknown internal error, expected "def" got "${rule.type}"`);
+	}
+
 	return new Rule(
 		(rule.value[0] as SyntaxNode).value as string,
 		BuildExpr(rule.value[1] as SyntaxNode)
@@ -11,6 +15,10 @@ function BuildRule(rule: SyntaxNode): Rule {
 }
 
 function BuildExpr(expr: SyntaxNode): any {
+	if (expr.type != "expr") {
+		throw new Error(`Unknown internal error, expected "expr" got "${expr.type}"`);
+	}
+
 	let base: any = {
 		type: "sequence",
 		count: "1",
@@ -73,7 +81,12 @@ function BuildExpr(expr: SyntaxNode): any {
 }
 
 function FlatternConstant(expr: SyntaxNode): string {
-	let inner = expr.value[0] as SyntaxNode;
+	if (expr.type != "constant") {
+		throw new Error(`Unknown internal error, expected "constant" got "${expr.type}"`);
+	}
+
+	let str = expr.value[0] as SyntaxNode
+	let inner = str.value[0] as SyntaxNode;
 	let out = "";
 
 	if (!Array.isArray(inner.value)) {
@@ -102,6 +115,10 @@ function FlatternConstant(expr: SyntaxNode): string {
 }
 
 function BuildOperand(expr: SyntaxNode): any {
+	if (expr.type != "expr_arg") {
+		throw new Error(`Unknown internal error, expected "expr_arg" got "${expr.type}"`);
+	}
+
 	let component = expr.value as SyntaxNode[];
 	let prefixes = component[0].value as SyntaxNode[];
 
