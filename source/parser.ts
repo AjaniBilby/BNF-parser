@@ -31,7 +31,7 @@ export function ParseCount(count: string): Count {
 		case "?":	return Count.ZeroToOne;
 		case "*":	return Count.ZeroToMany;
 		case "+":	return Count.OneToMany;
-		default: throw new Error("Unknown count");
+		default: throw new Error(`Unknown count "${count}"`);
 	}
 }
 
@@ -281,8 +281,11 @@ export class Term {
 				err = res;
 				break;
 			} else {
+				if (this.count == Count.One) {
+					return res;
+				}
+
 				cursor = res.ref.end;
-				res.type = this.value;
 				nodes.push(res);
 				consumption++;
 			}
@@ -295,10 +298,6 @@ export class Term {
 			}
 			err.add_stack(this.value);
 			return err;
-		}
-
-		if (this.count == Count.One) {
-			return nodes[0];
 		}
 
 		return new SyntaxNode(this.value+this.count, nodes, range);
@@ -348,6 +347,7 @@ export class Select {
 				break;
 			}
 			cursor = res.ref.end.clone();
+
 			nodes.push(res);
 			count++;
 		}
@@ -360,11 +360,7 @@ export class Select {
 			return err;
 		}
 
-		if (this.count == Count.One) {
-			return nodes[0];
-		}
-
-		return new SyntaxNode(`(...)${this.count}`, nodes, range);
+		return new SyntaxNode(`(...)${this.count == "1" ? "" : this.count}`, nodes, range);
 	}
 
 	parseSingle(input: string, ctx: Parser, cursor: Reference): SyntaxNode | ParseError {
@@ -375,7 +371,10 @@ export class Select {
 			let res = opt.parse(input, ctx, cursor.clone());
 			if (res instanceof ParseError) {
 				span.span(res.ref);
-				err = res.msg;
+				if (res.ref.end.index >= span.end.index) {
+					err = res.msg;
+				}
+
 				continue;
 			} else {
 				return res;
@@ -400,9 +399,24 @@ export class Sequence extends Select {
 		super(json);
 	}
 
+	parse(input: string, ctx: Parser, cursor: Reference): SyntaxNode | ParseError {
+		let out = super.parse(input, ctx, cursor);
+		if (out instanceof ParseError) {
+			return out;
+		}
+
+		if (this.count == Count.One) {
+			return (out.value as SyntaxNode[])[0];
+		}
+
+		return out;
+	}
+
 	parseSingle(input: string, ctx: Parser, cursor: Reference): SyntaxNode | ParseError {
 		let start = cursor.clone();
 		let nodes: SyntaxNode[] = [];
+
+		let onlyTerm = true;
 
 		for (let rule of this.exprs) {
 			let res = rule.parse(input, ctx, cursor.clone());
@@ -416,6 +430,16 @@ export class Sequence extends Select {
 			if (rule instanceof Omit) {
 				continue; // skip omitted operands
 			} else {
+				if (!(rule instanceof Term)) {
+					onlyTerm = false;
+				}
+
+				// Merge selection of a single item inline
+				if (rule instanceof Select && rule.count == Count.One) {
+					nodes.push((res.value as SyntaxNode[])[0]);
+					continue;
+				}
+
 				nodes.push(res);
 			}
 		}
