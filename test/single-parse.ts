@@ -1,12 +1,21 @@
-const { BNF, SyntaxNode, Compile } = require("../bin/index.js");
-const path = require('path');
-const fs = require('fs');
+import { BNF, SyntaxNode, Compile } from '../source/index';
+import * as path from 'path';
+import * as fs from 'fs';
+
 
 
 let input = fs.readFileSync(path.join(__dirname, '../bnf.bnf'), 'utf8');
 
 // BNF.setVerbose(true);
 let res = BNF.parse(input);
+
+fs.writeFileSync(
+	path.join(__dirname, './dump.json'),
+	JSON.stringify(res, (key, value)=>{
+		return key == "ref" ? undefined : value;
+	}, 2),
+'utf8');
+
 if (res instanceof SyntaxNode) {
 	let syntax = Compile(res);
 	syntax.setVerbose(true);
