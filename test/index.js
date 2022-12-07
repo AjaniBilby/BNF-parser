@@ -3,7 +3,10 @@ const path = require('path');
 
 
 let tests = {
-	"double-parse": ['node double-parse.js', {
+	"Single Parse": ['ts-node single-parse.ts', {
+		cwd: __dirname
+	}],
+	"Double Parse": ['node double-parse.js', {
 		cwd: __dirname
 	}],
 	"Uniview": ['ts-node run.ts', {

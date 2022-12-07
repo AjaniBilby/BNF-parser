@@ -24,7 +24,7 @@ if (res instanceof SyntaxNode) {
 
 	fs.writeFileSync(
 		path.join(__dirname, './dump-syntax.json'),
-		JSON.stringify(syntax.serialize()),
+		JSON.stringify(syntax.serialize(), null, 2),
 	'utf8');
 } else {
 	console.error(res.toString());
