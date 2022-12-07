@@ -37,8 +37,8 @@ program ::= %w* ( stmt_top %w* )* ;
 		float | integer ;
 
 	string ::= string_unicode | string_text ;
-		string_unicode   ::= "\"" ...( "\\\"" | !( "\"" ) )* "\"" ;
-		string_text      ::= "'" ...( "\\'"  | !( "'"  ) )* "'" ;
+		string_unicode   ::= "\"" ...( "\\\"" | !( "\\" )+ )* "\"" ;
+		string_text      ::= "'" ...( "\\'"  | !( "\\"  )+ )* "'" ;
 
 	hexidecimal ::= "0x" ...hex_char+ ;
 		hex_char ::= digit | "a" -> "f" | "A" -> "F" ;
@@ -46,7 +46,7 @@ program ::= %w* ( stmt_top %w* )* ;
 	octal ::= "0o" ...octal_char+ ;
 		octal_char ::= "0" -> "3" ;
 
-	binary ::= "0b" ( "0" | "1" )+ ;
+	binary ::= "0b" ...( "0" | "1" )+ ;
 
 	boolean ::= "true" | "false" ;
 

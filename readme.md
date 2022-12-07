@@ -5,6 +5,12 @@
 - [BNF-Parser ](#bnf-parser-)
 - [Example](#example)
 - [API](#api)
+  - [BNF Syntax](#bnf-syntax)
+    - [Escape Codes](#escape-codes)
+    - [Repetition `?`, `+`, `*`](#repetition---)
+    - [Omit `%`](#omit-)
+    - [Not `!`](#not-)
+    - [Range `->`](#range--)
   - [Imports](#imports)
     - [BNF](#bnf)
     - [Parser](#parser)
@@ -13,11 +19,14 @@
     - [ParseError](#parseerror)
     - [Reference](#reference)
     - [Reference Range](#reference-range)
-  - [BNF Syntax](#bnf-syntax)
-    - [Repetition `?`, `+`, `*`](#repetition---)
-    - [Omit `%`](#omit-)
-    - [Not `!`](#not-)
-    - [Range `->`](#range--)
+- [Syntax Tree](#syntax-tree)
+  - [Sequences](#sequences)
+  - [Select](#select)
+  - [Omit](#omit)
+  - [Gather](#gather)
+  - [Not](#not)
+  - [Range](#range)
+  - [Literal](#literal)
 
 A simple library for generate syntax pasers based BNF syntax descriptions.  
 There are a few changes from standard BNF forms to help produce cleaner syntax tree outputs that BNFs normally provide.
@@ -48,6 +57,86 @@ let tree = new Parser(
 ```
 
 # API
+
+## BNF Syntax
+
+```bnf
+program ::= %w* ( def %w* )+ ;
+
+# Consumes a single wild character
+any ::= !"" ;
+
+# Whitespace
+w ::= comment | " " | "\t" | "\n" | "\r" ;
+	comment ::= "#" !"\n"* "\n" ;
+
+name ::= ...( letter | digit | "_" )+ ;
+	letter ::= "a"->"z" | "A"->"Z" ;
+	digit ::= "0"->"9" ;
+
+constant ::= single | double ;
+	double ::= %"\"" ( ( "\\" ...any  ) | !"\""+ )* %"\"" ;
+	single ::= %"\'" ( ( "\\" ...any  ) | !"\'"+ )* %"\'" ;
+
+def ::= ...name %w+ %"::=" %w* expr %w* %";" ;
+
+expr ::= expr_arg %w* ( ...expr_infix? %w* expr_arg %w* )* ;
+	expr_arg ::= expr_prefix ( constant | expr_brackets | ...name ) ...expr_suffix? ;
+	expr_prefix ::= "%"? "..."? "!"? ;
+	expr_infix  ::= "->" | "|" ;
+	expr_suffix ::= "*" | "?" | "+" ;
+	expr_brackets ::= %"(" %w* expr %w* %")" ;
+```
+
+### Escape Codes
+
+| Code | Result |
+| :-: | :- |
+| `\b` | Backspace |
+| `\f` | Form Feed |
+| `\n` | New Line |
+| `\r` | Carriage Return |
+| `\t` | Horizontal Tab |
+| `\v` | Vertical Tab |
+| - | Unrecognised escapes will result in just the character after the slash |
+
+### Repetition `?`, `+`, `*`
+
+Only one repetition mark should exist per argument.
+```bnf
+term # once
+term? # one or zero
+term+ # at least once
+term* # zero or more
+```
+
+### Omit `%`
+
+```bnf
+%term
+```
+
+This operator will lead to the syntax under this operator being removed from the final syntax tree, however still remain as part of syntax validation. For instance in the BNF syntax above...
+
+The omit character goes in front af a single term, and must be the front most operator placing it in from of any `not` or `gather` operators.
+
+### Not `!`
+
+```bnf
+!term
+```
+
+This operator must be between two single length constants, this will accept all characters within the range of the two bounds (inclusive).  
+
+### Range `->`
+
+```bnf
+"a"->"z" # will consume a single character
+"a"->"z"* # will consume as many characters as are in the range
+```
+
+This operator must be between two single length constants, this will accept all characters within the range of the two bounds (inclusive). Until the repetition count is reached.  
+The first operand must have no repetitions, however the repetition markers on the last operand will apply to the whole group.
 
 ## Imports
 
@@ -197,72 +286,35 @@ class ReferenceRange {
 }
 ```
 
+# Syntax Tree
 
-## BNF Syntax
+There are two main core abstractions for how the syntax trees are generated from a BNF, sequences and selects.
 
-```bnf
-program ::= %w* ( def %w* )+ ;
+## Sequences
 
-# Consume a single wild character
-any ::= !"" ;
+A sequence is a linear list of elements that make up a match. A top level sequence (right side of the `::=`) will resolve with the `.type` of the matching name (the name on the left of the `::=`), any sub-sequences `()` will appear as a syntax node with the name `(...)` with subsequent values being evaluated the same as the top level.
 
-# White space characters
-w ::= " " | "\t" | %comment | "\n" | "\r" ;
-  comment ::= "#" !"\n"* "\n" ;
+If there is a repetition marker such as `name+` there will be an extra noded added with the type `(...)+` of whom's children will be the number of times the pattern was matched.
 
-name ::= ...( letter | digit | "_" )+ ;
-  letter ::= "a"->"z" | "A"->"Z" ;
-  digit ::= "0"->"9" ;
+## Select
 
-# String literals
-constant ::= ...( single | double ) ;
-  double ::= %"\"" ...( ( "\\" any  ) | !"\"" )* %"\"" ;
-  single ::= %"\'" ...( ( "\\" any  ) | !"\'" )* %"\'" ;
+Will resolve as the syntax tree of the first matching option. For instance if you have the select statement `variable | number`, if the parser matches a variable it would be the same as having a `variable` at that point in the sequence.
 
-def ::= ...name %w+ %"::=" %w* expr %w* %";" ;
+## Omit
 
-expr ::= expr_arg %w* ( ...expr_infix? %w* expr_arg %w* )* ;
-  expr_arg ::= expr_prefix ( ...constant | expr_brackets | ...name ) ...expr_suffix? ;
-  expr_prefix ::= "%"? "..."? "!"? ;
-  expr_infix  ::= "->" | "|" ;
-  expr_suffix ::= "*" | "?" | "+" ;
-  expr_brackets ::= %"(" %w* expr %w* %")" ;
-```
+Any omit statement within a sequence will be removed, and then looking at the outputted syntax tree it is like they never existed, however they are still critical to a successful match. In the case that they are within a select, they will still be visible with `.type` of `omit`, with no child nodes.
+## Gather
 
-### Repetition `?`, `+`, `*`
+This does not alter the outputted syntax tree form in relation to the sequence or select it is within, however it will squash all of it's child nodes back down into a single string. Node that this will reflect the affects of any omit operations which occurred within the child nodes.
 
-Only one repetition mark should exist per argument.
-```bnf
-term # once
-term? # one or zero
-term+ # at least once
-term* # zero or more
-```
+## Not
 
-### Omit `%`
+It's `.values` will be a single string of all characters it could consume until it matched with the target expression.
 
-```bnf
-%term
-```
+## Range
 
-This operator will lead to the syntax under this operator being removed from the final syntax tree, however still remain as part of syntax validation. For instance in the BNF syntax above...
+Ranges will appear with the `.type` of `range` with `.value` being a single string with the characters consumed by this expression, inclusing any repetition markers (so a range with `+` will be a string of length at least one).
 
-The omit character goes in front af a single term, and must be the front most operator placing it in from of any `not` or `gather` operators.
+## Literal
 
-### Not `!`
-
-```bnf
-!term
-```
-
-This operator must be between two single length constants, this will accept all characters within the range of the two bounds (inclusive).  
-
-### Range `->`
-
-```bnf
-"a"->"z" # will consume a single character
-"a"->"z"* # will consume as many characters as are in the range
-```
-
-This operator must be between two single length constants, this will accept all characters within the range of the two bounds (inclusive). Until the repetition count is reached.  
-The first operand must have no repetitions, however the repetition markers on the last operand will apply to the whole group.
+Ranges will appear with the `.type` of `literal` with `.value` being a copy of the exact literal as a string.

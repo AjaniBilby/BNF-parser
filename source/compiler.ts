@@ -4,6 +4,10 @@ import { SyntaxNode } from "./syntax";
 
 
 function BuildRule(rule: SyntaxNode): Rule {
+	if (rule.type != "def") {
+		throw new Error(`Unknown internal error, expected "def" got "${rule.type}"`);
+	}
+
 	return new Rule(
 		(rule.value[0] as SyntaxNode).value as string,
 		BuildExpr(rule.value[1] as SyntaxNode)
@@ -11,6 +15,10 @@ function BuildRule(rule: SyntaxNode): Rule {
 }
 
 function BuildExpr(expr: SyntaxNode): any {
+	if (expr.type != "expr") {
+		throw new Error(`Unknown internal error, expected "expr" got "${expr.type}"`);
+	}
+
 	let base: any = {
 		type: "sequence",
 		count: "1",
@@ -72,7 +80,45 @@ function BuildExpr(expr: SyntaxNode): any {
 	return base;
 }
 
+function FlatternConstant(expr: SyntaxNode): string {
+	if (expr.type != "constant") {
+		throw new Error(`Unknown internal error, expected "constant" got "${expr.type}"`);
+	}
+
+	let str = expr.value[0] as SyntaxNode
+	let inner = str.value[0] as SyntaxNode;
+	let out = "";
+
+	if (!Array.isArray(inner.value)) {
+		throw new TypeError("Internal logic failure. Unexpected string");
+	}
+
+	for (let charNode of inner.value) {
+		if (charNode.type == "literal") {
+			out += charNode.value;
+		} else {
+
+			let esc = charNode.value as SyntaxNode[];
+			switch (esc[1].value) {
+				case "b": out += "\b"; break;
+				case "f": out += "\f"; break;
+				case "n": out += "\n"; break;
+				case "r": out += "\r"; break;
+				case "t": out += "\t"; break;
+				case "v": out += "\v"; break;
+				default: out += esc[1].value;
+			}
+		}
+	}
+
+	return out;
+}
+
 function BuildOperand(expr: SyntaxNode): any {
+	if (expr.type != "expr_arg") {
+		throw new Error(`Unknown internal error, expected "expr_arg" got "${expr.type}"`);
+	}
+
 	let component = expr.value as SyntaxNode[];
 	let prefixes = component[0].value as SyntaxNode[];
 
@@ -83,13 +129,7 @@ function BuildOperand(expr: SyntaxNode): any {
 
 	switch (component[1].type) {
 		case "constant":
-			component[1].value = (component[1].value as string)
-				.replace(/\\t/g, "\t")
-				.replace(/\\n/g, "\n")
-				.replace(/\\r/g, "\r")
-				.replace(/\\"/g, "\"")
-				.replace(/\\'/g, "\'")
-				.replace(/\\\\/g, "\\");
+			component[1].value = FlatternConstant(component[1] as SyntaxNode);
 		case "name":
 			base.type = component[1].type == "constant" ? "literal" : "term";
 			base.value = component[1].value;
@@ -128,6 +168,10 @@ function BuildOperand(expr: SyntaxNode): any {
 }
 
 export function Compile(tree: SyntaxNode): Parser {
+	if (!(tree instanceof SyntaxNode)) {
+		throw new TypeError("Cannot compile syntax tree, as Syntax node is not provided");
+	}
+
 	let syntax = new Parser({});
 
 	for (let node of (tree.value[0] as SyntaxNode).value) {

@@ -27,53 +27,75 @@
 		"type": "select",
 		"count": "1",
 		"exprs": [
+			{ "type": "term", "value": "comment", "count": "1" },
 			{ "type": "literal", "value": "\n", "count": "1" },
 			{ "type": "literal", "value": "\r", "count": "1" },
 			{ "type": "literal", "value": " ", "count": "1" },
 			{ "type": "literal", "value": "\t", "count": "1" }
 		]
 	},
+	"comment": {
+		"type": "sequence",
+		"count": "1",
+		"exprs": [
+			{ "type": "literal", "value": "#", "count": "1" },
+			{"type": "not", "expr": { "type": "literal", "value": "\n", "count": "1" }, "count": "*"},
+			{ "type": "literal", "value": "\n", "count": "1" }
+		]
+	},
 
 	"name": {
-		"type": "select",
-		"count": "+",
-		"exprs": [
-			{ "type": "term", "value": "letter", "count": "1"	},
-			{ "type": "term", "value": "digit", "count": "1" }
-		]
+		"type": "gather",
+		"expr": {
+			"type": "select",
+			"count": "+",
+			"exprs": [
+				{ "type": "term", "value": "letter", "count": "1"	},
+				{ "type": "term", "value": "digit", "count": "1" },
+				{ "type": "literal", "value": "_", "count": "1" }
+			]
+		}
 	},
 	"letter": {
 		"type": "select",
 		"count": "1",
 		"exprs": [
 			{ "type": "range", "value": "a", "to": "z", "count": "1" },
-			{ "type": "range", "value": "A", "to": "Z", "count": "1" },
-			{ "type": "literal", "value": "_", "count": "1" }
+			{ "type": "range", "value": "A", "to": "Z", "count": "1" }
 		]
 	},
 	"digit": {
-		"type": "select",
-		"count": "1",
-		"exprs": [
-			{ "type": "range", "value": "0", "to": "9", "count": "1" }
-		]
+		"type": "range", "value": "0", "to": "9", "count": "1"
 	},
 
 
 	"constant": {
+		"type": "select",
+		"count": "1",
+		"exprs": [
+			{"type": "term", "value": "double", "count": "1"},
+			{"type": "term", "value": "double", "count": "1"}
+		]
+	},
+
+	"double": {
 		"type": "sequence",
 		"count": "1",
 		"exprs": [
 			{"type": "omit", "expr": {"type": "literal", "value": "\"", "count": "1"}},
-			{"type": "gather", "expr":
-				{"type": "select", "count": "*", "exprs": [
+
+			{
+				"type": "select",
+				"count": "*",
+				"exprs": [
 					{"type": "sequence", "count": "1", "exprs": [
 						{"type": "literal", "value": "\\", "count": "1"},
-						{"type": "term", "value": "any", "count": "1"}
+						{"type": "gather", "expr": {"type": "term", "value": "any", "count": "1"}}
 					]},
-					{"type": "not", "count": "1", "expr": {"type": "literal", "value": "\"", "count": "1"}}
-				]}
+					{"type": "not", "count": "+", "expr": {"type": "literal", "value": "\"", "count": "1"}}
+				]
 			},
+
 			{"type": "omit", "expr": {"type": "literal", "value": "\"", "count": "1"}}
 		]
 	},
@@ -112,7 +134,7 @@
 		"exprs": [
 			{"type": "term", "value": "expr_prefix", "count": "1"},
 			{"type": "select", "count": "1", "exprs": [
-				{"type": "gather", "expr": {"type": "term", "value": "constant", "count": "1"}},
+				{"type": "term", "value": "constant", "count": "1"},
 				{"type": "term", "value": "expr_brackets", "count": "1"},
 				{"type": "gather", "expr": {"type": "term", "value": "name", "count": "1"}}
 			]},

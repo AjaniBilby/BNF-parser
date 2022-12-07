@@ -17,7 +17,7 @@ if (res instanceof SyntaxNode) {
 		Compile(test);
 		console.log("Double build successful");
 	} else {
-		console.error(res.toString());
+		console.error(test.toString());
 		process.exit(1);
 	}
 } else {
