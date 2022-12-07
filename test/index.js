@@ -2,19 +2,20 @@ const { execSync }  = require('child_process');
 const path = require('path');
 
 
-let tests = [
-	['node double-parse.js', {
+let tests = {
+	"double-parse": ['node double-parse.js', {
 		cwd: __dirname
 	}],
-	['ts-node run.js', {
+	"Uniview": ['ts-node run.ts', {
 		cwd: path.join(__dirname, "/uv")
 	}]
-];
+};
 
 let failed = false;
 
-for (let test of tests) {
-	console.log(`${test[0]}`);
+for (let key in tests) {
+	let test = tests[key];
+	console.log(key);
 
 	test[1].stdio = [null, null, null];
 
