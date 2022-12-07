@@ -51,7 +51,8 @@
 			"count": "+",
 			"exprs": [
 				{ "type": "term", "value": "letter", "count": "1"	},
-				{ "type": "term", "value": "digit", "count": "1" }
+				{ "type": "term", "value": "digit", "count": "1" },
+				{ "type": "literal", "value": "_", "count": "1" }
 			]
 		}
 	},
@@ -60,16 +61,11 @@
 		"count": "1",
 		"exprs": [
 			{ "type": "range", "value": "a", "to": "z", "count": "1" },
-			{ "type": "range", "value": "A", "to": "Z", "count": "1" },
-			{ "type": "literal", "value": "_", "count": "1" }
+			{ "type": "range", "value": "A", "to": "Z", "count": "1" }
 		]
 	},
 	"digit": {
-		"type": "select",
-		"count": "1",
-		"exprs": [
-			{ "type": "range", "value": "0", "to": "9", "count": "1" }
-		]
+		"type": "range", "value": "0", "to": "9", "count": "1"
 	},
 
 
