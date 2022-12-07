@@ -13,8 +13,8 @@ name ::= ...( letter | digit | "_" )+ ;
 	digit ::= "0"->"9" ;
 
 constant ::= single | double ;
-	double ::= %"\"" ( ( "\\" ...any  ) | !"\""+ )* %"\"" ;
-	single ::= %"\'" ( ( "\\" ...any  ) | !"\'"+ )* %"\'" ;
+	double ::= %"\"" ( ( "\\" ...any ) | !"\""+ )* %"\"" ;
+	single ::= %"\'" ( ( "\\" ...any ) | !"\'"+ )* %"\'" ;
 
 def ::= ...name %w+ %"::=" %w* expr %w* %";" ;
 
