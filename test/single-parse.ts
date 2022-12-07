@@ -21,6 +21,11 @@ if (res instanceof SyntaxNode) {
 	syntax.setVerbose(true);
 
 	console.log("Parsed");
+
+	fs.writeFileSync(
+		path.join(__dirname, './dump-syntax.json'),
+		JSON.stringify(syntax.serialize()),
+	'utf8');
 } else {
 	console.error(res.toString());
 	process.exit(1);
