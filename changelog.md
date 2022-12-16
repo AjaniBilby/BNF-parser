@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 3.1.1
+### Fixes:
+ - [x] Incorrect referencing for syntax errors.
+
 ## Version 3.1.0
 
 ### Added:

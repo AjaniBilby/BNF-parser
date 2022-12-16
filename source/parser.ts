@@ -300,7 +300,10 @@ export class Term {
 			return err;
 		}
 
-		return new SyntaxNode(this.value+this.count, nodes, range);
+		let out = new SyntaxNode(this.value+this.count, nodes, range);
+		out.reach = err?.ref || null;
+
+		return out;
 	}
 
 	serialize(): any {
@@ -346,33 +349,42 @@ export class Select {
 				err = res;
 				break;
 			}
-			cursor = res.ref.end.clone();
 
+			cursor = res.ref.end.clone();
 			nodes.push(res);
 			count++;
 		}
 
-		let range = new ReferenceRange(start, cursor);
 		if (!CountCheck(count, this.count)) {
 			if (!err) {
-				err = new ParseError("Invalid count of sequence", range);
+				err = new ParseError(
+					"Invalid count of sequence",
+					new ReferenceRange(start, cursor)
+				);
 			}
 			return err;
 		}
 
-		return new SyntaxNode(`(...)${this.count == "1" ? "" : this.count}`, nodes, range);
+		let out = new SyntaxNode(
+			`(...)${this.count == "1" ? "" : this.count}`,
+			nodes,
+			new ReferenceRange(start, cursor)
+		);
+		if (err) {
+			out.reach = err.ref;
+		}
+
+		return out;
 	}
 
 	parseSingle(input: string, ctx: Parser, cursor: Reference): SyntaxNode | ParseError {
-		let span = new ReferenceRange(cursor.clone(), cursor.clone());
-		let err: string = "";
+		let err: null | ParseError = null;
 
 		for (let opt of this.exprs) {
 			let res = opt.parse(input, ctx, cursor.clone());
 			if (res instanceof ParseError) {
-				span.span(res.ref);
-				if (res.ref.end.index >= span.end.index) {
-					err = res.msg;
+				if (!err || err.ref.end.index <= res.ref.end.index) {
+					err = res;
 				}
 
 				continue;
@@ -381,7 +393,8 @@ export class Select {
 			}
 		}
 
-		return new ParseError("No valid option found", new ReferenceRange(cursor, cursor));
+		return err ||
+			new ParseError("No valid option found", new ReferenceRange(cursor, cursor));
 	}
 
 	serialize(): any {
@@ -416,16 +429,28 @@ export class Sequence extends Select {
 		let start = cursor.clone();
 		let nodes: SyntaxNode[] = [];
 
+		let reach: ReferenceRange | null = null;
+
 		let onlyTerm = true;
 
 		for (let rule of this.exprs) {
 			let res = rule.parse(input, ctx, cursor.clone());
 			if (res instanceof ParseError) {
-				res.ref.span(new ReferenceRange(start, cursor));
+				if (reach && reach.end.index > res.ref.end.index) {
+					res.ref = reach;
+					res.msg += "Unexpected syntax error (code POL)";
+				}
 				return res;
 			}
 
 			cursor = res.ref.end;
+
+			let nx_reach = res.getReach();
+			if (nx_reach) {
+				if (!reach || reach.valueOf() < nx_reach.valueOf()) {
+					reach = nx_reach;
+				}
+			}
 
 			if (rule instanceof Omit) {
 				continue; // skip omitted operands
@@ -444,7 +469,9 @@ export class Sequence extends Select {
 			}
 		}
 
-		return new SyntaxNode('seq[]', nodes, new ReferenceRange(start, cursor));
+		let out = new SyntaxNode('seq[]', nodes, new ReferenceRange(start, cursor));
+		out.reach = reach;
+		return out;
 	}
 
 	serialize(): any {
@@ -528,7 +555,7 @@ export class Parser {
 		if (!partial && res.ref.end.index != input.length) {
 			return new ParseError(
 				"Unexpected syntax at ",
-				new ReferenceRange(res.ref.end.clone(), res.ref.end)
+				res.getReach() || new ReferenceRange(res.ref.end.clone(), res.ref.end)
 			);
 		}
 

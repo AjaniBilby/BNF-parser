@@ -1,12 +1,6 @@
-/*======================================
-	Default inclusions required for
-	 the language to function properly
-=======================================*/
-
-trait Drop {
-	fn drop(this: @Self);
-}
-
-trait Clone {
-	fn clone(this: @Self): Self;
-}
+fn drop(this: @Self) {
+	if (true) {
+		let cat: void;
+	}
+	return 0;
+};
