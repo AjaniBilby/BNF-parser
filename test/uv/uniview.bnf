@@ -33,20 +33,20 @@ program ::= %w* ( stmt_top %w* )* ;
 	constant ::= boolean |
 		void |
 		string |
-		hexidecimal | octal | binary |
+		hexadecimal | octal | binary |
 		float | integer ;
 
 	string ::= string_unicode | string_text ;
-		string_unicode   ::= "\"" ...( "\\\"" | !( "\\" )+ )* "\"" ;
-		string_text      ::= "'" ...( "\\'"  | !( "\\"  )+ )* "'" ;
+		string_unicode   ::= %"\"" ( ( "\\" !"" ) | !( "\"" ) )* %"\"" ;
+		string_text      ::= %"\'" ( ( "\\" !"" ) | !( "\'" ) )* %"\'" ;
 
-	hexidecimal ::= "0x" ...hex_char+ ;
+	hexadecimal ::= "0x" ...hex_char+ ;
 		hex_char ::= digit | "a" -> "f" | "A" -> "F" ;
 
 	octal ::= "0o" ...octal_char+ ;
 		octal_char ::= "0" -> "3" ;
 
-	binary ::= "0b" ...( "0" | "1" )+ ;
+	binary ::= "0b" ( "0" | "1" )+ ;
 
 	boolean ::= "true" | "false" ;
 
@@ -59,126 +59,128 @@ program ::= %w* ( stmt_top %w* )* ;
 
 
 #=============================
+#  Accessors
+#=============================
+access ::= ...name %w* ( access_static | access_dynamic | access_template )* ;
+
+access_static  ::= %("." ) ...name %w* ;
+
+access_dynamic ::= %("[" w* ) call_args %( w* "]" ) %w* ;
+
+access_template ::= %( "#[" w* ) template_args %( w* "]" ) %w* ;
+	access_template_args ::= template_arg %w* ( %( "," w* ) template_arg %w* )* %","? ;
+	access_template_arg  ::= constant | data_type ;
+
+
+#=============================
 #  Variables
 #=============================
 	name ::= ( letter | "_" )* ( letter | digit | "_" )* ;
-	variable ::= ...name accessor* ;
-		accessor ::= accessor_dynamic | accessor_static ;
-			accessor_dynamic ::= "[" w* variable_args w* "]" ;
-			accessor_static  ::= "." ...name ;
-		variable_args ::= variable_arg ( w* "," w* variable_arg )* ;
-			variable_arg ::= constant | variable ;
+	variable ::= ...name %w* ( access_static | access_dynamic )* ;
 
-	data_type ::= ...name data_type_access* template? ;
-		data_type_access ::= "." ...name ;
+	data_type ::= ...("@" | "$")? ...name %w* ( access_static | access_template )* ;
+		data_type_access ::= %"." ...name ;
 
-	declare ::= %"let" %w+ ...name %w* %":" %w* data_type %w* %";" ;
-	assign  ::= variable %w* %"=" %w* expr %w* %";" ;
-
-	declare_assign ::= %"let" %w+ ...name %w* ( %":" %w* data_type %w* )? %"=" %w* expr %w* ";" ;
+	declare ::= %( "let" %w+ ) ...name %w* ( %( ":" w* ) data_type %w* )? ( %( "=" w* ) expr )? %( w* ";" ) ;
+	assign  ::= variable %( w* "=" w* ) expr %( w* ";" ) ;
 
 
 #=============================
 #  Function
 #=============================
 	function ::= func_head %w* ( function_body | ";" ) ;
-		func_head ::= %"fn" %w+ ...name %w* func_arguments %w* ( %":" %w* data_type )? ;
-			func_arguments ::=  %"(" %w* ( func_arg %w* ( %"," %w* func_arg %w* )* )? %w* %")" ;
-				func_arg ::= ...name %w* %":" %w* ( "@" | "&" )? %w* data_type ;
+		func_head ::= %( "fn" w+ ) ...name %( w* "(" w* ) func_arguments %( w* ")" w* ) %w* ( %( ":" w* ) data_type )? ;
+			func_arguments ::=  ( func_arg %w* ( %( "," w* ) func_arg %w* )* )? ;
+				func_arg ::= ...name %( w* ":" w* ) data_type ;
 
-		function_body ::= %"{" %w* ( func_stmt %w* )* %"}" w* %";"? ;
-			func_stmt ::= if | when | return | declare | assign | declare_assign | call_procedure ;
+		function_body ::= %( "{" w* ) ( func_stmt %w* )* %( "}" w* ";"? ) ;
+			func_stmt ::= if | when | return | declare | assign | call_procedure ;
 
-	function_outline ::= func_head %w* %";" ;
-	function_redirect ::= %"fn" %w+ string %w* func_arguments ( %w* %":" %w* data_type )? %w+ %"as" %w+ ...name %w* %";" ;
+	function_outline ::= func_head %( w* ";" ) ;
+	function_redirect ::= %( "fn" w+ ) string %( w* "(" w* ) func_arguments %( w* ")" w* ) ( %( w* ":" w* ) data_type )? %( w+ "as" w+ ) ...name %( w* ";" ) ;
 
-	call ::= variable %w* template? %w* call_args ;
-		call_args ::= "(" %w* ( call_arg ( %w* %"," %w* call_arg )* %w* )? ")" ;
-			call_arg ::= expr_lend | expr ;
+	call ::= access call_body ;
+		call_body ::= %( w* "(" w* ) call_args? %( w* ")" ) ;
+		call_args ::= expr %w* ( %( "," w* ) expr %w* )* %( ","? w* ) ;
 	call_procedure ::= call %";" ;
 
-	return ::= %"return" ( %w+ expr )? %w* %";" ;
+	return ::= %"return" ( %w+ expr )? %( w* ";" ) ;
 
 
 #=============================
 #  Structure
 #=============================
-	struct  ::= "struct" %w+ ...name %w* %"{" %w* struct_body %w* %"}" ;
+	struct  ::= %( "struct" w+ ) ...name %( w* "{" w* ) struct_body %( w* "}" ) ;
 		struct_body ::= ( %w* struct_stmt %w* )* ;
 		struct_stmt ::= struct_attribute | struct_attribute ;
-			struct_attribute ::= ...name %w* %":" %w* data_type %w* %";" ;
+			struct_attribute ::= ...name %( w* ":" w* ) data_type %( w* ";" ) ;
 
-	expr_struct ::= data_type %w* %"{" %w* expr_struct_args? %w* %"}" ;
-		expr_struct_args ::= expr_struct_arg %w* ( %"," %w* expr_struct_arg )* %w* %","? ;
-			expr_struct_arg ::= ...name %w* %":" %w* expr ;
-
-	impl ::= %"impl" %w+ data_type impl_for? %w* %"{" %w* impl_body %w* %"}" ;
-		impl_for ::= %w+ %"for" %w+ data_type ;
+	impl ::= %( "impl" w+ ) data_type impl_for? %( w* "{" w* ) impl_body %( w* "}" );
+		impl_for ::= %( w+ "for" w+ ) data_type ;
 		impl_body ::= ( %w* impl_stmt )* ;
 			impl_stmt ::= function | function ;
 
-	trait ::= %"trait" %w+ ...name %w* trait_reliance? %w* %"{" %w* trait_body %w* %"}" ;
-		trait_reliance ::= %":" %w* data_type ( %w* %"," %w* data_type )* ;
+	trait ::= %( "trait" w+ ) ...name %w* trait_reliance? %( w* "{" w* ) trait_body %( w* "}" ) ;
+		trait_reliance ::= %( ":" w* ) data_type ( %( w* "," w* ) data_type )* ;
 		trait_body ::= ( %w* trait_stmt )* ;
 			trait_stmt ::= function | function ;
+
+	expr_struct ::= data_type expr_struct_body ;
+		expr_struct_body ::= %( w* "{" w* ) expr_struct_args? %( w* "}" ) ;
+		expr_struct_args ::= expr_struct_arg %w* ( %( "," w* ) expr_struct_arg )* %( w* ","? ) ;
+			expr_struct_arg ::= ...name %( w* ":" w* ) expr ;
 
 
 #=============================
 #  Template
 #=============================
-	template ::= %"#[" %w* template_args %w* %"]" ;
-		template_args ::= template_arg %w* ( %"," %w* template_arg %w* )* ;
-		template_arg  ::= constant | data_type ;
+	template ::= %( %"template" w* "(" w* ) template_args %( w* ")" ) ;
+		template_args ::= struct_attribute %w* ( %( "," w* ) struct_attribute %w* )* ;
 
 
 #=============================
 #  Expression
 #=============================
-	expr ::= %w* expr_arg %w* ( expr_middle_opper %w* expr_arg %w* )* ;
-		expr_right_opper ::= "!" | "$" | "@" | "&" | "-" ;
-		expr_middle_opper ::= "?" | ":" | "&&" | "||" | "==" | "!=" | "<=" | ">=" | "<" | ">" | "%" | "*" | "/" | "+" | "-" ;
-		expr_arg ::= expr_struct | expr_val | expr_brackets ;
-			expr_val ::= expr_right_opper? %w* ( constant | variable ) %w* ( template? %w* call_args )? ;
-			expr_brackets ::= %"(" %w* expr %w* %")" ;
-
-	expr_lend ::= "@" variable ;
+	expr ::= expr_arg %w* ( ...expr_middle_oper %w* expr_arg %w* )* ;
+		expr_left_oper ::= "!" | "$" | "@" | "-" ;
+		expr_middle_oper ::= "," | "?" | ":" | "&&" | "||" | "==" | "!=" | "<=" | ">=" | "<" | ">" | "%" | "*" | "/" | "+" | "-" | "->" ;
+		expr_arg ::= expr_left_oper? %w* ( constant | expr_brackets | expr_val ) ;
+			expr_val ::= access ( expr_struct_body | call_body )? ;
+		expr_brackets ::= %( "(" w* ) expr %( w* ")" ) ;
 
 
 #=============================
 #  Library Management
 #=============================
 	library ::= import | import ;
-
-	import ::= import_as | import_direct ;
-		import_as ::= %"import" %w* string %w* %";" ;
-		import_direct ::= %"import" %w* string %w+ %"as" %w+ ...name %w* %";" ;
+	import ::= %( "import" w* ) string %w* ( %( "as" w+ ) ...name )? %( w* ";" ) ;
 
 
 #=============================
 #  External
 #=============================
-	include ::= %"include" %w+ include_type %w* string %w* %";" ;
+	include ::= %( "include" w+ ) ...include_type %w* string %( w* ";" ) ;
 		include_type ::= "llvm" | "cpp" | "c" ;
 
-	external ::= %"external" %w+ external_mode %w* %"{" %w* external_body %w* %"}" %";"? ;
+	external ::= %( "external" w+ ) ...external_mode %( w* "{" w* ) external_body %( w* "}" ";"? ) ;
 		external_mode ::= "assume" | "export" ;
 		external_body ::= ( external_term w* )* ;
-		external_term ::= function_redirect | function_outline | type_def | struct | comment ;
+		external_term ::= function_redirect | function_outline | type_def | struct ;
 
-	type_def ::= %"type" %w+ ...name %w+ "size" %w+ integer %w* %";" ;
+	type_def ::= %( "type" w+ ) ...name %( w+ "size" w+ ) integer %( w* ";" ) ;
 
 
 #=============================
 #  If statement
 #=============================
 	if ::= if_stmt %w* ( elif_stmt %w* )* else_stmt? ;
-		if_stmt   ::= %"if"   %w* %"(" %w* expr %w* %")" %w* function_body ;
-		elif_stmt ::= %"elif" %w* %"(" %w* expr %w* %")" %w* function_body ;
-		else_stmt ::= %"else" %w* function_body ;
+		if_stmt   ::= %( "if"   w* "(" w* ) expr %( w* ")" w* ) function_body ;
+		elif_stmt ::= %( "elif" w* "(" w* ) expr %( w* ")" w* ) function_body ;
+		else_stmt ::= %( "else" w* ) function_body ;
 
 
 #=============================
 #  When statement
 #=============================
-	when ::= %"when" %w+ variable %w* %"{" when_opt+ %"}" ;
-		when_opt ::= %w* ( "default" | data_type ) %w* function_body %w* ;
+	when ::= %( "when" w+ ) variable %( w* "{" %w* ) when_opt+ %"}" ;
+		when_opt ::= ( "default" | data_type ) %w* function_body %w* ;

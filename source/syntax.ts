@@ -20,6 +20,10 @@ export class Reference {
 		}
 	}
 
+	valueOf() {
+		return this.index;
+	}
+
 	clone(): Reference {
 		return new Reference(this.line, this.col, this.index);
 	}
@@ -49,6 +53,10 @@ export class ReferenceRange {
 		}
 	}
 
+	valueOf () {
+		return this.end.index;
+	}
+
 	clone(): ReferenceRange {
 		return new ReferenceRange(this.start.clone(), this.end.clone());
 	}
@@ -63,12 +71,25 @@ export class SyntaxNode {
 	type: string;
 	value: SyntaxValue;
 	ref: ReferenceRange;
+	reach: ReferenceRange | null;
 
 	constructor(type: string, value: SyntaxValue, ref: ReferenceRange) {
 		this.type = type;
 		this.ref = ref;
-
 		this.value = value;
+		this.reach = null;
+	}
+
+	getReach (): ReferenceRange | null {
+		if (this.reach) {
+			return this.reach;
+		}
+
+		if (typeof this.value == "string") {
+			return null;
+		}
+
+		return this.value[this.value.length-1].getReach();
 	}
 
 
