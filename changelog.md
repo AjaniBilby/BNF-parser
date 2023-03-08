@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 3.1.2
+### Fixes:
+ - [x] Updated readme to clarify behaviour of select statements
+
 ## Version 3.1.1
 ### Fixes:
  - [x] Incorrect referencing for syntax errors.

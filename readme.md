@@ -28,7 +28,7 @@
   - [Range](#range)
   - [Literal](#literal)
 
-A simple library for generate syntax pasers based BNF syntax descriptions.  
+A simple library for generate syntax pasers based BNF syntax descriptions.
 There are a few changes from standard BNF forms to help produce cleaner syntax tree outputs that BNFs normally provide.
 
 # Example
@@ -126,7 +126,7 @@ The omit character goes in front af a single term, and must be the front most op
 !term
 ```
 
-This operator must be between two single length constants, this will accept all characters within the range of the two bounds (inclusive).  
+This operator must be between two single length constants, this will accept all characters within the range of the two bounds (inclusive).
 
 ### Range `->`
 
@@ -135,7 +135,7 @@ This operator must be between two single length constants, this will accept all 
 "a"->"z"* # will consume as many characters as are in the range
 ```
 
-This operator must be between two single length constants, this will accept all characters within the range of the two bounds (inclusive). Until the repetition count is reached.  
+This operator must be between two single length constants, this will accept all characters within the range of the two bounds (inclusive). Until the repetition count is reached.
 The first operand must have no repetitions, however the repetition markers on the last operand will apply to the whole group.
 
 ## Imports
@@ -154,7 +154,7 @@ Is initialised with a built syntax tree. Once initialized it can be given input 
 
 ```ts
 class Parser {
-  constructor(blob: any) 
+  constructor(blob: any)
 
   // Attempts to parse a language into a syntax tree
   parse(
@@ -299,6 +299,14 @@ If there is a repetition marker such as `name+` there will be an extra noded add
 ## Select
 
 Will resolve as the syntax tree of the first matching option. For instance if you have the select statement `variable | number`, if the parser matches a variable it would be the same as having a `variable` at that point in the sequence.
+
+> The select statement will always consume the first valid option, and your should order your select statements accordingly
+> i.e.
+> ```bnf
+> program ::= "a" | "aa" ;
+> ```
+> Giving this program "aa" will fail, as it will consume the single "a", then since there is no repetition the program will end leaving the second "a" unconsumed. As the syntax did not parse the whole string, this is considered an error.
+> See [Parser](#parser) for information on how to allow partial matches
 
 ## Omit
 
