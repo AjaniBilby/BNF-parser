@@ -1,5 +1,6 @@
 # BNF-Parser <!-- no toc -->
 
+[![Test via NPM](https://github.com/AjaniBilby/BNF-parser/actions/workflows/npm-load-check.yml/badge.svg?branch=master)](https://github.com/AjaniBilby/BNF-parser/actions/workflows/npm-load-check.yml)
 [![Test](https://github.com/AjaniBilby/BNF-parser/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/AjaniBilby/BNF-parser/actions/workflows/test.yml)
 
 - [BNF-Parser ](#bnf-parser-)
