@@ -1,4 +1,4 @@
-import { BNF, SyntaxNode, Compile } from '../source/index';
+import { BNF, SyntaxNode, Compile } from 'bnf-parser';
 import * as path from 'path';
 import * as fs from 'fs';
 
