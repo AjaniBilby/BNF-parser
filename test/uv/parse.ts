@@ -1,4 +1,4 @@
-import { Parser, ParseError } from 'bnf-parser';
+import { Parser, ParseError } from '../../source/index';
 import * as fs from 'fs';
 
 
