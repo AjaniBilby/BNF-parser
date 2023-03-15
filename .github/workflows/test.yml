@@ -26,6 +26,9 @@ jobs:
       - name: Install bnf-parser
         run: npm install . -g
 
+      - name: Link local package
+        run: npm link bnf-parser
+
       - name: Build the library
         run: npm run build
 
