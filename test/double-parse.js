@@ -1,4 +1,4 @@
-const { BNF, SyntaxNode, Compile } = require("../bin/index.js");
+const { BNF, SyntaxNode, Compile } = require("bnf-parser");
 const path = require('path');
 const fs = require('fs');
 
