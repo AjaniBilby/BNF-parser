@@ -27,9 +27,10 @@
   - [Gather](#gather)
   - [Not](#not)
   - [Range](#range)
+  - [Repetition](#repetition)
   - [Literal](#literal)
 
-A simple library for generate syntax pasers based BNF syntax descriptions.
+A simple library for generate syntax parsers based deterministic BNF syntax descriptions.
 There are a few changes from standard BNF forms to help produce cleaner syntax tree outputs that BNFs normally provide.
 
 # Example
@@ -37,7 +38,7 @@ There are a few changes from standard BNF forms to help produce cleaner syntax t
 First of all provide the BNF representation of you language, and parse that into a syntax tree. This tree can then be compiled down into a representation ready to parse syntax trees for the compiled language.
 
 ```ts
-import { BNF, Parse, Compile } from "bnf-parser";
+import { BNF, Compile } from "bnf-parser";
 
 let result = BNF.parse(LANGUAGE_BNF);
 let tree = Compile(result);
@@ -76,8 +77,8 @@ name ::= ...( letter | digit | "_" )+ ;
 	digit ::= "0"->"9" ;
 
 constant ::= single | double ;
-	double ::= %"\"" ( ( "\\" ...any  ) | !"\""+ )* %"\"" ;
-	single ::= %"\'" ( ( "\\" ...any  ) | !"\'"+ )* %"\'" ;
+	double ::= %"\"" ( ( "\\" ...any ) | !"\""+ )* %"\"" ;
+	single ::= %"\'" ( ( "\\" ...any ) | !"\'"+ )* %"\'" ;
 
 def ::= ...name %w+ %"::=" %w* expr %w* %";" ;
 
@@ -119,7 +120,7 @@ term* # zero or more
 
 This operator will lead to the syntax under this operator being removed from the final syntax tree, however still remain as part of syntax validation. For instance in the BNF syntax above...
 
-The omit character goes in front af a single term, and must be the front most operator placing it in from of any `not` or `gather` operators.
+The omit character goes in front af a single term, and must be the front most operator placing it in front of any `not` or `gather` operators.
 
 ### Not `!`
 
@@ -159,9 +160,9 @@ class Parser {
 
   // Attempts to parse a language into a syntax tree
   parse(
-    input: string,    // The text to be parsed
-    partial = false,  // Whether the entire string needs to be consucanmed
-    entry = "program" // Where parsing should start from in the BNF definition
+    input   : string,             // The text to be parsed
+    partial : boolean = false,    // Whether the entire string needs to be consucanmed
+    entry   : string  = "program" // Where parsing should start from in the BNF definition
   ): SyntaxNode | ParseError
   setVerbose(mode: boolean) { }
 }
@@ -175,60 +176,33 @@ Given a `SyntaxNode` tree generated from the BNF pre-initialized parser it can g
 function Compile(tree: SyntaxNode): Parser
 ```
 
-```ts
-class Reference {
-
-  // Returns a deep copy of itself
-  clone(): Reference
-
-  // Stringifies itself for printing/debug
-  toString(): string
-}
-```
-
-```ts
-class ReferenceRange {
-  constructor(from: Reference, to: Reference)
-
-  // Returns a deep copy of itself
-  clone(): ReferenceRange
-
-  // Stringifies itself for printing/debug
-  toString(): string
-}
-```
-
-```ts
-class ParseError {
-  constructor(msg: string, ref: ReferenceRange)
-
-  // Stringifies itself for printing/debug
-  toString(): string
-}
-```
-
 ### SyntaxNode
+
+The type of a `SyntaxNode` is typically the name of the term being matched - i.e. the root node will be `program` by default.  
+However it can be a generated name in the case of brackets `(...)` and repetition markers such as `+` `(...)+`
 
 ```ts
 class SyntaxNode {
-  type: string;
-  value: SyntaxValue;
-  ref: ReferenceRange;
+  type  : string;
+  value : SyntaxValue;
+  ref   : ReferenceRange;
 
   constructor(type: string, value: SyntaxValue, ref: ReferenceRange) {};
 
   // Merges all of it's child syntax node values into a single string
   flat(): string {};
 }
+
+type SyntaxValue = SyntaxNode[] | string;
 ```
 
 ### ParseError
 
 ```ts
 class ParseError {
-  stack: string[]
-  msg: string
-  ref: ReferenceRange
+  stack : string[]
+  msg   : string
+  ref   : ReferenceRange
 
   constructor(msg: string, ref: ReferenceRange) { }
 
@@ -249,9 +223,9 @@ class ParseError {
 
 ```ts
 class Reference {
-  line: number;
-  col: number;
-  index: number;
+  index : number;
+  line  : number;
+  col   : number;
 
   constructor(line: number, col: number, index: number) { }
 
@@ -270,8 +244,8 @@ class Reference {
 
 ```ts
 class ReferenceRange {
-  start: Reference;
-  end: Reference;
+  start : Reference;
+  end   : Reference;
 
   constructor(from: Reference, to: Reference) { }
 
@@ -295,7 +269,7 @@ There are two main core abstractions for how the syntax trees are generated from
 
 A sequence is a linear list of elements that make up a match. A top level sequence (right side of the `::=`) will resolve with the `.type` of the matching name (the name on the left of the `::=`), any sub-sequences `()` will appear as a syntax node with the name `(...)` with subsequent values being evaluated the same as the top level.
 
-If there is a repetition marker such as `name+` there will be an extra noded added with the type `(...)+` of whom's children will be the number of times the pattern was matched.
+If there is a repetition marker such as `name+` there will be an extra nodes added with the type `(...)+` of whom's children will be the number of times the pattern was matched.
 
 ## Select
 
@@ -311,19 +285,25 @@ Will resolve as the syntax tree of the first matching option. For instance if yo
 
 ## Omit
 
-Any omit statement within a sequence will be removed, and then looking at the outputted syntax tree it is like they never existed, however they are still critical to a successful match. In the case that they are within a select, they will still be visible with `.type` of `omit`, with no child nodes.
+Any omit statement within a sequence will be removed, and then looking at the outputted syntax tree it is like they never existed, however they are still critical to a successful match. In the case that they are within a select, they will still be visible with `SyntaxNode.type` of `omit`, with no child nodes.
+
 ## Gather
 
 This does not alter the outputted syntax tree form in relation to the sequence or select it is within, however it will squash all of it's child nodes back down into a single string. Node that this will reflect the affects of any omit operations which occurred within the child nodes.
 
 ## Not
 
-It's `.values` will be a single string of all characters it could consume until it matched with the target expression.
+It's `SyntaxNode.values` will be a single string of all characters it could consume until it matched with the target expression.
 
 ## Range
 
-Ranges will appear with the `.type` of `range` with `.value` being a single string with the characters consumed by this expression, inclusing any repetition markers (so a range with `+` will be a string of length at least one).
+Ranges will appear with the `SyntaxNode.type` of `range` with `SyntaxNode.value` being a single string with the characters consumed by this expression, including any repetition markers (so a range with `+` will be a string of length at least one).
+
+## Repetition
+
+A repetition marker will create it's own node in the syntax tree, with it's children being the value of each repetition.   
+The `SyntaxNode.type` value of this node will be the `(...)` followed by the repetition marker in use - such as: `(...)+`, `(...)*`, `(...)?`
 
 ## Literal
 
-Ranges will appear with the `.type` of `literal` with `.value` being a copy of the exact literal as a string.
+Ranges will appear with the `SyntaxNode.type` of `literal` with `SyntaxNode.value` being a copy of the exact literal as a string.
