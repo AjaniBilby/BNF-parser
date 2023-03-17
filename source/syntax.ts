@@ -89,6 +89,10 @@ export class SyntaxNode {
 			return null;
 		}
 
+		if (this.value.length == 0) {
+			return null;
+		}
+
 		return this.value[this.value.length-1].getReach();
 	}
 
