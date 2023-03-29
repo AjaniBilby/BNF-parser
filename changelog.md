@@ -1,6 +1,14 @@
 # Changelog
 
 ## Version 3.1.2
+
+### Fixes:
+ - [x] Fixed missing bound check on getting reach of a SyntaxNode
+
+### Tweaks:
+ - [x] Clarified readme documentation
+
+## Version 3.1.2
 ### Fixes:
  - [x] Updated readme to clarify behaviour of select statements
 
