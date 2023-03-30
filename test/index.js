@@ -11,6 +11,9 @@ let tests = {
 	}],
 	"Uniview": ['ts-node run.ts', {
 		cwd: path.join(__dirname, "/uv")
+	}],
+	"Sequelize": ['ts-node index.ts', {
+		cwd: path.join(__dirname, "/sequelize")
 	}]
 };
 
