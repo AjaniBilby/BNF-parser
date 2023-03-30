@@ -4,7 +4,7 @@
 	"description": "Deterministic BNF compiler/parser",
 	"main": "./bin/index.js",
 	"scripts": {
-		"test": "node ./test",
+		"test": "npm run build & node ./test",
 		"build": "run-s build:*",
 		"build:ts": "tsc",
 		"build:syntax": "node ./bin/build.js --verbose"

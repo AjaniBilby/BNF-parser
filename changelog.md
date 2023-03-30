@@ -1,6 +1,15 @@
 # Changelog
 
-## Version 3.1.2
+## Version 3.1.4
+
+### Tweaks:
+ - [x] Added extra test case `Sequalize`
+ - [x] Clarified readme documentation further
+ - [x] Synced up some documentation inconsistencies between NPM and Github
+ - [x] Fixed typo in previous version number's changelog
+ - [x] Got ChatGPT-4 to read my homework (read over the readme and helped clarify a few things)
+
+## Version 3.1.3
 
 ### Fixes:
  - [x] Fixed missing bound check on getting reach of a SyntaxNode
