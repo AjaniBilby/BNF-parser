@@ -98,9 +98,7 @@ export class StreamCache {
 	 */
 	pipe_node(stream: Stream.Readable) {
 		stream.on('data', (chunk)=> {
-			this._buffer += chunk;
-			this._signal.trigger();
-			this.shrink();
+			this.write(chunk);
 		});
 		stream.on('end', ()=>{
 			this._ended = true;
@@ -113,16 +111,14 @@ export class StreamCache {
 	 * Pipe Web JS readable stream to the stream cache
 	 * @param stream
 	 */
-	pipe_classic(stream: ReadableStream) {
+	pipe_classic(stream: ReadableStream<string>) {
 		(async ()=>{
 			let reader = stream.getReader();
 
 			while (true) {
 				let res = await reader.read();
 				if (res.value) {
-					this._buffer += res.value;
-					this._signal.trigger();
-					this.shrink();
+					this.write(res.value);
 				}
 
 				if (res.done) {
@@ -140,8 +136,8 @@ export class StreamCache {
 	 * Pipe single string to the stream cache
 	 * @param stream
 	 */
-	pipe_str(str: string) {
-		this._buffer = str;
+	write(str: string) {
+		this._buffer += str;
 		this._signal.trigger();
 		this.shrink();
 	}
