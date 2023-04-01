@@ -1,37 +1,43 @@
-import { Parser, ParseError, experimental } from 'bnf-parser';
+import { experimental } from 'bnf-parser';
 import * as fs from 'fs';
 
-
-
 let fstream = fs.createReadStream(
-	"P:\\Documents\\school\\UTS\\Course\\Social and Information Network\\simplewiki-latest-pages-articles.xml", "utf8"
+	"P:\\Documents\\school\\UTS\\Course\\Social and Information Network\\simplewiki-latest-pages-articles.xml",
+	"utf8"
 );
 
+let peaked = 0;
+let read = 0;
+
+let max_buf = 0;
+let max_pool = 0;
+
 let stream = new experimental.StreamCache();
+let cursorA = stream.cursor();
 stream.pipe_node(fstream);
 
 async function main() {
-	let cursorA = stream.cursor();
-	console.log(22, await cursorA.readAtleast(5));
-	let cursorB = cursorA.clone();
-	console.log(24, await cursorA.readAtleast(10));
-	console.log(25, await cursorA.readAtleast(5));
-	console.log(26, await cursorB.readAtleast(5));
-	console.log("drop B");
-	stream.drop(cursorB);
-	stream.shrink();
-	stream.drop(cursorA);
-}
+	console.time("duration");
 
+	while (!cursorA.isDone()) {
+		let val = cursorA._skip_read(100);
+		if (cursorA.isDone()) {
+			break;
+		}
+		read += val.length;
+		peaked += val.length;
+
+		if (val == "") {
+			let val = await cursorA.next(100);
+			read += val.length;
+		}
+	}
+
+	cursorA.drop();
+}
 main();
 
 fstream.on('end', ()=>{
-	clearInterval(status);
-})
-
-
-let status = setInterval(()=>{
-	const memoryUsage = process.memoryUsage();
-	const gbUsed = memoryUsage.heapUsed / 1024 / 1024 / 1024;
-	console.log(`Memory usage: ${gbUsed.toFixed(2)} GB`);
-}, 500)
+	console.timeEnd("duration");
+	console.log(`read: ${read}, peaked: ${peaked}`);
+});

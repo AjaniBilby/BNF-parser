@@ -15,45 +15,18 @@ class Cursor {
 	}
 
 	/**
-	 * Will read the next single character from the stream
+	 * Will read n characters or the remaining amount before the end
 	 */
-	async next(): Promise<string | null> {
-		let char = await this._owner._read(this);
-		if (char) {
-			this._offset += 1;
-		}
-
-		return char;
+	next(highWaterMark = 1): Promise<string> {
+		return this._owner._read(this, highWaterMark);
 	}
 
-	/**
-	 * Will read at least n characters from the stream
-	 * (could return empty string)
-	 */
-	async readAtleast(chars: number): Promise<string> {
-		let out = "";
-		while (out.length < chars) {
-			let c = await this.next();
-			if (c == null) {
-				break;
-			}
-
-			out += c;
-		}
-
-		return out;
+	_skip_read(highWaterMark = 1): string {
+		return this._owner._skip_read(this, highWaterMark);
 	}
 
-	/**
-	 * Will read n characters from the stream or return null if unable to
-	 */
-	async readChars(chars: number): Promise<string | null> {
-		let out = await this.readAtleast(chars);
-		if (out.length < chars) {
-			return null;
-		}
-
-		return out;
+	isDone(): boolean {
+		return this._owner.isDone();
 	}
 
 	/**
@@ -80,17 +53,34 @@ export class StreamCache {
 	private _signal: PromiseQueue;
 	private _cursors: Cursor[];
 
-	private _buffer: string;
+	private _cache: string[];
+	private _total_cache: number;
 	private _ended: boolean;
+
+	shrinks: number;
 
 	constructor() {
 		this._ended = false;
-		this._buffer = "";
 		this._cursors = [];
+
+		this._cache = [];
+		this._total_cache = 0;
+
+		this.shrinks = 0;
 
 		this._signal = new PromiseQueue();
 	}
 
+	getCacheSize(): number {
+		return this._total_cache;
+	}
+	getCachePools(): number {
+		return this._cache.length;
+	}
+
+	isDone(): boolean {
+		return this._ended;
+	}
 
 	/**
 	 * Pipe a NodeJS readable stream to the stream cache
@@ -101,9 +91,7 @@ export class StreamCache {
 			this.write(chunk);
 		});
 		stream.on('end', ()=>{
-			this._ended = true;
-			this._signal.trigger();
-			this.shrink();
+			this.end("");
 		});
 	}
 
@@ -126,9 +114,7 @@ export class StreamCache {
 				}
 			}
 
-			this._ended = true;
-			this._signal.trigger();
-			this.shrink();
+			this.end("");
 		})();
 	}
 
@@ -137,9 +123,15 @@ export class StreamCache {
 	 * @param stream
 	 */
 	write(str: string) {
-		this._buffer += str;
+		this._cache.push(str);
+		this._total_cache += str.length;
 		this._signal.trigger();
 		this.shrink();
+	}
+
+	end (str: string) {
+		this._ended = true;
+		this.write(str);
 	}
 
 	/**
@@ -150,23 +142,35 @@ export class StreamCache {
 		// Drop the currently buffered information
 		//   as it is unreachable
 		if (this._cursors.length === 0) {
-			this._buffer = "";
+			this._cache = [];
+			this._total_cache = 0;
+			this.shrinks++;
 			return;
 		}
 
-		let extra = this._cursors
-			.map(x => x._offset)
-			.reduce((c, p) => Math.min(c, p), Infinity);
+		let extra = this._cache.length;
+		for (let cursor of this._cursors) {
+			let loc = this._offset_to_cacheLoc(cursor._offset);
+			if (loc[0] < extra) {
+				extra = loc[0];
+			}
+		}
 
 		if (extra < 1) {
 			return;
 		}
 
-		this._buffer = this._buffer.slice(extra);
-		// Adjust all of the cursor offsets
-		for (let cursor of this._cursors) {
-			cursor._offset -= extra;
+		let size = 0;
+		for (let i=0; i<extra; i++) {
+			size += this._cache[i].length;
 		}
+		this._cache.splice(0, extra);
+
+		for (let cursor of this._cursors) {
+			cursor._offset -= size;
+		}
+		this._total_cache -= size;
+		this.shrinks++;
 	}
 
 	/**
@@ -207,16 +211,16 @@ export class StreamCache {
 	 * @param cursor must be created by this object
 	 * @returns {Promise[string | null]}
 	 */
-	async _read(cursor: Cursor): Promise<string | null> {
+	async _read(cursor: Cursor, size = 1): Promise<string> {
 		if (cursor._offset < 0) {
 			throw new Error("Cursor behind buffer position");
 		}
 
 		// Wait for more data to load if necessary
-		while (cursor._offset >= this._buffer.length) {
+		while (cursor._offset > this._total_cache - size) {
 			// The required data will never be loaded
 			if (this._ended) {
-				return null;
+				break;
 			}
 
 			// Wait for more data
@@ -225,10 +229,43 @@ export class StreamCache {
 		}
 
 		// Return the data
-		if (cursor._offset < this._buffer.length) {
-			return this._buffer[cursor._offset];
+		let loc = this._offset_to_cacheLoc(cursor._offset);
+		if (loc[0] >= this._cache.length) {
+			return "";
 		}
 
-		throw new Error("Something when horribly wrong - attempting to read out of bound stream data after stream ended");
+		let out = this._cache[loc[0]].slice(loc[1], loc[1]+size);
+		cursor._offset += out.length;
+		return out;
+	}
+
+	_skip_read(cursor: Cursor, size = 1): string {
+		if (cursor._offset > this._total_cache - size) {
+			return "";
+		}
+
+		// Return the data
+		let loc = this._offset_to_cacheLoc(cursor._offset);
+		if (loc[0] >= this._cache.length) {
+			return "";
+		}
+
+		let out = this._cache[loc[0]].slice(loc[1], loc[1]+size);
+		cursor._offset += out.length;
+		return out;
+	}
+
+
+	private _offset_to_cacheLoc(offset: number) {
+		let i = 0;
+		for (; i<this._cache.length; i++) {
+			if (offset < this._cache[i].length) {
+				break;
+			}
+
+			offset -= this._cache[i].length;
+		}
+
+		return [i, offset];
 	}
 }
