@@ -1,0 +1,19 @@
+program ::= %w* ( def %w* )+ ;
+
+name ::= letter ( letter | digit | "_" | "-" | "." | ":" )* ;
+	letter ::= "a"->"z" | "A"->"Z" ;
+	digit ::= "0"->"9" ;
+
+string ::= string_single | string_double ;
+	string_double ::= %"\"" ( ( "\\" ...any ) | !"\""+ )* %"\"" ;
+	string_single ::= %"\'" ( ( "\\" ...any ) | !"\'"+ )* %"\'" ;
+
+def ::= element %w+ "%" %w* expr %w* %";" ;
+
+
+element ::= %("<" w*) name %w* attribute* w* ( "/>" | %(">" w*) content %w element_end ) ;
+	element_start ::= %("<" w*) name %w* attribute* %w %( "/>" | ">") ;
+	attribute ::= name %w* (%"=" %w* string )? %w* ;
+	element_end ::= %("</" w*) name %(w* ">") ;
+
+	content ::= !element_end ;

@@ -5,6 +5,7 @@ import { SyntaxNode, ParseError, Reference, ReferenceRange } from "./syntax";
 import { Compile } from "./compiler";
 import { Parser } from "./parser";
 
+
 const BNF = new Parser(
 	JSON.parse(fs.readFileSync(
 		path.join(__dirname, '../bnf.json'),
@@ -12,6 +13,13 @@ const BNF = new Parser(
 	))
 );
 
+
+import { PromiseQueue } from "./lib/promise-queue";
+import { StreamCache } from "./lib/cache";
+const experimental = {
+	StreamCache,
+	PromiseQueue
+};
 
 export {
 	BNF,
@@ -21,4 +29,5 @@ export {
 	ParseError,
 	Reference,
 	ReferenceRange,
+	experimental
 };
