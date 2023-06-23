@@ -1,5 +1,12 @@
 # Changelog
 
+## Version 3.1.5
+
+### Tweaks:
+ - [x] Better webpack support  
+    No reliance on `fs` for deployment.  
+    Now generates a javascript file containing all start up requirements.
+
 ## Version 3.1.4
 
 ### Tweaks:

@@ -1,17 +1,10 @@
-import * as path from "path";
-import * as fs from "fs";
-
 import { SyntaxNode, ParseError, Reference, ReferenceRange } from "./syntax";
 import { Compile } from "./compiler";
 import { Parser } from "./parser";
 
+import { bnf_json } from "./preload";
 
-const BNF = new Parser(
-	JSON.parse(fs.readFileSync(
-		path.join(__dirname, '../bnf.json'),
-		'utf8'
-	))
-);
+const BNF = new Parser( bnf_json );
 
 
 import { PromiseQueue } from "./lib/promise-queue";

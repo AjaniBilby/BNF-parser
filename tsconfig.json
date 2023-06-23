@@ -7,5 +7,5 @@
 		"strict": true
 	},
 	"include": ["source"],
-	"exclude": ["node_modules"]
+	"exclude": ["node_modules", "source/build.ts"]
 }

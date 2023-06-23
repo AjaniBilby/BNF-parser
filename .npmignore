@@ -1,7 +1,6 @@
 *
 
 !bin/*
-!bnf.json
 !changelog.md
 !package.json
 !readme.md
