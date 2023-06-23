@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 3.1.6
+
+### Patch:
+ - [x] NPM ignore some how removed `/bin/lib`
+
 ## Version 3.1.5
 
 ### Tweaks:
