@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from "fs";
+import { readFileSync } from "fs";
 import * as path from "path";
 
 
@@ -8,7 +8,7 @@ type WasmParser = WebAssembly.Instance & {
 		input       : WebAssembly.Global;
 		inputLength : WebAssembly.Global;
 
-		_init: () => void;
+		_init: () => number;
 		program: (index: number) => void;
 	}
 }
@@ -27,7 +27,7 @@ async function Init(wasm: BufferSource){
 function Parse(ctx: WasmParser, data: string, entry?: string) {
 	InjectString(ctx, data);
 
-	ctx.exports._init();
+	const heap = ctx.exports._init();
 	console.log("init");
 
 	const startIndex = ctx.exports.input.value;
@@ -41,17 +41,15 @@ function Parse(ctx: WasmParser, data: string, entry?: string) {
 		ctx.exports.program(startIndex);
 	}
 
-	return Decode(ctx);
+	return Decode(ctx, heap);
 }
 
 
-function Decode(ctx: WasmParser) {
+function Decode(ctx: WasmParser, heap: number) {
 	const memory = ctx.exports.memory;
 	const memoryArray = new Int32Array(memory.buffer);
 
-	const address = ctx.exports.input.value + ctx.exports.inputLength.value;
-	console.log(`reading ${address}`);
-	const value = memoryArray[Math.ceil(address / Int32Array.BYTES_PER_ELEMENT)];
+	const value = memoryArray[Math.ceil(heap / Int32Array.BYTES_PER_ELEMENT)];
 	console.log(`"b" at index ${value}`);
 }
 
@@ -69,14 +67,12 @@ function InjectString(ctx: WasmParser, data: string) {
 	const wasmMemory = new Uint8Array(memory.buffer);
 	wasmMemory.set(stringBytes, ctx.exports.input.value);
 
-	console.log(66, wasmMemory);
-
 	ctx.exports.inputLength.value = stringBytes.byteLength;
 }
 
 async function Test(){
 	const sample = await Init(
-		readFileSync(path.join(__dirname, "./sample.wasm"))
+		readFileSync("../out.wasm")
 	);
 
 	Parse(sample, "Hello, Web Assembly!");
