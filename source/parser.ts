@@ -1,4 +1,7 @@
-import {SyntaxNode, ParseError, Reference, ReferenceRange} from "./syntax";
+import {
+	SyntaxNode, ParseError,
+	Reference, ReferenceRange
+} from "./syntax.js";
 
 export type Expression = Literal | CharRange | Term | Not | Omit | Gather | Select | Sequence;
 
@@ -35,7 +38,7 @@ export function ParseCount(count: string): Count {
 	}
 }
 
-function CountCheck(count: Number, mode: Count): boolean {
+function CountCheck(count: number, mode: Count): boolean {
 	if (count < 1 && (
 		mode == Count.One ||
 		mode == Count.OneToMany

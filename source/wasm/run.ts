@@ -1,5 +1,4 @@
 import { readFileSync } from "fs";
-import * as path from "path";
 
 
 type WasmParser = WebAssembly.Instance & {
@@ -14,7 +13,7 @@ type WasmParser = WebAssembly.Instance & {
 }
 
 
-async function Init(wasm: BufferSource){
+export async function Create(wasm: BufferSource){
 	const bundle = await WebAssembly.instantiate(wasm, {
 		js: {
 			print_i32: console.log,
@@ -24,7 +23,7 @@ async function Init(wasm: BufferSource){
 	return bundle.instance as WasmParser;
 }
 
-function Parse(ctx: WasmParser, data: string, entry?: string) {
+export function Parse(ctx: WasmParser, data: string, entry?: string) {
 	InjectString(ctx, data);
 
 	const heap = ctx.exports._init();
@@ -69,13 +68,3 @@ function InjectString(ctx: WasmParser, data: string) {
 
 	ctx.exports.inputLength.value = stringBytes.byteLength;
 }
-
-async function Test(){
-	const sample = await Init(
-		readFileSync("../out.wasm")
-	);
-
-	Parse(sample, "Hello, Web Assembly!");
-}
-
-Test();
