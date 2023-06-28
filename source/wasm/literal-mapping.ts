@@ -58,11 +58,15 @@ export default class LiteralMapping {
 	}
 
 	ingestBnf(bnf: Parser) {
+		this.addKey("literal");
+		this.addKey("(...)");
+		this.addKey("(...)?");
+		this.addKey("(...)*");
+		this.addKey("(...)+");
 		for (let [_, rule] of bnf.terms) {
 			this.ingestBnfExpression(rule.seq);
 			this.addKey(rule.name);
 		}
-		this.addKey("literal");
 	}
 
 	ingestBnfExpression(expr: Expression) {

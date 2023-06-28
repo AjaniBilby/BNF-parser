@@ -26,8 +26,7 @@ export function Parse(ctx: WasmParser, data: string) {
 
 	const heap = ctx.exports._init();
 
-	const startIndex = ctx.exports.input.value;
-	ctx.exports.program(startIndex);
+	ctx.exports.program(0);
 
 	return Decode(ctx, heap);
 }

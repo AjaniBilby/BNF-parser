@@ -31,19 +31,8 @@ function IngestLiterals(m: binaryen.Module, bnf: Parser) {
 }
 
 function GenerateInternals(m: binaryen.Module) {
-	m.addFunction("_roundWord", binaryen.createType([binaryen.i32]), binaryen.i32, [], m.block(null, [
-		m.return(
-			m.i32.and(
-				m.i32.add(
-					m.local.get(0, binaryen.i32),
-					m.i32.const(3)
-				),
-				m.i32.const(-4)
-			)
-		)
-	]));
-
-	m.addFunction("_init", binaryen.none, binaryen.i32, [], m.block(null, [
+	m.addFunction("_init",
+		binaryen.none, binaryen.i32, [], m.block(null, [
 		m.global.set("heap",
 			m.call("_roundWord", [
 				m.i32.add(
@@ -57,19 +46,54 @@ function GenerateInternals(m: binaryen.Module) {
 			m.global.get("heap", binaryen.i32)
 		)
 	]));
+
+	m.addFunction("_roundWord",
+		binaryen.createType([binaryen.i32]), binaryen.i32, [], m.block(null, [
+		m.return(
+			m.i32.and(
+				m.i32.add(
+					m.local.get(0, binaryen.i32),
+					m.i32.const(3)
+				),
+				m.i32.const(-4)
+			)
+		)
+	]));
+
+	m.addFunction("_max_i32",
+		binaryen.createType([binaryen.i32, binaryen.i32]), binaryen.i32, [],
+		m.block(null, [
+			m.select(
+				m.i32.ge_s(
+					m.local.get(0, binaryen.i32),
+					m.local.get(1, binaryen.i32)
+				),
+				m.local.get(0, binaryen.i32),
+				m.local.get(1, binaryen.i32)
+			)
+		]
+	));
+
 	m.addFunctionExport("_init", "_init");
 
-	m.addFunction(
-		"matchString", binaryen.createType([binaryen.i32, binaryen.i32, binaryen.i32]), binaryen.i32, [
+	m.addFunction("_matchString",
+		binaryen.createType([binaryen.i32, binaryen.i32, binaryen.i32]), binaryen.i32, [
 			binaryen.i32
 		],
 		m.block(null, [
+			m.local.set(0, m.i32.add(
+				m.local.get(0, binaryen.i32),
+				m.global.get("input", binaryen.i32)
+			)),
 			m.local.set(3, m.i32.const(0)),
 
 			m.block("outer", [
 				m.loop("loop", m.block(null, [
 					m.call("print_i32", [
-						m.local.get(3, binaryen.i32)
+						m.i32.add(
+							m.local.get(0, binaryen.i32),
+							m.local.get(3, binaryen.i32)
+						)
 					], binaryen.none),
 					m.br_if("outer",
 						m.i32.ne(
@@ -95,10 +119,7 @@ function GenerateInternals(m: binaryen.Module) {
 					),
 					m.br_if("outer",
 						m.i32.ge_s(
-							m.i32.add(
-								m.local.get(1, binaryen.i32),
-								m.local.get(3, binaryen.i32),
-							),
+							m.local.get(3, binaryen.i32),
 							m.local.get(2, binaryen.i32)
 						)
 					),

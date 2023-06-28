@@ -4,28 +4,32 @@ import { GenerateWasm } from "./compile.js";
 import { writeFileSync } from "fs";
 import * as Runner from "./run.js";
 
-const syntax = BNF.parse(`program ::= "Hello Web" " Assembly";`);
+const syntax = BNF.parse(`program ::= "bb" "aa";`);
 if (syntax instanceof ParseError) throw syntax;
 
 const bnf = Compile(syntax);
 
 
 
-const myModule = GenerateWasm(bnf);
+try {
+	const myModule = GenerateWasm(bnf);
 
-// Optimize the module using default passes and levels
-// myModule.optimize();
+	// Optimize the module using default passes and levels
+	// myModule.optimize();
 
-// Validate the module
-// if (!myModule.validate())
-// 	throw new Error("validation error");
+	// Validate the module
+	// if (!myModule.validate())
+	// 	throw new Error("validation error");
 
 
-var textData = myModule.emitText();
-writeFileSync("out.wat", textData);
+	var textData = myModule.emitText();
+	writeFileSync("out.wat", textData);
 
-Runner.Create(myModule.emitBinary())
-	.then((wasm) => {
-		console.log(29, Runner.Parse(wasm, "Hello, Web Assembly!"));
-	})
-	.catch(console.error);
+	Runner.Create(myModule.emitBinary())
+		.then((wasm) => {
+			console.log(29, Runner.Parse(wasm, "bbaa"));
+		})
+		.catch(console.error);
+} catch (e: any) {
+	console.error(e);
+}
