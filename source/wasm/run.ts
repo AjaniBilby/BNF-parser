@@ -1,11 +1,9 @@
-import { readFileSync } from "fs";
-
-
 type WasmParser = WebAssembly.Instance & {
 	exports: {
 		memory      : WebAssembly.Memory;
 		input       : WebAssembly.Global;
 		inputLength : WebAssembly.Global;
+		heap        : WebAssembly.Global;
 
 		_init: () => number;
 		program: (index: number) => void;
@@ -23,22 +21,13 @@ export async function Create(wasm: BufferSource){
 	return bundle.instance as WasmParser;
 }
 
-export function Parse(ctx: WasmParser, data: string, entry?: string) {
+export function Parse(ctx: WasmParser, data: string) {
 	InjectString(ctx, data);
 
 	const heap = ctx.exports._init();
-	console.log("init");
 
 	const startIndex = ctx.exports.input.value;
-
-	if (entry) {
-		const funcs = ctx.exports as any;
-		if (typeof(funcs[entry]) !== "function") throw new Error(`Unknown entry point ${entry}`);
-
-		funcs[entry](startIndex);
-	} else {
-		ctx.exports.program(startIndex);
-	}
+	ctx.exports.program(startIndex);
 
 	return Decode(ctx, heap);
 }
@@ -48,8 +37,7 @@ function Decode(ctx: WasmParser, heap: number) {
 	const memory = ctx.exports.memory;
 	const memoryArray = new Int32Array(memory.buffer);
 
-	const value = memoryArray[Math.ceil(heap / Int32Array.BYTES_PER_ELEMENT)];
-	console.log(`"b" at index ${value}`);
+	console.log(`Consumed ${Number(ctx.exports.reach)}`);
 }
 
 

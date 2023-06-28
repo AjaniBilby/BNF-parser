@@ -3,9 +3,26 @@ import {
 	Literal, Not, Omit, Gather, Select, Sequence
 } from "../parser.js";
 
+
+// Using a class for better V8 performance
+class Mapping {
+	readonly value: string;
+	readonly bytes: Uint8Array;
+	readonly offset: number;
+
+	constructor(value: string, bytes: Uint8Array, offset: number) {
+		this.value = value;
+		this.bytes = bytes;
+		this.offset = offset;
+
+		Object.freeze(this);
+	}
+}
+
+
 export default class LiteralMapping {
 	encoder: TextEncoder;
-	values: [Uint8Array, number][];
+	values: Mapping[];
 	size: number;
 
 	constructor() {
@@ -16,19 +33,15 @@ export default class LiteralMapping {
 
 	addKey(val: string) {
 		const bytes = this.encoder.encode(val);
-		const res = this.values.find(x => LiteralMapping.Uint8ArraysEqual(x[0], bytes));
+		const res = this.values.find(x => x.value === val);
 		if (res) return;
 
-		this.values.push([
-			bytes,
-			this.size
-		]);
+		this.values.push(new Mapping(val, bytes, this.size));
 		this.size += bytes.byteLength;
 	}
 
 	getKey(val: string) {
-		const bytes = this.encoder.encode(val);
-		const res = this.values.find(x => x[0] == bytes);
+		const res = this.values.find(x => x.value === val);
 		if (res) return res;
 
 		throw new Error(`Internal error: Unmapped literal ${val}`);
@@ -47,7 +60,9 @@ export default class LiteralMapping {
 	ingestBnf(bnf: Parser) {
 		for (let [_, rule] of bnf.terms) {
 			this.ingestBnfExpression(rule.seq);
+			this.addKey(rule.name);
 		}
+		this.addKey("literal");
 	}
 
 	ingestBnfExpression(expr: Expression) {

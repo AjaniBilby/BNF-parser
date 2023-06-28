@@ -1,6 +1,8 @@
-import { Expression, Parser } from "../parser";
-import LiteralMapping from "./literal-mapping.js";
 import binaryen from "binaryen";
+
+import LiteralMapping from "./literal-mapping.js";
+import { CompileRule } from "./rule.js";
+import { Parser } from "../parser";
 
 
 
@@ -12,8 +14,8 @@ function IngestLiterals(m: binaryen.Module, bnf: Parser) {
 
 	m.setMemory(1, 10, "memory",
 		literals.values.map(x => ({
-			data: x[0],
-			offset: m.i32.const(x[1])
+			data: x.bytes,
+			offset: m.i32.const(x.offset)
 		}))
 	);
 
@@ -29,8 +31,7 @@ function IngestLiterals(m: binaryen.Module, bnf: Parser) {
 }
 
 function GenerateInternals(m: binaryen.Module) {
-	const syntaxFuncParams = binaryen.createType([binaryen.i32]);
-	m.addFunction("_roundWord", syntaxFuncParams, binaryen.i32, [], m.block(null, [
+	m.addFunction("_roundWord", binaryen.createType([binaryen.i32]), binaryen.i32, [], m.block(null, [
 		m.return(
 			m.i32.and(
 				m.i32.add(
@@ -57,23 +58,6 @@ function GenerateInternals(m: binaryen.Module) {
 		)
 	]));
 	m.addFunctionExport("_init", "_init");
-
-
-	m.addFunction(
-		"program", syntaxFuncParams, binaryen.none, [],
-		m.block(null, [
-			m.i32.store(
-				0, 4,
-				m.global.get("heap", binaryen.i32),
-				m.call("matchString", [
-					m.local.get(0, binaryen.i32),
-					m.i32.const(0),
-					m.i32.const(5),
-				], binaryen.i32)
-			)
-		]
-	));
-	m.addFunctionExport("program", "program");
 
 	m.addFunction(
 		"matchString", binaryen.createType([binaryen.i32, binaryen.i32, binaryen.i32]), binaryen.i32, [
@@ -135,13 +119,19 @@ function GenerateInternals(m: binaryen.Module) {
 	));
 }
 
+
+
 export function GenerateWasm(bnf: Parser) {
 	var m = new binaryen.Module();
 	m.setMemory(1, 1);
 	m.addFunctionImport("print_i32", "js", "print_i32", binaryen.createType([binaryen.i32]), binaryen.none);
 
-	IngestLiterals(m, bnf);
+	const literals = IngestLiterals(m, bnf);
 	GenerateInternals(m);
+
+	for (let [_, rule] of bnf.terms) {
+		CompileRule(m, literals, rule);
+	}
 
 	return m;
 }
