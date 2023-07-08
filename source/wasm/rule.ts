@@ -1,4 +1,4 @@
-import { CharRange, Count, Expression, Literal, Rule, Select, Sequence, Term } from "../parser.js";
+import { CharRange, Count, Expression, Literal, Omit, Rule, Select, Sequence, Term } from "../parser.js";
 import LiteralMapping from "./literal-mapping.js";
 import binaryen from "binaryen";
 
@@ -67,6 +67,8 @@ function CompileExpression(ctx: CompilerContext, expr: Expression, name?: string
 		return CompileLiteral(ctx, expr);
 	} else if (expr instanceof Term) {
 		return CompileTerm(ctx, expr);
+	} else if (expr instanceof Omit) {
+		return CompileOmit(ctx, expr);
 	}
 
 	throw new Error(`Unexpected expression type ${expr.constructor.name} during compilation`);
@@ -93,7 +95,12 @@ function CompileSequenceOnce(ctx: CompilerContext, expr: Sequence, name?: string
 	}
 	const literal = ctx.l.getKey(name);
 
-	const lblBody    = ctx.reserveBlock();
+	const visibleChildren = expr.exprs.reduce((s, c) => {
+		if (c instanceof Omit) return s;
+		return s + 1;
+	}, 0);
+
+	const lblBody = ctx.reserveBlock();
 
 	return ctx.m.block(null, [
 		ctx.m.local.set(rewind, ctx.m.global.get("heap", binaryen.i32)),
@@ -158,7 +165,7 @@ function CompileSequenceOnce(ctx: CompilerContext, expr: Sequence, name?: string
 				ctx.m.i32.store(
 					OFFSET.COUNT, 4,
 					ctx.m.local.get(rewind, binaryen.i32),
-					ctx.m.i32.const(expr.exprs.length)
+					ctx.m.i32.const(visibleChildren)
 				)
 			])
 		)
@@ -225,6 +232,17 @@ function CompileSelectOnce(ctx: CompilerContext, expr: Select, name?: string): n
 	}
 
 	return ctx.m.block(null, body);
+}
+
+
+function CompileOmit(ctx: CompilerContext, expr: Omit): number {
+	const rewind = ctx.declareVar(binaryen.i32);
+
+	return ctx.m.block(null, [
+		ctx.m.local.set(rewind, ctx.m.global.get("heap", binaryen.i32)),
+		CompileExpression(ctx, expr.expr),
+		ctx.m.global.set("heap", ctx.m.local.get(rewind, binaryen.i32)),
+	]);
 }
 
 
