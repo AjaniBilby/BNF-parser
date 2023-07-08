@@ -1,4 +1,4 @@
-import { CharRange, Count, Expression, Literal, Rule, Sequence, Term } from "../parser.js";
+import { CharRange, Count, Expression, Literal, Rule, Select, Sequence, Term } from "../parser.js";
 import LiteralMapping from "./literal-mapping.js";
 import binaryen from "binaryen";
 
@@ -59,6 +59,8 @@ class CompilerContext {
 function CompileExpression(ctx: CompilerContext, expr: Expression, name?: string): number {
 	if (expr instanceof Sequence) {
 		return CompileSequence(ctx, expr, name);
+	} else if (expr instanceof Select) {
+		return CompileSelect(ctx, expr, name);
 	} else if (expr instanceof CharRange) {
 		throw new Error(`Unexpected expression type ${expr.constructor.name} during compilation`);
 	} else if (expr instanceof Literal) {
@@ -162,6 +164,118 @@ function CompileSequenceOnce(ctx: CompilerContext, expr: Sequence, name?: string
 		)
 	]);
 }
+
+
+function CompileSelect(ctx: CompilerContext, expr: Select, name?: string): number {
+	const once = CompileSelectOnce(ctx, expr, name);
+
+	if (expr.count === "1") {
+		return once;
+	} else {
+		return CompileRepeat(ctx, once, expr.count);
+	}
+}
+
+function CompileSelectOnce(ctx: CompilerContext, expr: Select, name?: string): number {
+	const error  = SHARED.ERROR;
+	const rewind = name ? ctx.declareVar(binaryen.i32) : null;
+
+	const lblBody    = ctx.reserveBlock();
+	const body = [];
+
+	if (rewind) {
+		body.push(ctx.m.local.set(rewind, ctx.m.global.get("heap", binaryen.i32)))
+	}
+
+	body.push(
+		ctx.m.block(lblBody, expr.exprs.flatMap((child) => [
+			// On failure already cleans up after itself
+			CompileExpression(ctx, child),
+
+			// Stop parsing if child succeeded to parse
+			ctx.m.br(lblBody, ctx.m.i32.eq(
+				ctx.m.local.get(error, binaryen.i32),
+				ctx.m.i32.const(0)
+			))
+		]))
+	)
+
+	// Override name if necessary
+	if (rewind && name) {
+		const literal = ctx.l.getKey(name);
+
+		body.push(ctx.m.if(
+			ctx.m.i32.eq(
+				ctx.m.local.get(error, binaryen.i32),
+				ctx.m.i32.const(0)
+			),
+			ctx.m.block(null, [
+				ctx.m.i32.store(
+					OFFSET.TYPE, 4,
+					ctx.m.local.get(rewind, binaryen.i32),
+					ctx.m.i32.const(literal.offset)
+				),
+				ctx.m.i32.store(
+					OFFSET.TYPE_LEN, 4,
+					ctx.m.local.get(rewind, binaryen.i32),
+					ctx.m.i32.const(literal.bytes.byteLength)
+				),
+			])
+		))
+	}
+
+	return ctx.m.block(null, body);
+}
+
+
+function CompileTerm(ctx: CompilerContext, expr: Term): number {
+	const once = CompileTermOnce(ctx, expr);
+
+	if (expr.count === "1") {
+		return once;
+	} else {
+		return CompileRepeat(ctx, once, expr.count);
+	}
+}
+
+function CompileTermOnce(ctx: CompilerContext, expr: Term): number {
+	// const index  = SHARED.INDEX;
+	const error  = SHARED.ERROR;
+	const rewind = ctx.declareVar(binaryen.i32);
+
+	const literal = ctx.l.getKey(expr.value);
+
+	return ctx.m.block(null, [
+		ctx.m.local.set(rewind, ctx.m.global.get("heap", binaryen.i32)),
+
+		ctx.m.local.set(error,
+			ctx.m.call(expr.value, [], binaryen.i32)
+		),
+
+		ctx.m.if(
+			ctx.m.i32.eq(
+				ctx.m.local.get(error, binaryen.i32),
+				ctx.m.i32.const(0)
+			),
+			ctx.m.block(null, [ // On success
+				// Override name
+				ctx.m.i32.store(
+					OFFSET.TYPE, 4,
+					ctx.m.local.get(rewind, binaryen.i32),
+					ctx.m.i32.const(literal.offset)
+				),
+				ctx.m.i32.store(
+					OFFSET.TYPE_LEN, 4,
+					ctx.m.local.get(rewind, binaryen.i32),
+					ctx.m.i32.const(literal.bytes.byteLength)
+				),
+			]),
+			// Failure already cleaned up by child
+		)
+	]);
+}
+
+
 
 function CompileLiteral(ctx: CompilerContext, expr: Literal): number {
 	const once = CompileLiteralOnce(ctx, expr);
@@ -278,54 +392,6 @@ function CompileLiteralOnce(ctx: CompilerContext, expr: Literal): number {
 			ctx.m.i32.const(literal.offset),
 			ctx.m.i32.const(literal.bytes.byteLength),
 		], binaryen.none)
-	]);
-}
-
-
-function CompileTerm(ctx: CompilerContext, expr: Term, name?: string): number {
-	const once = CompileTermOnce(ctx, expr, name);
-
-	if (expr.count === "1") {
-		return once;
-	} else {
-		return CompileRepeat(ctx, once, expr.count);
-	}
-}
-
-function CompileTermOnce(ctx: CompilerContext, expr: Term, name?: string): number {
-	// const index  = SHARED.INDEX;
-	const error  = SHARED.ERROR;
-	const rewind = ctx.declareVar(binaryen.i32);
-
-	const literal = ctx.l.getKey(expr.value);
-
-	return ctx.m.block(null, [
-		ctx.m.local.set(rewind, ctx.m.global.get("heap", binaryen.i32)),
-
-		ctx.m.local.set(error,
-			ctx.m.call(expr.value, [], binaryen.i32)
-		),
-
-		ctx.m.if(
-			ctx.m.i32.eq(
-				ctx.m.local.get(error, binaryen.i32),
-				ctx.m.i32.const(0)
-			),
-			ctx.m.block(null, [ // On success
-				// Override name
-				ctx.m.i32.store(
-					OFFSET.TYPE, 4,
-					ctx.m.local.get(rewind, binaryen.i32),
-					ctx.m.i32.const(literal.offset)
-				),
-				ctx.m.i32.store(
-					OFFSET.TYPE_LEN, 4,
-					ctx.m.local.get(rewind, binaryen.i32),
-					ctx.m.i32.const(literal.bytes.byteLength)
-				),
-			]),
-			// Failure already cleaned up by child
-		)
 	]);
 }
 
