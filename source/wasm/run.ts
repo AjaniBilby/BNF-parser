@@ -21,22 +21,31 @@ export async function Create(wasm: BufferSource){
 	return bundle.instance as WasmParser;
 }
 
-export function Parse(ctx: WasmParser, data: string) {
+export function Parse(ctx: WasmParser, data: string, partial = false) {
 	InjectString(ctx, data);
 
 	const heap = ctx.exports._init();
 
 	ctx.exports.program(0);
 
-	return Decode(ctx, heap);
+	return Decode(ctx, heap, partial);
 }
 
 
-function Decode(ctx: WasmParser, heap: number) {
+function Decode(ctx: WasmParser, heap: number, partial: boolean) {
 	const memory = ctx.exports.memory;
 	const memoryArray = new Int32Array(memory.buffer);
 
-	console.log(`Consumed ${Number(ctx.exports.reach)}`);
+	const offset = heap / 4;
+
+	const start = memoryArray.at(offset+1);
+	const end   = memoryArray.at(offset+2);
+
+	if (!partial && end !== ctx.exports.inputLength.value) {
+		console.error("Partial match");
+	}
+
+	console.log(`Start: ${start} End: ${end} Reached: ${Number(ctx.exports.reach)}`);
 }
 
 

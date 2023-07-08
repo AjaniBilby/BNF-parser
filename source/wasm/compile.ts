@@ -89,12 +89,12 @@ function GenerateInternals(m: binaryen.Module) {
 
 			m.block("outer", [
 				m.loop("loop", m.block(null, [
-					m.call("print_i32", [
-						m.i32.add(
-							m.local.get(0, binaryen.i32),
-							m.local.get(3, binaryen.i32)
-						)
-					], binaryen.none),
+					// m.call("print_i32", [
+					// 	m.i32.add(
+					// 		m.local.get(0, binaryen.i32),
+					// 		m.local.get(3, binaryen.i32)
+					// 	)
+					// ], binaryen.none),
 					m.br_if("outer",
 						m.i32.ne(
 							m.i32.load8_u(0, 1,
