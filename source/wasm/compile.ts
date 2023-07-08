@@ -22,6 +22,7 @@ function IngestLiterals(m: binaryen.Module, bnf: Parser) {
 	m.addGlobal("input",       binaryen.i32, false, m.i32.const(literals.size));
 	m.addGlobal("inputLength", binaryen.i32, true,  m.i32.const(0));
 	m.addGlobal("heap",        binaryen.i32, true,  m.i32.const(0));
+	m.addGlobal("index",       binaryen.i32, true,  m.i32.const(0));
 	m.addGlobal("reach",       binaryen.i32, true,  m.i32.const(0));
 	m.addGlobalExport("input", "input");
 	m.addGlobalExport("reach", "reach");
@@ -33,19 +34,21 @@ function IngestLiterals(m: binaryen.Module, bnf: Parser) {
 function GenerateInternals(m: binaryen.Module) {
 	m.addFunction("_init",
 		binaryen.none, binaryen.i32, [], m.block(null, [
-		m.global.set("heap",
-			m.call("_roundWord", [
-				m.i32.add(
-					m.global.get("inputLength", binaryen.i32),
-					m.global.get("input", binaryen.i32),
-				)
-			], binaryen.i32)
-		),
-		m.global.set("reach", m.i32.const(0)),
-		m.return(
-			m.global.get("heap", binaryen.i32)
-		)
-	]));
+			m.global.set("index", m.i32.const(0)),
+			m.global.set("reach", m.i32.const(0)),
+			m.global.set("heap",
+				m.call("_roundWord", [
+					m.i32.add(
+						m.global.get("inputLength", binaryen.i32),
+						m.global.get("input", binaryen.i32),
+					)
+				], binaryen.i32)
+			),
+			m.return(
+				m.global.get("heap", binaryen.i32)
+			)
+		])
+	);
 
 	m.addFunction("_roundWord",
 		binaryen.createType([binaryen.i32]), binaryen.i32, [], m.block(null, [
@@ -60,21 +63,35 @@ function GenerateInternals(m: binaryen.Module) {
 		)
 	]));
 
-	m.addFunction("_max_i32",
-		binaryen.createType([binaryen.i32, binaryen.i32]), binaryen.i32, [],
+	// m.addFunction("_max_i32",
+	// 	binaryen.createType([binaryen.i32, binaryen.i32]), binaryen.i32, [],
+	// 	m.block(null, [
+	// 		m.return(
+	// 			m.select(
+	// 				m.i32.ge_s(
+	// 					m.local.get(0, binaryen.i32),
+	// 					m.local.get(1, binaryen.i32)
+	// 				),
+	// 				m.local.get(0, binaryen.i32),
+	// 				m.local.get(1, binaryen.i32)
+	// 			)
+	// 		)
+	// 	]
+	// ));
+
+	m.addFunction("_reach_update", binaryen.createType([binaryen.i32]), binaryen.none, [],
 		m.block(null, [
-			m.return(
-				m.select(
-					m.i32.ge_s(
-						m.local.get(0, binaryen.i32),
-						m.local.get(1, binaryen.i32)
-					),
+			m.if (
+				m.i32.ge_s(
 					m.local.get(0, binaryen.i32),
-					m.local.get(1, binaryen.i32)
-				)
+					m.global.get("reach", binaryen.i32)
+				),
+				m.block(null, [
+					m.global.set("reach", m.local.get(0, binaryen.i32))
+				])
 			)
-		]
-	));
+		])
+	),
 
 	m.addFunctionExport("_init", "_init");
 

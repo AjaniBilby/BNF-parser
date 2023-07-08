@@ -212,12 +212,9 @@ function CompileLiteralOnce(ctx: CompilerContext, expr: Literal): number {
 		),
 
 		// Update furthest reach
-		ctx.m.global.set("reach",
-			ctx.m.call("_max_i32", [
-				ctx.m.local.get(index,    binaryen.i32),
-				ctx.m.global.get("reach", binaryen.i32),
-			], binaryen.i32)
-		),
+		ctx.m.call("_reach_update", [
+			ctx.m.local.get(index,    binaryen.i32),
+		], binaryen.none),
 
 		// Check if fully matched literal
 		ctx.m.if(
@@ -412,10 +409,10 @@ function CompileRepeat(ctx: CompilerContext, innerWasm: number, repetitions: Cou
 export function CompileRule(m: binaryen.Module, literals: LiteralMapping, rule: Rule) {
 	const ctx = new CompilerContext(m, literals, rule);
 	// Function input
-	ctx.declareVar(binaryen.i32);
+	const input = ctx.declareVar(binaryen.i32);
 	const error = ctx.declareVar(binaryen.i32);
 
-	const block = CompileExpression(ctx, rule.seq, rule.name);
+	const innerWasm = CompileExpression(ctx, rule.seq, rule.name);
 
 	ctx.m.addFunction(
 		rule.name,
@@ -423,7 +420,9 @@ export function CompileRule(m: binaryen.Module, literals: LiteralMapping, rule: 
 		ctx.vars.slice(1),
 		ctx.m.block(null, [
 			ctx.m.local.set(error, ctx.m.i32.const(0)),
-			block,
+
+			innerWasm,
+
 			ctx.m.return(ctx.m.i32.const(1))
 		])
 	);
