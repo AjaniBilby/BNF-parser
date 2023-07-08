@@ -1,3 +1,5 @@
+import { OFFSET } from "./layout.js";
+
 type WasmParser = WebAssembly.Instance & {
 	exports: {
 		memory      : WebAssembly.Memory;
@@ -7,6 +9,24 @@ type WasmParser = WebAssembly.Instance & {
 
 		_init: () => number;
 		program: (index: number) => void;
+	}
+}
+
+
+export class Wasm_SyntaxNode {
+	type : string;
+	start: number;
+	end  : number;
+	count: number;
+
+	value: Wasm_SyntaxNode[] | string;
+
+	constructor (type: string, start: number, end: number, count: number) {
+		this.type  = type;
+		this.start = start;
+		this.end   = end;
+		this.count = count;
+		this.value = [];
 	}
 }
 
@@ -21,31 +41,78 @@ export async function Create(wasm: BufferSource){
 	return bundle.instance as WasmParser;
 }
 
-export function Parse(ctx: WasmParser, data: string, partial = false) {
+export function Parse(ctx: WasmParser, data: string, refMapping = false) {
 	InjectString(ctx, data);
 
 	const heap = ctx.exports._init();
 
 	ctx.exports.program(0);
 
-	return Decode(ctx, heap, partial);
+	const root = Decode(ctx, heap);
+	const reach = Number(ctx.exports.reach);
+
+	console.log(`Start: ${root.start} End: ${root.end} Reached: ${Number(ctx.exports.reach)}`);
+
+	return { root, reach };
 }
 
 
-function Decode(ctx: WasmParser, heap: number, partial: boolean) {
+function Decode(ctx: WasmParser, heap: number) {
 	const memory = ctx.exports.memory;
 	const memoryArray = new Int32Array(memory.buffer);
+	const byteArray   = new Int8Array(memory.buffer);
 
-	const offset = heap / 4;
+	const decoder = new TextDecoder('ascii');
 
-	const start = memoryArray.at(offset+1);
-	const end   = memoryArray.at(offset+2);
 
-	if (!partial && end !== ctx.exports.inputLength.value) {
-		console.error("Partial match");
+
+	const stack: Wasm_SyntaxNode[] = [];
+	let root: null | Wasm_SyntaxNode = null;
+	let offset = (heap / 4);
+
+	while (root === null || stack.length > 0) {
+		const curr = stack[stack.length-1];
+
+		// Has current stack element been satisfied?
+		if (curr && curr.count == curr.value.length) {
+			stack.pop();
+			continue;
+		}
+
+		const type_ptr = memoryArray.at(offset + OFFSET.TYPE    /4) || 0;
+		const type_len = memoryArray.at(offset + OFFSET.TYPE_LEN/4) || 0;
+
+		const next = new Wasm_SyntaxNode(
+			decoder.decode(byteArray.slice(type_ptr, type_ptr+type_len)),
+			memoryArray.at(offset + OFFSET.START/4) || 0,
+			memoryArray.at(offset + OFFSET.END  /4) || 0,
+			memoryArray.at(offset + OFFSET.COUNT/4) || 0
+		);
+		offset += OFFSET.DATA/4;
+
+		// Add child to current top of stack
+		//  or make it the root
+		if (curr) {
+			if (typeof(curr.value) === "string") throw new Error("Attempting to add a syntax child to a string");
+			curr.value.push(next);
+		} else {
+			root = next;
+		}
+
+		// Attempt to satisfy the child
+		if (next.type === "literal") {
+			const data_ptr = offset*4; // offset already pushed to data
+			const segment  = byteArray.slice(data_ptr, data_ptr+next.count);
+			next.value = decoder.decode(segment);
+			offset += Math.ceil(next.count/4);
+		} else {
+			stack.push(next);
+		}
 	}
 
-	console.log(`Start: ${start} End: ${end} Reached: ${Number(ctx.exports.reach)}`);
+	if (!root) throw new Error("How?");
+
+	return root;
 }
 
 

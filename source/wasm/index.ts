@@ -4,7 +4,7 @@ import { GenerateWasm } from "./compile.js";
 import { writeFileSync } from "fs";
 import * as Runner from "./run.js";
 
-const syntax = BNF.parse(`program ::= ( "a"+ "b"+ )+;`);
+const syntax = BNF.parse(`program ::= ("a"+ "b"+)+;`);
 if (syntax instanceof ParseError) throw syntax;
 
 const bnf = Compile(syntax);
@@ -24,7 +24,10 @@ try {
 
 	Runner.Create(myModule.emitBinary())
 		.then((wasm) => {
-			console.log(29, Runner.Parse(wasm, "aaaababbbb"));
+			const output = Runner.Parse(wasm, "aabbbbabbba");
+			console.log(29, output);
+
+			writeFileSync("dump.json", JSON.stringify(output.root, null, 2));
 		})
 		.catch(console.error);
 } catch (e: any) {

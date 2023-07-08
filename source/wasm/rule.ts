@@ -1,7 +1,8 @@
-import { FlatMap } from "../helper/flatmap.js";
 import { CharRange, Count, Expression, Literal, Rule, Sequence } from "../parser.js";
 import LiteralMapping from "./literal-mapping.js";
 import binaryen from "binaryen";
+
+import { OFFSET } from "./layout.js";
 
 
 const syntaxFuncParams = binaryen.createType([binaryen.i32]);
@@ -9,14 +10,6 @@ const syntaxFuncParams = binaryen.createType([binaryen.i32]);
 const SHARED = {
 	INDEX: 0, // local variable for index progression
 	ERROR: 1, // local variable for error flag
-}
-
-const OFFSET = {
-	TYPE  :  0, // pointer to string for node name
-	START :  4, // index of consumption start
-	END   :  8, // index of consumption end
-	COUNT : 12, // number of child nodes / literal byte length
-	DATA  : 16, // offset for first child
 }
 
 // Using OO because of better V8 memory optimisations
@@ -95,6 +88,7 @@ function CompileSequenceOnce(ctx: CompilerContext, expr: Sequence, name?: string
 	if (!name) {
 		name = "(...)";
 	}
+	const literal = ctx.l.getKey(name);
 
 	const lblBody    = ctx.reserveBlock();
 
@@ -113,7 +107,7 @@ function CompileSequenceOnce(ctx: CompilerContext, expr: Sequence, name?: string
 			ctx.m.i32.const(OFFSET.DATA)
 		)),
 
-		ctx.m.block(lblBody, FlatMap(expr.exprs, (child) => [
+		ctx.m.block(lblBody, expr.exprs.flatMap((child) => [
 			CompileExpression(ctx, child),
 
 			// Stop parsing if child failed to parse
@@ -144,7 +138,12 @@ function CompileSequenceOnce(ctx: CompilerContext, expr: Sequence, name?: string
 				ctx.m.i32.store(
 					OFFSET.TYPE, 4,
 					ctx.m.local.get(rewind, binaryen.i32),
-					ctx.m.i32.const(ctx.l.getKey(name).offset)
+					ctx.m.i32.const(literal.offset)
+				),
+				ctx.m.i32.store(
+					OFFSET.TYPE_LEN, 4,
+					ctx.m.local.get(rewind, binaryen.i32),
+					ctx.m.i32.const(literal.bytes.byteLength)
 				),
 				// End index
 				ctx.m.i32.store(
@@ -156,7 +155,7 @@ function CompileSequenceOnce(ctx: CompilerContext, expr: Sequence, name?: string
 				ctx.m.i32.store(
 					OFFSET.COUNT, 4,
 					ctx.m.local.get(rewind, binaryen.i32),
-					ctx.m.i32.const(0)
+					ctx.m.i32.const(expr.exprs.length)
 				)
 			])
 		)
@@ -180,6 +179,7 @@ function CompileLiteralOnce(ctx: CompilerContext, expr: Literal): number {
 	const progress = ctx.declareVar(binaryen.i32);
 
 	const literal = ctx.l.getKey(expr.value);
+	const type    = ctx.l.getKey("literal");
 
 	const block = ctx.pushBlock();
 
@@ -240,40 +240,46 @@ function CompileLiteralOnce(ctx: CompilerContext, expr: Literal): number {
 		),
 
 
-		// Type
+		// Node META
 		ctx.m.i32.store(
 			OFFSET.TYPE, 4,
 			ctx.m.global.get("heap", binaryen.i32),
-			ctx.m.i32.const(ctx.l.getKey("literal").offset)
+			ctx.m.i32.const(type.offset)
 		),
-
-		// Index end
+		ctx.m.i32.store(
+			OFFSET.TYPE_LEN, 4,
+			ctx.m.global.get("heap", binaryen.i32),
+			ctx.m.i32.const(type.bytes.byteLength)
+		),
 		ctx.m.i32.store(
 			OFFSET.END, 4,
 			ctx.m.global.get("heap", binaryen.i32),
 			ctx.m.local.get(index, binaryen.i32)
 		),
-
-		// string length
 		ctx.m.i32.store(
 			OFFSET.COUNT, 4,
 			ctx.m.global.get("heap", binaryen.i32),
 			ctx.m.i32.const(literal.bytes.byteLength)
 		),
 
-		// Update index
-		ctx.m.local.set(index, ctx.m.i32.add(
-			ctx.m.local.get(index, binaryen.i32),
-			ctx.m.i32.const(literal.bytes.byteLength),
-		)),
-
 		// Update new heap tail
-		ctx.m.global.set("heap", ctx.m.i32.add(
-			ctx.m.local.get(rewind, binaryen.i32),
-			ctx.m.i32.const( OFFSET.DATA + literal.bytes.byteLength )
-		)),
+		ctx.m.global.set("heap",
+			ctx.m.call("_roundWord", [
+				ctx.m.i32.add(
+					ctx.m.local.get(rewind, binaryen.i32),
+					ctx.m.i32.const( OFFSET.DATA + literal.bytes.byteLength )
+				)
+			], binaryen.i32)
+		),
 
-		// TODO: Copy literal into self as data
+		ctx.m.call("_memcpy", [
+			ctx.m.i32.add(
+				ctx.m.local.get(rewind, binaryen.i32),
+				ctx.m.i32.const(OFFSET.DATA)
+			),
+			ctx.m.i32.const(literal.offset),
+			ctx.m.i32.const(literal.bytes.byteLength),
+		], binaryen.none)
 	]);
 }
 
@@ -290,6 +296,7 @@ function CompileRepeat(ctx: CompilerContext, innerWasm: number, repetitions: Cou
 	const count  = ctx.declareVar(binaryen.i32);
 
 	let name = "(...)" + repetitions;
+	const literal = ctx.l.getKey(name);
 
 	const outer = ctx.reserveBlock();
 	const block = ctx.reserveBlock();
@@ -302,14 +309,14 @@ function CompileRepeat(ctx: CompilerContext, innerWasm: number, repetitions: Cou
 
 		// Start index
 		ctx.m.i32.store(
-			1*4, 4,
+			OFFSET.START, 4,
 			ctx.m.local.get(rewind,  binaryen.i32),
 			ctx.m.local.get(index, binaryen.i32)
 		),
 
 		ctx.m.global.set("heap", ctx.m.i32.add(
 			ctx.m.local.get(rewind, binaryen.i32),
-			ctx.m.i32.const(4*4)
+			ctx.m.i32.const(OFFSET.DATA)
 		)),
 
 		ctx.m.block(block, [
@@ -372,21 +379,25 @@ function CompileRepeat(ctx: CompilerContext, innerWasm: number, repetitions: Cou
 		//   And the fail iteration should have rolled itself back already
 		ctx.m.local.set(error, ctx.m.i32.const(0)),
 
-		// Type
+		// Node Meta
 		ctx.m.i32.store(
-			0*4, 4,
+			OFFSET.TYPE, 4,
 			ctx.m.local.get(rewind, binaryen.i32),
-			ctx.m.i32.const(ctx.l.getKey(name).offset)
+			ctx.m.i32.const(literal.offset)
 		),
-		// End index
 		ctx.m.i32.store(
-			2*4, 4,
+			OFFSET.TYPE_LEN, 4,
+			ctx.m.local.get(rewind, binaryen.i32),
+			ctx.m.i32.const(literal.bytes.byteLength)
+		),
+		ctx.m.i32.store(
+			OFFSET.END, 4,
 			ctx.m.local.get(rewind, binaryen.i32),
 			ctx.m.local.get(index,  binaryen.i32)
 		),
 		// Count index
 		ctx.m.i32.store(
-			3*4, 4,
+			OFFSET.COUNT, 4,
 			ctx.m.local.get(rewind, binaryen.i32),
 			ctx.m.local.get(count,  binaryen.i32)
 		),
@@ -404,7 +415,7 @@ export function CompileRule(m: binaryen.Module, literals: LiteralMapping, rule: 
 	ctx.declareVar(binaryen.i32);
 	const error = ctx.declareVar(binaryen.i32);
 
-	const block = CompileExpression(ctx, rule.seq);
+	const block = CompileExpression(ctx, rule.seq, rule.name);
 
 	ctx.m.addFunction(
 		rule.name,

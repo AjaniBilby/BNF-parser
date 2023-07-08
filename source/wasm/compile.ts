@@ -141,6 +141,43 @@ function GenerateInternals(m: binaryen.Module) {
 			m.return( m.local.get(3, binaryen.i32) )
 		]
 	));
+
+	m.addFunction("_memcpy",
+		binaryen.createType([binaryen.i32, binaryen.i32, binaryen.i32]),
+		binaryen.none,
+		[
+			binaryen.i32
+		],
+		m.block(null, [
+			m.local.set(3, m.i32.const(0)),
+
+			m.block("outer", [
+				m.loop("loop", m.block(null, [
+					m.i32.store8(
+						0, 0,
+						m.i32.add(m.local.get(0, binaryen.i32), m.local.get(3, binaryen.i32)),
+						m.i32.load8_u(
+							0, 0,
+							m.i32.add(m.local.get(1, binaryen.i32), m.local.get(3, binaryen.i32))
+						)
+					),
+					m.local.set(3,
+						m.i32.add(
+							m.local.get(3, binaryen.i32),
+							m.i32.const(1)
+						)
+					),
+					m.br_if("outer",
+						m.i32.ge_s(
+							m.local.get(3, binaryen.i32),
+							m.local.get(2, binaryen.i32)
+						)
+					),
+					m.br("loop")
+				]))
+			])
+		]
+	));
 }
 
 
