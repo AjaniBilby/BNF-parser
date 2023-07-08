@@ -63,13 +63,15 @@ function GenerateInternals(m: binaryen.Module) {
 	m.addFunction("_max_i32",
 		binaryen.createType([binaryen.i32, binaryen.i32]), binaryen.i32, [],
 		m.block(null, [
-			m.select(
-				m.i32.ge_s(
+			m.return(
+				m.select(
+					m.i32.ge_s(
+						m.local.get(0, binaryen.i32),
+						m.local.get(1, binaryen.i32)
+					),
 					m.local.get(0, binaryen.i32),
 					m.local.get(1, binaryen.i32)
-				),
-				m.local.get(0, binaryen.i32),
-				m.local.get(1, binaryen.i32)
+				)
 			)
 		]
 	));
@@ -135,7 +137,8 @@ function GenerateInternals(m: binaryen.Module) {
 					m.br("loop")
 				]))
 			]),
-			m.local.get(3, binaryen.i32)
+
+			m.return( m.local.get(3, binaryen.i32) )
 		]
 	));
 }

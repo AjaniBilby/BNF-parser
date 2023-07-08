@@ -1,3 +1,4 @@
+import { FlatMap } from "../helper/flatmap.js";
 import { CharRange, Count, Expression, Literal, Rule, Sequence } from "../parser.js";
 import LiteralMapping from "./literal-mapping.js";
 import binaryen from "binaryen";
@@ -97,21 +98,6 @@ function CompileSequenceOnce(ctx: CompilerContext, expr: Sequence, name?: string
 
 	const lblBody    = ctx.reserveBlock();
 
-	const children: number[] = [];
-	for (let child of expr.exprs) {
-		children.push( CompileExpression(ctx, child) );
-
-		// Update to best reach will have been updated by children
-
-		// Stop parsing if child failed to parse
-		children.push(
-			ctx.m.br(lblBody, ctx.m.i32.eq(
-				ctx.m.local.get(error, binaryen.i32),
-				ctx.m.i32.const(1)
-			))
-		);
-	}
-
 	return ctx.m.block(null, [
 		ctx.m.local.set(rewind, ctx.m.global.get("heap", binaryen.i32)),
 
@@ -127,7 +113,15 @@ function CompileSequenceOnce(ctx: CompilerContext, expr: Sequence, name?: string
 			ctx.m.i32.const(OFFSET.DATA)
 		)),
 
-		ctx.m.block(lblBody, children),
+		ctx.m.block(lblBody, FlatMap(expr.exprs, (child) => [
+			CompileExpression(ctx, child),
+
+			// Stop parsing if child failed to parse
+			ctx.m.br(lblBody, ctx.m.i32.eq(
+				ctx.m.local.get(error, binaryen.i32),
+				ctx.m.i32.const(1)
+			))
+		])),
 
 		ctx.m.if(
 			ctx.m.i32.eq(
