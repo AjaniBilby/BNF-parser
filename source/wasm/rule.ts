@@ -1,4 +1,4 @@
-import { CharRange, Count, Expression, Literal, Rule, Sequence } from "../parser.js";
+import { CharRange, Count, Expression, Literal, Rule, Sequence, Term } from "../parser.js";
 import LiteralMapping from "./literal-mapping.js";
 import binaryen from "binaryen";
 
@@ -63,6 +63,8 @@ function CompileExpression(ctx: CompilerContext, expr: Expression, name?: string
 		throw new Error(`Unexpected expression type ${expr.constructor.name} during compilation`);
 	} else if (expr instanceof Literal) {
 		return CompileLiteral(ctx, expr);
+	} else if (expr instanceof Term) {
+		return CompileTerm(ctx, expr);
 	}
 
 	throw new Error(`Unexpected expression type ${expr.constructor.name} during compilation`);
@@ -276,6 +278,54 @@ function CompileLiteralOnce(ctx: CompilerContext, expr: Literal): number {
 			ctx.m.i32.const(literal.offset),
 			ctx.m.i32.const(literal.bytes.byteLength),
 		], binaryen.none)
+	]);
+}
+
+
+function CompileTerm(ctx: CompilerContext, expr: Term, name?: string): number {
+	const once = CompileTermOnce(ctx, expr, name);
+
+	if (expr.count === "1") {
+		return once;
+	} else {
+		return CompileRepeat(ctx, once, expr.count);
+	}
+}
+
+function CompileTermOnce(ctx: CompilerContext, expr: Term, name?: string): number {
+	// const index  = SHARED.INDEX;
+	const error  = SHARED.ERROR;
+	const rewind = ctx.declareVar(binaryen.i32);
+
+	const literal = ctx.l.getKey(expr.value);
+
+	return ctx.m.block(null, [
+		ctx.m.local.set(rewind, ctx.m.global.get("heap", binaryen.i32)),
+
+		ctx.m.local.set(error,
+			ctx.m.call(expr.value, [], binaryen.i32)
+		),
+
+		ctx.m.if(
+			ctx.m.i32.eq(
+				ctx.m.local.get(error, binaryen.i32),
+				ctx.m.i32.const(0)
+			),
+			ctx.m.block(null, [ // On success
+				// Override name
+				ctx.m.i32.store(
+					OFFSET.TYPE, 4,
+					ctx.m.local.get(rewind, binaryen.i32),
+					ctx.m.i32.const(literal.offset)
+				),
+				ctx.m.i32.store(
+					OFFSET.TYPE_LEN, 4,
+					ctx.m.local.get(rewind, binaryen.i32),
+					ctx.m.i32.const(literal.bytes.byteLength)
+				),
+			]),
+			// Failure already cleaned up by child
+		)
 	]);
 }
 
