@@ -27,6 +27,11 @@ try {
 			const output = Runner.Parse(wasm, "aabbbbabbba");
 			console.log(29, output);
 
+			if (output instanceof ParseError) {
+				console.error(output.toString());
+				process.exit(1);
+			}
+
 			writeFileSync("dump.json", JSON.stringify(output.root, null, 2));
 		})
 		.catch(console.error);

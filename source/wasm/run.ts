@@ -1,3 +1,4 @@
+import { ParseError, Reference, ReferenceRange } from "../syntax.js";
 import { OFFSET } from "./layout.js";
 
 type WasmParser = WebAssembly.Instance & {
@@ -8,7 +9,7 @@ type WasmParser = WebAssembly.Instance & {
 		heap        : WebAssembly.Global;
 
 		_init: () => number;
-		program: (index: number) => void;
+		program: () => number;
 	}
 }
 
@@ -46,10 +47,17 @@ export function Parse(ctx: WasmParser, data: string, refMapping = false) {
 
 	const heap = ctx.exports._init();
 
-	ctx.exports.program(0);
+	const statusCode = ctx.exports.program();
+	const reach = Number(ctx.exports.reach);
+	if (statusCode == 1) return new ParseError(
+		"Unable to parse",
+		new ReferenceRange(
+			new Reference(0, 0, 0),
+			new Reference(0, 0, reach)
+		)
+	);
 
 	const root = Decode(ctx, heap);
-	const reach = Number(ctx.exports.reach);
 
 	console.log(`Start: ${root.start} End: ${root.end} Reached: ${Number(ctx.exports.reach)}`);
 

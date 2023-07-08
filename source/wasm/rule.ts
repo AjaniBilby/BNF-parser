@@ -5,11 +5,10 @@ import binaryen from "binaryen";
 import { OFFSET } from "./layout.js";
 
 
-const syntaxFuncParams = binaryen.createType([binaryen.i32]);
+const syntaxFuncParams = binaryen.createType([]);
 
 const SHARED = {
-	INDEX: 0, // local variable for index progression
-	ERROR: 1, // local variable for error flag
+	ERROR: 0, // local variable for error flag
 }
 
 // Using OO because of better V8 memory optimisations
@@ -81,7 +80,7 @@ function CompileSequence(ctx: CompilerContext, expr: Sequence, name?: string): n
 }
 
 function CompileSequenceOnce(ctx: CompilerContext, expr: Sequence, name?: string): number {
-	const index  = SHARED.INDEX;
+	// const index  = SHARED.INDEX;
 	const error  = SHARED.ERROR;
 	const rewind = ctx.declareVar(binaryen.i32);
 
@@ -97,8 +96,8 @@ function CompileSequenceOnce(ctx: CompilerContext, expr: Sequence, name?: string
 
 		ctx.m.i32.store(
 			OFFSET.START, 4,
-			ctx.m.local.get(rewind, binaryen.i32),
-			ctx.m.local.get(index, binaryen.i32)
+			ctx.m.local.get(rewind,   binaryen.i32),
+			ctx.m.global.get("index", binaryen.i32)
 		),
 
 
@@ -125,7 +124,7 @@ function CompileSequenceOnce(ctx: CompilerContext, expr: Sequence, name?: string
 			ctx.m.block(null, [
 				// mark failed + rollback ALL progress
 				ctx.m.local.set(error, ctx.m.i32.const(1)),
-				ctx.m.local.set(index,
+				ctx.m.global.set("index",
 					ctx.m.i32.load(
 						OFFSET.START, 4,
 						ctx.m.local.get(rewind, binaryen.i32)
@@ -148,8 +147,8 @@ function CompileSequenceOnce(ctx: CompilerContext, expr: Sequence, name?: string
 				// End index
 				ctx.m.i32.store(
 					OFFSET.END, 4,
-					ctx.m.local.get(rewind, binaryen.i32),
-					ctx.m.local.get(index,  binaryen.i32)
+					ctx.m.local.get(rewind,   binaryen.i32),
+					ctx.m.global.get("index", binaryen.i32)
 				),
 				// Child count
 				ctx.m.i32.store(
@@ -173,7 +172,7 @@ function CompileLiteral(ctx: CompilerContext, expr: Literal): number {
 }
 
 function CompileLiteralOnce(ctx: CompilerContext, expr: Literal): number {
-	const index    = SHARED.INDEX;
+	// const index    = SHARED.INDEX;
 	const error    = SHARED.ERROR;
 	const rewind   = ctx.declareVar(binaryen.i32);
 	const progress = ctx.declareVar(binaryen.i32);
@@ -192,28 +191,28 @@ function CompileLiteralOnce(ctx: CompilerContext, expr: Literal): number {
 		// Start index
 		ctx.m.i32.store(
 			OFFSET.START, 4,
-			ctx.m.local.get(rewind,  binaryen.i32),
-			ctx.m.local.get(index, binaryen.i32)
+			ctx.m.local.get(rewind,   binaryen.i32),
+			ctx.m.global.get("index", binaryen.i32)
 		),
 
 		// Attempt match
 		ctx.m.local.set(progress,
 			ctx.m.call("_matchString", [
-				ctx.m.local.get(index, binaryen.i32),
+				ctx.m.global.get("index", binaryen.i32),
 				ctx.m.i32.const(literal.offset),
 				ctx.m.i32.const(literal.bytes.byteLength),
 			], binaryen.i32)
 		),
-		ctx.m.local.set(index,
+		ctx.m.global.set("index",
 			ctx.m.i32.add(
 				ctx.m.local.get(progress, binaryen.i32),
-				ctx.m.local.get(index,    binaryen.i32)
+				ctx.m.global.get("index", binaryen.i32)
 			)
 		),
 
 		// Update furthest reach
 		ctx.m.call("_reach_update", [
-			ctx.m.local.get(index,    binaryen.i32),
+			ctx.m.global.get("index", binaryen.i32),
 		], binaryen.none),
 
 		// Check if fully matched literal
@@ -225,7 +224,7 @@ function CompileLiteralOnce(ctx: CompilerContext, expr: Literal): number {
 			ctx.m.block(null, [
 				ctx.m.local.set(error, ctx.m.i32.const(1)),
 				// roll back progress
-				ctx.m.local.set(index,
+				ctx.m.global.set("index",
 					ctx.m.i32.load(
 						OFFSET.START, 4,
 						ctx.m.local.get(rewind, binaryen.i32)
@@ -250,8 +249,8 @@ function CompileLiteralOnce(ctx: CompilerContext, expr: Literal): number {
 		),
 		ctx.m.i32.store(
 			OFFSET.END, 4,
-			ctx.m.global.get("heap", binaryen.i32),
-			ctx.m.local.get(index, binaryen.i32)
+			ctx.m.global.get("heap",  binaryen.i32),
+			ctx.m.global.get("index", binaryen.i32)
 		),
 		ctx.m.i32.store(
 			OFFSET.COUNT, 4,
@@ -287,8 +286,8 @@ function CompileLiteralOnce(ctx: CompilerContext, expr: Literal): number {
 function CompileRepeat(ctx: CompilerContext, innerWasm: number, repetitions: Count): number {
 	if (repetitions === "1") throw new Error("Don't compile repetitions for 1 to 1 repetition");
 
-	const index = 0;
-	const error = 1;
+	// const index = 0;
+	const error = SHARED.ERROR;
 	const rewind = ctx.declareVar(binaryen.i32);
 	const count  = ctx.declareVar(binaryen.i32);
 
@@ -307,8 +306,8 @@ function CompileRepeat(ctx: CompilerContext, innerWasm: number, repetitions: Cou
 		// Start index
 		ctx.m.i32.store(
 			OFFSET.START, 4,
-			ctx.m.local.get(rewind,  binaryen.i32),
-			ctx.m.local.get(index, binaryen.i32)
+			ctx.m.local.get(rewind,   binaryen.i32),
+			ctx.m.global.get("index", binaryen.i32)
 		),
 
 		ctx.m.global.set("heap", ctx.m.i32.add(
@@ -360,7 +359,7 @@ function CompileRepeat(ctx: CompilerContext, innerWasm: number, repetitions: Cou
 				ctx.m.block(null, [
 					// mark failed + rollback ALL progress
 					ctx.m.local.set(error, ctx.m.i32.const(1)),
-					ctx.m.local.set(index,
+					ctx.m.global.set("index",
 						ctx.m.i32.load(4, 4,
 							ctx.m.local.get(rewind, binaryen.i32)
 						)
@@ -389,8 +388,8 @@ function CompileRepeat(ctx: CompilerContext, innerWasm: number, repetitions: Cou
 		),
 		ctx.m.i32.store(
 			OFFSET.END, 4,
-			ctx.m.local.get(rewind, binaryen.i32),
-			ctx.m.local.get(index,  binaryen.i32)
+			ctx.m.local.get(rewind,   binaryen.i32),
+			ctx.m.global.get("index", binaryen.i32)
 		),
 		// Count index
 		ctx.m.i32.store(
@@ -409,7 +408,6 @@ function CompileRepeat(ctx: CompilerContext, innerWasm: number, repetitions: Cou
 export function CompileRule(m: binaryen.Module, literals: LiteralMapping, rule: Rule) {
 	const ctx = new CompilerContext(m, literals, rule);
 	// Function input
-	const input = ctx.declareVar(binaryen.i32);
 	const error = ctx.declareVar(binaryen.i32);
 
 	const innerWasm = CompileExpression(ctx, rule.seq, rule.name);
@@ -417,13 +415,13 @@ export function CompileRule(m: binaryen.Module, literals: LiteralMapping, rule: 
 	ctx.m.addFunction(
 		rule.name,
 		syntaxFuncParams, binaryen.i32,
-		ctx.vars.slice(1),
+		ctx.vars,
 		ctx.m.block(null, [
 			ctx.m.local.set(error, ctx.m.i32.const(0)),
 
 			innerWasm,
 
-			ctx.m.return(ctx.m.i32.const(1))
+			ctx.m.return(ctx.m.local.get(error, binaryen.i32))
 		])
 	);
 	ctx.m.addFunctionExport(rule.name, rule.name);
