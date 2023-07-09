@@ -57,20 +57,14 @@ class CompilerContext {
 
 
 function CompileExpression(ctx: CompilerContext, expr: Expression, name?: string): number {
-	if (expr instanceof Sequence) {
-		return CompileSequence(ctx, expr, name);
-	} else if (expr instanceof Select) {
-		return CompileSelect(ctx, expr, name);
-	} else if (expr instanceof CharRange) {
-		return CompileRange(ctx, expr);
-	} else if (expr instanceof Literal) {
-		return CompileLiteral(ctx, expr);
-	} else if (expr instanceof Term) {
-		return CompileTerm(ctx, expr);
-	} else if (expr instanceof Omit) {
-		return CompileOmit(ctx, expr);
-	} else if (expr instanceof Not) {
-		return CompileNot(ctx, expr);
+	switch (expr.constructor.name) {
+		case "Select":    return CompileSelect  (ctx, expr as Select, name);
+		case "Sequence":  return CompileSequence(ctx, expr as Sequence, name);
+		case "CharRange": return CompileRange   (ctx, expr as CharRange);
+		case "Literal":   return CompileLiteral (ctx, expr as Literal);
+		case "Term":      return CompileTerm    (ctx, expr as Term);
+		case "Omit":      return CompileOmit    (ctx, expr as Omit);
+		case "Not":       return CompileNot     (ctx, expr as Not);
 	}
 
 	throw new Error(`Unexpected expression type ${expr.constructor.name} during compilation`);
@@ -186,18 +180,16 @@ function CompileSelect(ctx: CompilerContext, expr: Select, name?: string): numbe
 }
 
 function CompileSelectOnce(ctx: CompilerContext, expr: Select, name?: string): number {
-	const error  = SHARED.ERROR;
-	const rewind = name ? ctx.declareVar(binaryen.i32) : null;
+	const error = SHARED.ERROR;
 
-	const lblBody    = ctx.reserveBlock();
-	const body = [];
-
-	if (rewind) {
-		body.push(ctx.m.local.set(rewind, ctx.m.global.get("heap", binaryen.i32)))
-	}
+	const lblBody = ctx.reserveBlock();
+	const body    = [];
 
 	body.push(
 		ctx.m.block(lblBody, expr.exprs.flatMap((child) => [
+			// Reset error state for previous failures
+			ctx.m.local.set(error, ctx.m.i32.const(0)),
+
 			// On failure already cleans up after itself
 			CompileExpression(ctx, child),
 
@@ -208,30 +200,6 @@ function CompileSelectOnce(ctx: CompilerContext, expr: Select, name?: string): n
 			))
 		]))
 	)
-
-	// Override name if necessary
-	if (rewind && name) {
-		const literal = ctx.l.getKey(name);
-
-		body.push(ctx.m.if(
-			ctx.m.i32.eq(
-				ctx.m.local.get(error, binaryen.i32),
-				ctx.m.i32.const(0)
-			),
-			ctx.m.block(null, [
-				ctx.m.i32.store(
-					OFFSET.TYPE, 4,
-					ctx.m.local.get(rewind, binaryen.i32),
-					ctx.m.i32.const(literal.offset)
-				),
-				ctx.m.i32.store(
-					OFFSET.TYPE_LEN, 4,
-					ctx.m.local.get(rewind, binaryen.i32),
-					ctx.m.i32.const(literal.bytes.byteLength)
-				),
-			])
-		))
-	}
 
 	return ctx.m.block(null, body);
 }
@@ -897,7 +865,17 @@ export function CompileRule(m: binaryen.Module, literals: LiteralMapping, rule: 
 	// Function input
 	const error = ctx.declareVar(binaryen.i32);
 
-	const innerWasm = CompileExpression(ctx, rule.seq, rule.name);
+	// Convert any rule that starts with a select to start with a sequence
+	let inner = rule.seq;
+	if (inner instanceof Select) {
+		inner = new Sequence({
+			exprs: [],
+			count: "1"
+		});
+		inner.exprs = [ rule.seq ];
+	}
+
+	const innerWasm = CompileExpression(ctx, inner, rule.name);
 
 	ctx.m.addFunction(
 		rule.name,
