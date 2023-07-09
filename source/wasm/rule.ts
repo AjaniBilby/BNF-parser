@@ -680,10 +680,17 @@ function CompileLiteral(ctx: CompilerContext, expr: Literal): number {
 function CompileLiteralOnce(ctx: CompilerContext, expr: Literal): number {
 	// const index    = SHARED.INDEX;
 	const error    = SHARED.ERROR;
+	const literal = ctx.l.getKey(expr.value);
+
+	if (literal.bytes.byteLength === 0) {
+		return ctx.m.block(null, [
+			ctx.m.local.set(error, ctx.m.i32.const(1))
+		])
+	}
+
 	const rewind   = ctx.declareVar(binaryen.i32);
 	const progress = ctx.declareVar(binaryen.i32);
 
-	const literal = ctx.l.getKey(expr.value);
 	const type    = ctx.l.getKey("literal");
 
 	const block = ctx.pushBlock();
