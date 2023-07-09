@@ -5,7 +5,8 @@ import { writeFileSync } from "fs";
 import * as Runner from "./run.js";
 
 const syntax = BNF.parse(`
-program ::= "0" | ( "1" -> "9" "0" -> "9"* );
+	program ::= ...integer;
+	integer ::= "0" | ...( "1" -> "9" "0" -> "9"* ) ;
 `);
 if (syntax instanceof ParseError) throw syntax;
 
@@ -26,7 +27,7 @@ try {
 
 	Runner.Create(myModule.emitBinary())
 		.then((wasm) => {
-			const output = Runner.Parse(wasm, "1245");
+			const output = Runner.Parse(wasm, "12389740213");
 			console.log(29, output);
 
 			if (output instanceof ParseError) {

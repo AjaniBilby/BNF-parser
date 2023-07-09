@@ -1,4 +1,4 @@
-import { CharRange, Count, Expression, Literal, Not, Omit, Rule, Select, Sequence, Term } from "../parser.js";
+import { CharRange, Count, Expression, Gather, Literal, Not, Omit, Rule, Select, Sequence, Term } from "../parser.js";
 import LiteralMapping from "./literal-mapping.js";
 import binaryen from "binaryen";
 
@@ -58,13 +58,14 @@ class CompilerContext {
 
 function CompileExpression(ctx: CompilerContext, expr: Expression, name?: string): number {
 	switch (expr.constructor.name) {
-		case "Select":    return CompileSelect  (ctx, expr as Select, name);
 		case "Sequence":  return CompileSequence(ctx, expr as Sequence, name);
-		case "CharRange": return CompileRange   (ctx, expr as CharRange);
+		case "Select":    return CompileSelect  (ctx, expr as Select);
 		case "Literal":   return CompileLiteral (ctx, expr as Literal);
-		case "Term":      return CompileTerm    (ctx, expr as Term);
+		case "CharRange": return CompileRange   (ctx, expr as CharRange);
 		case "Omit":      return CompileOmit    (ctx, expr as Omit);
+		case "Term":      return CompileTerm    (ctx, expr as Term);
 		case "Not":       return CompileNot     (ctx, expr as Not);
+		case "Gather":    return CompileGather  (ctx, expr as Gather);
 	}
 
 	throw new Error(`Unexpected expression type ${expr.constructor.name} during compilation`);
@@ -169,8 +170,8 @@ function CompileSequenceOnce(ctx: CompilerContext, expr: Sequence, name?: string
 }
 
 
-function CompileSelect(ctx: CompilerContext, expr: Select, name?: string): number {
-	const once = CompileSelectOnce(ctx, expr, name);
+function CompileSelect(ctx: CompilerContext, expr: Select): number {
+	const once = CompileSelectOnce(ctx, expr);
 
 	if (expr.count === "1") {
 		return once;
@@ -179,7 +180,7 @@ function CompileSelect(ctx: CompilerContext, expr: Select, name?: string): numbe
 	}
 }
 
-function CompileSelectOnce(ctx: CompilerContext, expr: Select, name?: string): number {
+function CompileSelectOnce(ctx: CompilerContext, expr: Select): number {
 	const error = SHARED.ERROR;
 
 	const lblBody = ctx.reserveBlock();
@@ -212,6 +213,57 @@ function CompileOmit(ctx: CompilerContext, expr: Omit): number {
 		ctx.m.local.set(rewind, ctx.m.global.get("heap", binaryen.i32)),
 		CompileExpression(ctx, expr.expr),
 		ctx.m.global.set("heap", ctx.m.local.get(rewind, binaryen.i32)),
+	]);
+}
+
+function CompileGather(ctx: CompilerContext, expr: Omit): number {
+	const error  = SHARED.ERROR;
+	const rewind = ctx.declareVar(binaryen.i32);
+
+	const literal = ctx.l.getKey("literal");
+
+	return ctx.m.block(null, [
+		ctx.m.local.set(rewind, ctx.m.global.get("heap", binaryen.i32)),
+
+		// All meta set after the fact
+
+		CompileExpression(ctx, expr.expr),
+
+		ctx.m.if(
+			ctx.m.i32.eq(
+				ctx.m.local.get(error, binaryen.i32),
+				ctx.m.i32.const(1)
+			),
+			ctx.m.block(null, [
+				// Unwind error
+				ctx.m.global.set("heap", ctx.m.local.get(rewind, binaryen.i32)),
+			]),
+			ctx.m.block(null, [
+				ctx.m.i32.store(
+					OFFSET.COUNT, 4,
+					ctx.m.local.get(rewind, binaryen.i32),
+					ctx.m.call("_gather", [
+						ctx.m.local.get(rewind, binaryen.i32),
+						ctx.m.i32.add(
+							ctx.m.local.get(rewind, binaryen.i32),
+							ctx.m.i32.const(OFFSET.DATA)
+						)
+					], binaryen.i32)
+				),
+
+				// Override type
+				ctx.m.i32.store(
+					OFFSET.TYPE, 4,
+					ctx.m.local.get(rewind, binaryen.i32),
+					ctx.m.i32.const(literal.offset)
+				),
+				ctx.m.i32.store(
+					OFFSET.TYPE_LEN, 4,
+					ctx.m.local.get(rewind, binaryen.i32),
+					ctx.m.i32.const(literal.bytes.byteLength)
+				),
+			]),
+		)
 	]);
 }
 
@@ -867,12 +919,15 @@ export function CompileRule(m: binaryen.Module, literals: LiteralMapping, rule: 
 
 	// Convert any rule that starts with a select to start with a sequence
 	let inner = rule.seq;
-	if (inner instanceof Select) {
+	if (inner.constructor.name === "Select") {
+		let child: Expression = inner as Select;
+		if (child.exprs.length === 1) child = child.exprs[0];
+
 		inner = new Sequence({
 			exprs: [],
 			count: "1"
 		});
-		inner.exprs = [ rule.seq ];
+		inner.exprs = [ child ];
 	}
 
 	const innerWasm = CompileExpression(ctx, inner, rule.name);
