@@ -15,10 +15,12 @@ function IngestLiterals(m: binaryen.Module, bnf: Parser) {
 	literals.ingestBnf(bnf);
 
 	m.setMemory(1, 10, "memory",
-		literals.values.map(x => ({
-			data: x.bytes,
-			offset: m.i32.const(x.offset)
-		}))
+		literals.values
+			.filter(x => x.bytes.byteLength > 0)
+			.map(x => ({
+				data: x.bytes,
+				offset: m.i32.const(x.offset)
+			}))
 	);
 
 	m.addGlobal("input",       binaryen.i32, false, m.i32.const(literals.size));
