@@ -131,17 +131,31 @@ export function Parse(ctx: WasmParser, data: string, refMapping = true) {
 
 	const statusCode = ctx.exports.program();
 	const reach = Number(ctx.exports.reach);
-	if (statusCode == 1) return new ParseError(
-		"Unable to parse",
-		new ReferenceRange(
-			new Reference(0, 0, 0),
-			new Reference(0, 0, reach)
-		)
-	);
+	if (statusCode == 1) {
+		if (refMapping) {
+			return new ParseError(
+				"Unable to parse",
+				new ReferenceRange(
+					new Reference(0, 0, 0),
+					MapBytes2String(data, reach, 0, new Reference(1,1,0)).ref
+				)
+			)
+		} else {
+			return new ParseError(
+				"Unable to parse",
+				new ReferenceRange(
+					new Reference(0, 0, 0),
+					new Reference(0, 0, reach)
+				)
+			)
+		}
+
+
+	};
 
 	const root = Decode(ctx, heap);
 
-	MapTreeRefs(root, data);
+	if (refMapping) MapTreeRefs(root, data);
 
 	console.log(`Start: ${root.start} End: ${root.end} Reached: ${Number(ctx.exports.reach)}`);
 
