@@ -4,16 +4,21 @@ import { GenerateWasm } from "./compile.js";
 import { writeFileSync } from "fs";
 import * as Runner from "./run.js";
 
-const syntax = BNF.parse(`
-	program ::= ...integer;
-	integer ::= "0" | ...( "1" -> "9" "0" -> "9"* ) ;
-`);
-if (syntax instanceof ParseError) throw syntax;
+export function CompileBnf2Wasm(bnf: string) {
+	const syntax = BNF.parse(bnf);
+	if (syntax instanceof ParseError) throw syntax;
 
-const bnf = Compile(syntax);
+	const lang = Compile(syntax);
+
+	return GenerateWasm(lang);
+}
+
 
 try {
-	const myModule = GenerateWasm(bnf);
+	const myModule = CompileBnf2Wasm(`
+	program ::= "Hello🦆People";
+	integer ::= "0" | ...( "1" -> "9" "0" -> "9"* ) ;
+`);
 
 	// Optimize the module using default passes and levels
 	// myModule.optimize();
@@ -27,7 +32,7 @@ try {
 
 	Runner.Create(myModule.emitBinary())
 		.then((wasm) => {
-			const output = Runner.Parse(wasm, "12389740213");
+			const output = Runner.Parse(wasm, "Hello🦆People");
 			console.log(29, output);
 
 			if (output instanceof ParseError) {

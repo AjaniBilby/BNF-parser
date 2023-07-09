@@ -14,6 +14,7 @@ type WasmParser = WebAssembly.Instance & {
 }
 
 
+
 export class Wasm_SyntaxNode {
 	type : string;
 	start: number;
@@ -22,12 +23,19 @@ export class Wasm_SyntaxNode {
 
 	value: Wasm_SyntaxNode[] | string;
 
+	ref: null | ReferenceRange
+
 	constructor (type: string, start: number, end: number, count: number) {
 		this.type  = type;
 		this.start = start;
 		this.end   = end;
 		this.count = count;
 		this.value = [];
+		this.ref = null;
+	}
+
+	static toString() {
+		return `class ${Wasm_SyntaxNode.constructor.name}{${Wasm_SyntaxNode.constructor.toString()}}`;
 	}
 }
 
@@ -35,17 +43,91 @@ export class Wasm_SyntaxNode {
 export async function Create(wasm: BufferSource){
 	const bundle = await WebAssembly.instantiate(wasm, {
 		js: {
-			print_i32: console.log,
-			print_i32_i32_i32: console.log
+			print_i32: console.log
 		}
 	});
 	return bundle.instance as WasmParser;
 }
 
-export function Parse(ctx: WasmParser, data: string, refMapping = false) {
-	InjectString(ctx, data);
+function InitParse(ctx: WasmParser, data: string) {
+	const memory = ctx.exports.memory;
+	memory.grow(1); // grow memory if needed
 
-	const heap = ctx.exports._init();
+	// Convert the string to UTF-8 bytes
+	const utf8Encoder = new TextEncoder();
+	const stringBytes = utf8Encoder.encode(data);
+
+	// Copy the string bytes to WebAssembly memory
+	const wasmMemory = new Uint8Array(memory.buffer);
+	wasmMemory.set(stringBytes, ctx.exports.input.value);
+
+	ctx.exports.inputLength.value = stringBytes.byteLength;
+
+	return ctx.exports._init();
+}
+
+function MapBytes2String(str: string, bytes: number, byteOffset: number = 0, ref: Reference) {
+	const encoder = new TextEncoder();
+
+	// const ref = from.clone();
+
+	while(byteOffset <= bytes && ref.index < str.length) {
+		const char = str[ref.index];
+		const byteSize = encoder.encode(char).byteLength;
+
+		if (byteOffset + byteSize > bytes) {
+			break;
+		}
+
+		ref.advance(char === "\n");
+		byteOffset += byteSize;
+	}
+
+	return {
+		bytes: byteOffset,
+		ref: ref
+	};
+}
+
+function MapTreeRefs(tree: Wasm_SyntaxNode, str: string) {
+	let stack  = [tree];
+	let byteOffset = 0;
+
+	let overlap = {
+		ref: new Reference(1,1,0),
+		bytes: 0
+	};
+
+	while (stack.length > 0) {
+		const curr = stack.pop();
+		if (!curr) continue;
+
+		if (!curr.ref) {
+			overlap = overlap.bytes === curr.start ? overlap :
+				MapBytes2String(str, curr.start, byteOffset, overlap.ref);
+			curr.ref = new ReferenceRange(
+				overlap.ref.clone(),
+				new Reference(0,0,0)
+			);
+			byteOffset = overlap.bytes;
+
+			if (typeof(curr.value) === "string") {
+				stack.push(curr);
+			} else {
+				stack = stack.concat([ curr, ...[...curr.value].reverse()]);
+			}
+		} else {
+			overlap = overlap.bytes === curr.end ? overlap :
+				MapBytes2String(str, curr.end, byteOffset, overlap.ref);
+			curr.ref.end = overlap.ref.clone();
+			curr.ref.end.advance(false);
+			byteOffset = overlap.bytes;
+		}
+	}
+}
+
+export function Parse(ctx: WasmParser, data: string, refMapping = true) {
+	const heap = InitParse(ctx, data);
 
 	const statusCode = ctx.exports.program();
 	const reach = Number(ctx.exports.reach);
@@ -59,6 +141,8 @@ export function Parse(ctx: WasmParser, data: string, refMapping = false) {
 
 	const root = Decode(ctx, heap);
 
+	MapTreeRefs(root, data);
+
 	console.log(`Start: ${root.start} End: ${root.end} Reached: ${Number(ctx.exports.reach)}`);
 
 	return { root, reach };
@@ -70,9 +154,7 @@ function Decode(ctx: WasmParser, heap: number) {
 	const memoryArray = new Int32Array(memory.buffer);
 	const byteArray   = new Int8Array(memory.buffer);
 
-	const decoder = new TextDecoder('ascii');
-
-
+	const decoder = new TextDecoder();
 
 	const stack: Wasm_SyntaxNode[] = [];
 	let root: null | Wasm_SyntaxNode = null;
@@ -124,18 +206,12 @@ function Decode(ctx: WasmParser, heap: number) {
 }
 
 
-
-function InjectString(ctx: WasmParser, data: string) {
-	const memory = ctx.exports.memory;
-	memory.grow(1); // grow memory if needed
-
-	// Convert the string to UTF-8 bytes
-	const utf8Encoder = new TextEncoder();
-	const stringBytes = utf8Encoder.encode(data);
-
-	// Copy the string bytes to WebAssembly memory
-	const wasmMemory = new Uint8Array(memory.buffer);
-	wasmMemory.set(stringBytes, ctx.exports.input.value);
-
-	ctx.exports.inputLength.value = stringBytes.byteLength;
+export function toString() {
+	return Wasm_SyntaxNode.toString()+
+		Create.toString()+
+		InitParse.toString()+
+		MapBytes2String.toString()+
+		MapTreeRefs.toString()+
+		Parse.toString()+
+		Decode.toString();
 }
