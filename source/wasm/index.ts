@@ -5,7 +5,7 @@ import { writeFileSync } from "fs";
 import * as Runner from "./run.js";
 
 const syntax = BNF.parse(`
-program ::= "a" !"c"+ "c";
+program ::= "b"->"x"+;
 `);
 if (syntax instanceof ParseError) throw syntax;
 
@@ -15,7 +15,7 @@ try {
 	const myModule = GenerateWasm(bnf);
 
 	// Optimize the module using default passes and levels
-	myModule.optimize();
+	// myModule.optimize();
 
 	// Validate the module
 	// if (!myModule.validate())
@@ -26,7 +26,7 @@ try {
 
 	Runner.Create(myModule.emitBinary())
 		.then((wasm) => {
-			const output = Runner.Parse(wasm, "ac");
+			const output = Runner.Parse(wasm, "abcdefz");
 			console.log(29, output);
 
 			if (output instanceof ParseError) {
