@@ -1,4 +1,4 @@
-import { CharRange, Count, Expression, Literal, Omit, Rule, Select, Sequence, Term } from "../parser.js";
+import { CharRange, Count, Expression, Literal, Not, Omit, Rule, Select, Sequence, Term } from "../parser.js";
 import LiteralMapping from "./literal-mapping.js";
 import binaryen from "binaryen";
 
@@ -69,6 +69,8 @@ function CompileExpression(ctx: CompilerContext, expr: Expression, name?: string
 		return CompileTerm(ctx, expr);
 	} else if (expr instanceof Omit) {
 		return CompileOmit(ctx, expr);
+	} else if (expr instanceof Not) {
+		return CompileNot(ctx, expr);
 	}
 
 	throw new Error(`Unexpected expression type ${expr.constructor.name} during compilation`);
@@ -294,6 +296,192 @@ function CompileTermOnce(ctx: CompilerContext, expr: Term): number {
 }
 
 
+function CompileNot(ctx: CompilerContext, expr: Not): number {
+	const error = SHARED.ERROR;
+	const rewind = ctx.declareVar(binaryen.i32);
+	const count  = ctx.declareVar(binaryen.i32);
+
+	const literal = ctx.l.getKey("literal");
+
+	const outer = ctx.reserveBlock();
+	const block = ctx.reserveBlock();
+	const loop  = ctx.reserveBlock();
+
+	return ctx.m.block(outer, [
+		// Store information for failure reversion
+		ctx.m.local.set(rewind,  ctx.m.global.get("heap", binaryen.i32)),
+		ctx.m.local.set(count, ctx.m.i32.const(0)),
+
+		// Start index
+		ctx.m.i32.store(
+			OFFSET.START, 4,
+			ctx.m.local.get(rewind,   binaryen.i32),
+			ctx.m.global.get("index", binaryen.i32)
+		),
+
+		// Backup reach
+		ctx.m.i32.store(
+			OFFSET.END, 4,
+			ctx.m.local.get(rewind,   binaryen.i32),
+			ctx.m.global.get("reach", binaryen.i32)
+		),
+
+		ctx.m.global.set("heap", ctx.m.i32.add(
+			ctx.m.local.get(rewind, binaryen.i32),
+			ctx.m.i32.const(OFFSET.DATA)
+		)),
+
+		ctx.m.block(block, [
+			ctx.m.loop(loop, ctx.m.block(null, [
+				ctx.m.br(block, ctx.m.i32.ge_s(
+					ctx.m.global.get("index",       binaryen.i32),
+					ctx.m.global.get("inputLength", binaryen.i32)
+				)),
+
+				ctx.m.local.set(error, ctx.m.i32.const(0)), // don't confuse the child call with previous fails
+				CompileExpression(ctx, expr.expr),
+
+				// Break loop if match succeeded
+				ctx.m.br(block,
+					ctx.m.i32.eq(ctx.m.local.get(error, binaryen.i32), ctx.m.i32.const(0))
+				),
+
+				// Increment count
+				ctx.m.local.set(count, ctx.m.i32.add(
+					ctx.m.local.get(count, binaryen.i32),
+					ctx.m.i32.const(1)
+				)),
+
+				ctx.m.global.set("index", ctx.m.i32.add(
+					ctx.m.global.get("index", binaryen.i32),
+					ctx.m.i32.const(1)
+				)),
+
+				// Break loop if hit count limit
+				expr.count == "?" || expr.count == "1" ?
+					ctx.m.br(block,
+						ctx.m.i32.eq(ctx.m.local.get(count, binaryen.i32), ctx.m.i32.const(1))
+					) :
+					ctx.m.nop(),
+
+				// Continue loop
+				ctx.m.br(loop)
+			]))
+		]),
+
+		// Fix reach which might have been corrupted by NOT's child
+		ctx.m.global.set("reach",
+			ctx.m.i32.load(
+				OFFSET.END, 4,
+				ctx.m.local.get(rewind, binaryen.i32)
+			)
+		),
+		// Update to true reach
+		ctx.m.call("_reach_update", [
+			ctx.m.i32.add(
+				ctx.m.i32.load(4, 4,
+					ctx.m.local.get(rewind, binaryen.i32)
+				),
+				ctx.m.local.get(count, binaryen.i32)
+			)
+		], binaryen.none),
+
+		// Check satisfies count
+		/*
+			At this point given repetition:
+				?, 1: Exited the loop once 1 had been reached, 0 -> 1
+				*, +: Exited when failed so 0 -> many
+		*/
+		expr.count == "+" || expr.count == "1" ?
+			ctx.m.if(
+				ctx.m.i32.lt_s(
+					ctx.m.local.get(count, binaryen.i32),
+					ctx.m.i32.const(1)
+				),
+				ctx.m.block(null, [
+					// mark failed + rollback ALL progress
+					ctx.m.local.set(error, ctx.m.i32.const(1)),
+					ctx.m.global.set("index",
+						ctx.m.i32.load(4, 4,
+							ctx.m.local.get(rewind, binaryen.i32)
+						)
+					),
+					ctx.m.global.set("heap", ctx.m.local.get(rewind, binaryen.i32)),
+					ctx.m.br(outer)
+				])
+			):
+			ctx.m.nop(),
+
+		// UNO REVERSE! This is a NOT statement
+		ctx.m.local.set(error, ctx.m.i32.const(0)),
+
+		// The exit case of the loop means the NOT's child was successful
+		// 	This child likely pushed index forwards, correct the index position
+		ctx.m.global.set("index",
+			ctx.m.i32.add(
+				ctx.m.i32.load(
+					OFFSET.START, 4,
+					ctx.m.local.get(rewind, binaryen.i32)
+				),
+				ctx.m.local.get(count, binaryen.i32)
+			)
+		),
+
+		// Node Meta
+		ctx.m.i32.store(
+			OFFSET.TYPE, 4,
+			ctx.m.local.get(rewind, binaryen.i32),
+			ctx.m.i32.const(literal.offset)
+		),
+		ctx.m.i32.store(
+			OFFSET.TYPE_LEN, 4,
+			ctx.m.local.get(rewind, binaryen.i32),
+			ctx.m.i32.const(literal.bytes.byteLength)
+		),
+		ctx.m.i32.store(
+			OFFSET.END, 4,
+			ctx.m.local.get(rewind,   binaryen.i32),
+			ctx.m.global.get("index", binaryen.i32)
+		),
+		// Count index
+		ctx.m.i32.store(
+			OFFSET.COUNT, 4,
+			ctx.m.local.get(rewind, binaryen.i32),
+			ctx.m.local.get(count,  binaryen.i32)
+		),
+
+		// Copy in the data
+		ctx.m.call("_memcpy", [
+			ctx.m.i32.add(
+				ctx.m.local.get(rewind, binaryen.i32),
+				ctx.m.i32.const(OFFSET.DATA)
+			),
+			ctx.m.i32.add(
+				ctx.m.global.get("input", binaryen.i32),
+				ctx.m.i32.load(
+					OFFSET.START, 4,
+					ctx.m.local.get(rewind, binaryen.i32)
+				),
+			),
+			ctx.m.local.get(count, binaryen.i32),
+		], binaryen.none),
+
+		// Update new heap tail
+		ctx.m.global.set("heap",
+			ctx.m.call("_roundWord", [
+				ctx.m.i32.add(
+					ctx.m.local.get(rewind, binaryen.i32),
+					ctx.m.i32.add(
+						ctx.m.local.get(count, binaryen.i32),
+						ctx.m.i32.const( OFFSET.DATA )
+					)
+				)
+			], binaryen.i32)
+		),
+	]);
+}
+
+
 
 function CompileLiteral(ctx: CompilerContext, expr: Literal): number {
 	const once = CompileLiteralOnce(ctx, expr);
@@ -392,6 +580,16 @@ function CompileLiteralOnce(ctx: CompilerContext, expr: Literal): number {
 			ctx.m.i32.const(literal.bytes.byteLength)
 		),
 
+		// Copy in the data
+		ctx.m.call("_memcpy", [
+			ctx.m.i32.add(
+				ctx.m.local.get(rewind, binaryen.i32),
+				ctx.m.i32.const(OFFSET.DATA)
+			),
+			ctx.m.i32.const(literal.offset),
+			ctx.m.i32.const(literal.bytes.byteLength),
+		], binaryen.none),
+
 		// Update new heap tail
 		ctx.m.global.set("heap",
 			ctx.m.call("_roundWord", [
@@ -401,15 +599,6 @@ function CompileLiteralOnce(ctx: CompilerContext, expr: Literal): number {
 				)
 			], binaryen.i32)
 		),
-
-		ctx.m.call("_memcpy", [
-			ctx.m.i32.add(
-				ctx.m.local.get(rewind, binaryen.i32),
-				ctx.m.i32.const(OFFSET.DATA)
-			),
-			ctx.m.i32.const(literal.offset),
-			ctx.m.i32.const(literal.bytes.byteLength),
-		], binaryen.none)
 	]);
 }
 
