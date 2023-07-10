@@ -157,9 +157,13 @@ export function Parse(ctx: WasmParser, data: string, refMapping = true) {
 	};
 
 	console.time("decode");
-	const root = Decode(ctx, heap);
-	if (refMapping) MapTreeRefs(root, data);
+	const root = Decode(ctx, heap, refMapping);
 	console.timeEnd("decode");
+	if (refMapping) {
+		console.time("sourceMap");
+		MapTreeRefs(root, data)
+		console.timeEnd("sourceMap");
+	};
 
 	return {
 		root,
@@ -169,7 +173,7 @@ export function Parse(ctx: WasmParser, data: string, refMapping = true) {
 }
 
 
-function Decode(ctx: WasmParser, heap: number) {
+function Decode(ctx: WasmParser, heap: number, readBoundary = false) {
 	const memory = ctx.exports.memory;
 	const memoryArray = new Int32Array(memory.buffer);
 	const byteArray   = new Int8Array(memory.buffer);
@@ -179,6 +183,8 @@ function Decode(ctx: WasmParser, heap: number) {
 	const stack: Wasm_SyntaxNode[] = [];
 	let root: null | Wasm_SyntaxNode = null;
 	let offset = (heap / 4);
+
+	const typeCache = new Map<number, string>();
 
 	while (root === null || stack.length > 0) {
 		const curr = stack[stack.length-1];
@@ -190,12 +196,18 @@ function Decode(ctx: WasmParser, heap: number) {
 		}
 
 		const type_ptr = memoryArray.at(offset + OFFSET.TYPE    /4) || 0;
-		const type_len = memoryArray.at(offset + OFFSET.TYPE_LEN/4) || 0;
+		let type = typeCache.get(type_ptr);;
+		if (!type) {
+			const type_len = memoryArray.at(offset + OFFSET.TYPE_LEN/4) || 0;
+			type = decoder.decode(byteArray.slice(type_ptr, type_ptr+type_len));
+
+			typeCache.set(type_ptr, type);
+		}
 
 		const next = new Wasm_SyntaxNode(
-			decoder.decode(byteArray.slice(type_ptr, type_ptr+type_len)),
-			memoryArray.at(offset + OFFSET.START/4) || 0,
-			memoryArray.at(offset + OFFSET.END  /4) || 0,
+			type,
+			readBoundary ? memoryArray.at(offset + OFFSET.START/4) || 0 : -1,
+			readBoundary ? memoryArray.at(offset + OFFSET.END/4) || 0   : -1,
 			memoryArray.at(offset + OFFSET.COUNT/4) || 0
 		);
 		offset += OFFSET.DATA/4;
