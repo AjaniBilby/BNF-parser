@@ -4,9 +4,6 @@ import binaryen from "binaryen";
 
 import { OFFSET } from "./layout.js";
 
-
-const syntaxFuncParams = binaryen.createType([]);
-
 const SHARED = {
 	ERROR: 0, // local variable for error flag
 }
@@ -283,34 +280,12 @@ function CompileTermOnce(ctx: CompilerContext, expr: Term): number {
 	const error  = SHARED.ERROR;
 	const rewind = ctx.declareVar(binaryen.i32);
 
-	const literal = ctx.l.getKey(expr.value);
-
 	return ctx.m.block(null, [
 		ctx.m.local.set(rewind, ctx.m.global.get("heap", binaryen.i32)),
 
+		// Forward processing to child
 		ctx.m.local.set(error,
 			ctx.m.call(expr.value, [], binaryen.i32)
-		),
-
-		ctx.m.if(
-			ctx.m.i32.eq(
-				ctx.m.local.get(error, binaryen.i32),
-				ctx.m.i32.const(0)
-			),
-			ctx.m.block(null, [ // On success
-				// Override name
-				ctx.m.i32.store(
-					OFFSET.TYPE, 4,
-					ctx.m.local.get(rewind, binaryen.i32),
-					ctx.m.i32.const(literal.offset)
-				),
-				ctx.m.i32.store(
-					OFFSET.TYPE_LEN, 4,
-					ctx.m.local.get(rewind, binaryen.i32),
-					ctx.m.i32.const(literal.bytes.byteLength)
-				),
-			]),
-			// Failure already cleaned up by child
 		)
 	]);
 }
@@ -924,7 +899,7 @@ export function CompileRule(m: binaryen.Module, literals: LiteralMapping, rule: 
 	// Function input
 	const error = ctx.declareVar(binaryen.i32);
 
-	// Convert any rule that starts with a select to start with a sequence
+	// Make sure all rules start with a sequence
 	let inner = rule.seq;
 	if (inner.constructor.name === "Select") {
 		let child: Expression = inner as Select;
@@ -935,13 +910,19 @@ export function CompileRule(m: binaryen.Module, literals: LiteralMapping, rule: 
 			count: "1"
 		});
 		inner.exprs = [ child ];
+	} else if (rule.seq.constructor.name !== "Sequence") {
+		inner = new Sequence({
+			exprs: [],
+			count: "1"
+		});
+		inner.exprs = [ rule.seq ];
 	}
 
 	const innerWasm = CompileExpression(ctx, inner, rule.name);
 
 	ctx.m.addFunction(
 		rule.name,
-		syntaxFuncParams, binaryen.i32,
+		binaryen.createType([]), binaryen.i32,
 		ctx.vars,
 		ctx.m.block(null, [
 			ctx.m.local.set(error, ctx.m.i32.const(0)),
