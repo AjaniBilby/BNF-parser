@@ -5,3 +5,5 @@
 !changelog.md
 !package.json
 !readme.md
+
+bin/tools/*

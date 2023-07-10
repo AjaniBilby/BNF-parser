@@ -1,6 +1,6 @@
 {
 	"name": "bnf-parser",
-	"version": "3.1.6",
+	"version": "4.0.0-alpha1",
 	"description": "Deterministic BNF compiler/parser",
 	"main": "./bin/index.js",
 	"type": "module",
@@ -8,8 +8,8 @@
 		"test": "npm run build & node ./test",
 		"build": "run-s build:*",
 		"build:ts": "tsc",
-		"build:syntax": "ts-node ./tools/build-syntax",
-		"build:preload": "ts-node ./tools/post-build.ts"
+		"build:syntax": "node ./tools/build-syntax.js",
+		"build:preload": "node ./tools/post-build.js"
 	},
 	"repository": {
 		"type": "git",

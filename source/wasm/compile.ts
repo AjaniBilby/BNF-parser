@@ -2,7 +2,7 @@ import binaryen from "binaryen";
 
 import LiteralMapping from "./literal-mapping.js";
 import { CompileRule } from "./rule.js";
-import { Parser } from "../parser";
+import { Parser } from "../legacy/parser.js";
 
 import { OFFSET } from "./layout.js";
 

@@ -1,4 +1,4 @@
-import { ParseError, Reference, ReferenceRange } from "../syntax.js";
+import { ParseError, Reference, ReferenceRange } from "../legacy/syntax.js";
 import { OFFSET } from "./layout.js";
 
 type WasmParser = WebAssembly.Instance & {
@@ -156,8 +156,6 @@ export function Parse(ctx: WasmParser, data: string, refMapping = true) {
 	const root = Decode(ctx, heap);
 
 	if (refMapping) MapTreeRefs(root, data);
-
-	console.log(`Start: ${root.start} End: ${root.end} Reached: ${Number(ctx.exports.reach)}`);
 
 	return { root, reach };
 }

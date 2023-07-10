@@ -1,7 +1,7 @@
-import { CharRange, Count, Expression, Gather, Literal, Not, Omit, Rule, Select, Sequence, Term } from "../parser.js";
-import LiteralMapping from "./literal-mapping.js";
 import binaryen from "binaryen";
 
+import { CharRange, Count, Expression, Gather, Literal, Not, Omit, Rule, Select, Sequence, Term } from "../legacy/parser.js";
+import LiteralMapping from "./literal-mapping.js";
 import { OFFSET } from "./layout.js";
 
 const SHARED = {
