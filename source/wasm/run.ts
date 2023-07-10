@@ -35,7 +35,7 @@ export class Wasm_SyntaxNode {
 	}
 
 	static toString() {
-		return `class ${Wasm_SyntaxNode.constructor.name}{${Wasm_SyntaxNode.constructor.toString()}}`;
+		return "class Wasm_SyntaxNode{constructor(type,start,end,count){this.type=type;this.start=start;this.end=end;this.count=count;this.value=[];this.ref=null;}}\n";
 	}
 }
 
@@ -127,13 +127,13 @@ function MapTreeRefs(tree: Wasm_SyntaxNode, str: string) {
 	}
 }
 
-export function Parse(ctx: WasmParser, data: string, refMapping = true) {
+export function Parse(ctx: WasmParser, data: string, refMapping = true, entry = "program") {
 	console.time("encode");
 	const heap = InitParse(ctx, data);
 	console.timeEnd("encode");
 
 	console.time("process");
-	const statusCode = ctx.exports.program();
+	const statusCode = (ctx.exports as any)[entry]() as number;
 	console.timeEnd("process");
 	let reach = Number(ctx.exports.reach);
 	if (statusCode == 1) {
@@ -240,7 +240,6 @@ function Decode(ctx: WasmParser, heap: number, readBoundary = false) {
 
 export function toString() {
 	return Wasm_SyntaxNode.toString()+
-		Create.toString()+
 		InitParse.toString()+
 		MapBytes2String.toString()+
 		MapTreeRefs.toString()+
