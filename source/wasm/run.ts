@@ -20,9 +20,7 @@ export class Wasm_SyntaxNode {
 	start: number;
 	end  : number;
 	count: number;
-
 	value: Wasm_SyntaxNode[] | string;
-
 	ref: null | ReferenceRange
 
 	constructor (type: string, start: number, end: number, count: number) {

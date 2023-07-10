@@ -6,6 +6,15 @@ import { bnf_json } from "./preload.js";
 
 const BNF = new Parser( bnf_json );
 
+const helper = {
+	Compile: (bnf: string) => {
+		const syntax = BNF.parse(bnf);
+		if (syntax instanceof ParseError) return syntax;
+
+		return Compile(syntax);
+	}
+}
+
 export {
 	BNF,
 	Parser,
@@ -13,5 +22,6 @@ export {
 	SyntaxNode,
 	ParseError,
 	Reference,
-	ReferenceRange
+	ReferenceRange,
+	helper
 };
