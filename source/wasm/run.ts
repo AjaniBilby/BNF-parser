@@ -1,7 +1,7 @@
 import { ParseError, Reference, ReferenceRange } from "../legacy/syntax.js";
 import { OFFSET } from "./layout.js";
 
-type WasmParser = WebAssembly.Instance & {
+export type WasmParser = WebAssembly.Instance & {
 	exports: {
 		memory      : WebAssembly.Memory;
 		input       : WebAssembly.Global;
@@ -40,13 +40,14 @@ export class Wasm_SyntaxNode {
 }
 
 
-export async function Create(wasm: BufferSource){
-	const bundle = await WebAssembly.instantiate(wasm, {
+export function Create(wasm: BufferSource){
+	const mod = new WebAssembly.Module(wasm);
+	const bundle = new WebAssembly.Instance(mod, {
 		js: {
 			print_i32: console.log
 		}
-	});
-	return bundle.instance as WasmParser;
+	} as any);
+	return bundle as WasmParser;
 }
 
 function InitParse(ctx: WasmParser, data: string) {
@@ -127,10 +128,14 @@ function MapTreeRefs(tree: Wasm_SyntaxNode, str: string) {
 }
 
 export function Parse(ctx: WasmParser, data: string, refMapping = true) {
+	console.time("encode");
 	const heap = InitParse(ctx, data);
+	console.timeEnd("encode");
 
+	console.time("process");
 	const statusCode = ctx.exports.program();
-	const reach = Number(ctx.exports.reach);
+	console.timeEnd("process");
+	let reach = Number(ctx.exports.reach);
 	if (statusCode == 1) {
 		if (refMapping) {
 			return new ParseError(
@@ -149,15 +154,18 @@ export function Parse(ctx: WasmParser, data: string, refMapping = true) {
 				)
 			)
 		}
-
-
 	};
 
+	console.time("decode");
 	const root = Decode(ctx, heap);
-
 	if (refMapping) MapTreeRefs(root, data);
+	console.timeEnd("decode");
 
-	return { root, reach };
+	return {
+		root,
+		reachBytes: reach,
+		inputBytes: ctx.exports.inputLength.value
+	};
 }
 
 
