@@ -259,6 +259,20 @@ function CompileGather(ctx: CompilerContext, expr: Omit): number {
 					ctx.m.local.get(rewind, binaryen.i32),
 					ctx.m.i32.const(literal.bytes.byteLength)
 				),
+
+				// Heap position
+				ctx.m.global.set("heap", ctx.m.call("_roundWord", [
+					ctx.m.i32.add(
+						ctx.m.local.get(rewind, binaryen.i32),
+						ctx.m.i32.add(
+							ctx.m.i32.load(
+								OFFSET.COUNT, 4,
+								ctx.m.local.get(rewind, binaryen.i32)
+							),
+							ctx.m.i32.const(OFFSET.DATA)
+						)
+					)
+				], binaryen.i32))
 			]),
 		)
 	]);
