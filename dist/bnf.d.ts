@@ -74,7 +74,7 @@ export declare function constant (i: string): _Shared.ParseError | { root: _Shar
 export type Term_Frag = {
   type: "(...)", start: number, end: number, count: number, ref: null | _Shared.ReferenceRange,
   value: [
-    (Term_Escape | { type: "literal", value: string, start: number, end: number, count: number, ref: null | _Shared.ReferenceRange })
+    (Term_Escape | Term_Byte | { type: "literal", value: string, start: number, end: number, count: number, ref: null | _Shared.ReferenceRange })
   ]
 }
 export declare function frag (i: string): _Shared.ParseError | { root: _Shared.SyntaxNode & Term_Frag, reachBytes: number, inputBytes: number }

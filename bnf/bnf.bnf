@@ -8,7 +8,7 @@ name ::= ( letter ( letter | digit | "_" )* ) ;
 	hex   ::= "0"->"9" | "a"->"f" | "A"->"F" ;
 
 constant ::= %"\"" frag* %"\"" ;
-	frag   ::= escape | !"\""+ ;
+	frag   ::= escape | byte | !"\""+ ;
 	escape ::= %"\\" !"" ;
 	byte   ::= %"x" ...(hex hex) ;
 
