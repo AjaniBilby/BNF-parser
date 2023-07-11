@@ -36,6 +36,7 @@ if (myModule instanceof ParseError) {
 	console.error(myModule.toString());
 	process.exit(1);
 }
+writeFileSync("out.wasm", myModule.emitBinary());
 
 try {
 	// Optimize the module using default passes and levels
@@ -60,6 +61,7 @@ try {
 console.log(" ");
 console.time('total');
 
+wasm = Runner.Create(bin);
 const output = Runner.Parse(wasm, bnf, false);
 
 // const output = Runner.Parse(wasm, bnf, false);

@@ -4,6 +4,9 @@
 	"description": "Deterministic BNF compiler/parser",
 	"main": "./bin/index.js",
 	"type": "module",
+	"bin": {
+		"bnf-compile": "bin/cli.js"
+	},
 	"scripts": {
 		"test": "npm run build & node ./test",
 		"build": "run-s build:*",

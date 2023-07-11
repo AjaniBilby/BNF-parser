@@ -37,4 +37,4 @@ if (lang instanceof ParseError) {
 	process.exit(1);
 }
 
-writeFileSync("./dump.d.ts", types.Compile(lang));
+writeFileSync("./dump.d.ts", types.CompileTypes(lang));

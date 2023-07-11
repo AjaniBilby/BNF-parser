@@ -29,7 +29,7 @@ function CompileSequence(expr: Sequence): string {
 }
 
 function CompileSequenceOnce(expr: Sequence): string {
-	return "SyntaxNode & {\n  type: \"(...)\", value: [\n" +
+	return "_Shared.SyntaxNode & {\n  type: \"(...)\", value: [\n" +
 		expr.exprs
 			.map(x => CompileExpression(x))
 			.filter(x => x.length > 0)
@@ -64,7 +64,7 @@ function CompileOmit(): string {
 }
 
 function CompileGather(): string {
-	return "(SyntaxNode & { type: \"literal\", value: string })";
+	return "(_Shared.SyntaxNode & { type: \"literal\", value: string })";
 }
 
 
@@ -84,11 +84,11 @@ function CompileTermOnce(expr: Term): string {
 
 
 function CompileNot(): string {
-	return "(SyntaxNode & { type: \"literal\", value: string })";
+	return "(_Shared.SyntaxNode & { type: \"literal\", value: string })";
 }
 
 function CompileRange(): string {
-	return "(SyntaxNode & { type: \"literal\", value: string })";
+	return "(_Shared.SyntaxNode & { type: \"literal\", value: string })";
 }
 
 
@@ -108,7 +108,7 @@ function CompileLiteralOnce(expr: Literal): string {
 		(char) => "\\x" + char.charCodeAt(0).toString(16).padStart(2, "0")
 	);
 
-	return `(SyntaxNode & { type: "literal", value: "${safe}" })`;
+	return `(_Shared.SyntaxNode & { type: "literal", value: "${safe}" })`;
 }
 
 
@@ -117,7 +117,7 @@ function CompileLiteralOnce(expr: Literal): string {
 
 function CompileRepeat(innerType: string, repetitions: Count): string {
 	if (repetitions === "1") throw new Error("Don't compile repetitions for 1 to 1 repetition");
-	return `SyntaxNode & { type: "(...)${repetitions}", value: ${innerType}[] }`;
+	return `_Shared.SyntaxNode & { type: "(...)${repetitions}", value: ${innerType}[] }`;
 }
 
 
@@ -150,27 +150,14 @@ function CompileRule(rule: Rule) {
 		inner.exprs = [ rule.seq ];
 	}
 
-	return `export type Term_${rule.name[0].toUpperCase()}${rule.name.slice(1)} = ${CompileExpression(inner)}`;
+	const typeName = `Term_${rule.name[0].toUpperCase()}${rule.name.slice(1)}`;
+	return `export type ${typeName} = ${CompileExpression(inner)}\n` +
+		`export declare function ${rule.name} (): _Shared.ParserError | { root: ${typeName}, reachBytes: number, inputBytes: number }\n`;
 }
 
 
-export function Compile(lang: Parser) {
-	return `declare type Reference = {
-	start: number;
-	end  : number;
-}
-declare type ReferenceRange = {
-	start: Reference;
-	end  : Reference;
-}
-declare type SyntaxNode = {
-	type : string;
-	start: number;
-	end  : number;
-	count: number;
-	value: SyntaxNode[] | string;
-	ref: ReferenceRange | null;
-}\n`+ [...lang.terms.keys()]
+export function CompileTypes(lang: Parser) {
+	return `import * as _Shared from "./shared.js";\n`+ [...lang.terms.keys()]
 	.map(x => CompileRule(lang.terms.get(x) as any)) // hush Typescript it's okay
 	.join("\n");
 }

@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 4.0.0
+
+### Fixes:
+  - [] Count not working when applied directly to a range (i.e. `"a"->"z"+`)
+
 ## Version 3.1.6
 
 ### Patch:

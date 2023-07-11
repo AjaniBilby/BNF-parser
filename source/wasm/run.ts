@@ -1,5 +1,6 @@
-import { ParseError, Reference, ReferenceRange } from "../legacy/syntax.js";
+import { ParseError, Reference, ReferenceRange, SyntaxNode } from "../artifacts/shared.js";
 import { OFFSET } from "./layout.js";
+
 
 export type WasmParser = WebAssembly.Instance & {
 	exports: {
@@ -10,30 +11,6 @@ export type WasmParser = WebAssembly.Instance & {
 
 		_init: () => number;
 		program: () => number;
-	}
-}
-
-
-
-export class Wasm_SyntaxNode {
-	type : string;
-	start: number;
-	end  : number;
-	count: number;
-	value: Wasm_SyntaxNode[] | string;
-	ref: null | ReferenceRange
-
-	constructor (type: string, start: number, end: number, count: number) {
-		this.type  = type;
-		this.start = start;
-		this.end   = end;
-		this.count = count;
-		this.value = [];
-		this.ref = null;
-	}
-
-	static toString() {
-		return "class Wasm_SyntaxNode{constructor(type,start,end,count){this.type=type;this.start=start;this.end=end;this.count=count;this.value=[];this.ref=null;}}\n";
 	}
 }
 
@@ -88,7 +65,7 @@ function MapBytes2String(str: string, bytes: number, byteOffset: number = 0, ref
 	};
 }
 
-function MapTreeRefs(tree: Wasm_SyntaxNode, str: string) {
+function MapTreeRefs(tree: SyntaxNode, str: string) {
 	let stack  = [tree];
 	let byteOffset = 0;
 
@@ -126,13 +103,9 @@ function MapTreeRefs(tree: Wasm_SyntaxNode, str: string) {
 }
 
 export function Parse(ctx: WasmParser, data: string, refMapping = true, entry = "program") {
-	console.time("encode");
 	const heap = InitParse(ctx, data);
-	console.timeEnd("encode");
 
-	console.time("process");
 	const statusCode = (ctx.exports as any)[entry]() as number;
-	console.timeEnd("process");
 	let reach = Number(ctx.exports.reach);
 	if (statusCode == 1) {
 		if (refMapping) {
@@ -154,13 +127,9 @@ export function Parse(ctx: WasmParser, data: string, refMapping = true, entry = 
 		}
 	};
 
-	console.time("decode");
 	const root = Decode(ctx, heap, refMapping);
-	console.timeEnd("decode");
 	if (refMapping) {
-		console.time("sourceMap");
-		MapTreeRefs(root, data)
-		console.timeEnd("sourceMap");
+		MapTreeRefs(root, data);
 	};
 
 	return {
@@ -178,8 +147,8 @@ function Decode(ctx: WasmParser, heap: number, readBoundary = false) {
 
 	const decoder = new TextDecoder();
 
-	const stack: Wasm_SyntaxNode[] = [];
-	let root: null | Wasm_SyntaxNode = null;
+	const stack: SyntaxNode[] = [];
+	let root: null | SyntaxNode = null;
 	let offset = (heap / 4);
 
 	const typeCache = new Map<number, string>();
@@ -202,7 +171,7 @@ function Decode(ctx: WasmParser, heap: number, readBoundary = false) {
 			typeCache.set(type_ptr, type);
 		}
 
-		const next = new Wasm_SyntaxNode(
+		const next = new SyntaxNode(
 			type,
 			readBoundary ? memoryArray.at(offset + OFFSET.START/4) || 0 : -1,
 			readBoundary ? memoryArray.at(offset + OFFSET.END/4) || 0   : -1,
@@ -237,10 +206,10 @@ function Decode(ctx: WasmParser, heap: number, readBoundary = false) {
 
 
 export function toString() {
-	return Wasm_SyntaxNode.toString()+
-		InitParse.toString()+
-		MapBytes2String.toString()+
-		MapTreeRefs.toString()+
-		Parse.toString()+
-		Decode.toString();
+	return `import "./shared.js";\n` +
+		`const OFFSET = ${JSON.stringify(OFFSET)};` +
+		"\nexport "+MapBytes2String.toString()+
+		"\nexport "+MapTreeRefs.toString()+
+		"\nexport "+Parse.toString()+
+		"\nexport "+Decode.toString()+"\n\n";
 }
