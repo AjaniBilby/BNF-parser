@@ -70,8 +70,6 @@ for (const file of files) {
 		writeFileSync(`${root}/${name}.js`,
 			GenerateRunner(lang, module.emitBinary())
 		);
-
-		writeFileSync(`${root}/${name}.wasm`, module.emitBinary());
 	} catch (e) {
 		console.error(`Error while compiling ${file} to wasm`);
 		console.error(e);
@@ -80,8 +78,6 @@ for (const file of files) {
 
 	console.log(`  - Compiled: ${file}`);
 }
-
-console.log(82, dirname);
 
 writeFileSync(`${root}/shared.js`, wasm.Runner.toString());
 writeFileSync(`${root}/shared.d.ts`, readFileSync(`${dirname}/artifacts/shared.d.ts`, "utf8"));
