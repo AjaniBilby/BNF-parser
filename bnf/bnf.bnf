@@ -15,7 +15,7 @@ constant ::= %"\"" frag* %"\"" ;
 def ::= ...name %(w+ "::=" w*) expr %(w* ";" w*) ;
 
 expr ::= expr_arg %w* ( ...expr_infix? %w* expr_arg %w* )* ;
-	expr_arg ::= expr_prefix ( ...constant | expr_brackets | ...name ) ...expr_suffix? ;
+	expr_arg ::= expr_prefix ( constant | expr_brackets | ...name ) ...expr_suffix? ;
 	expr_prefix ::= ..."%"? ..."..."? ..."!"? ;
 	expr_infix  ::= "->" | "|" ;
 	expr_suffix ::= "*" | "?" | "+" ;
