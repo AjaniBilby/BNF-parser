@@ -152,7 +152,7 @@ function CompileRule(rule: Rule) {
 
 	const typeName = `Term_${rule.name[0].toUpperCase()}${rule.name.slice(1)}`;
 	return `export type ${typeName} = ${CompileExpression(inner)}\n` +
-		`export declare function ${rule.name} (): _Shared.ParserError | { root: ${typeName}, reachBytes: number, inputBytes: number }\n`;
+		`export declare function ${rule.name} (i: string): _Shared.ParseError | { root: ${typeName}, reachBytes: number, inputBytes: number }\n`;
 }
 
 
