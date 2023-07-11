@@ -2,9 +2,9 @@ import { CharRange, Count, Expression, Gather, Literal, Not, Omit, Parser, Rule,
 
 
 
-function CompileExpression(expr: Expression): string {
+function CompileExpression(expr: Expression, name?: string): string {
 	switch (expr.constructor.name) {
-		case "Sequence":  return CompileSequence(expr as Sequence);
+		case "Sequence":  return CompileSequence(expr as Sequence, name);
 		case "Select":    return CompileSelect  (expr as Select);
 		case "Literal":   return CompileLiteral (expr as Literal);
 		case "Term":      return CompileTerm    (expr as Term);
@@ -18,8 +18,8 @@ function CompileExpression(expr: Expression): string {
 }
 
 
-function CompileSequence(expr: Sequence): string {
-	const once = CompileSequenceOnce(expr);
+function CompileSequence(expr: Sequence, name?: string): string {
+	const once = CompileSequenceOnce(expr, name);
 
 	if (expr.count === "1") {
 		return once;
@@ -28,8 +28,8 @@ function CompileSequence(expr: Sequence): string {
 	}
 }
 
-function CompileSequenceOnce(expr: Sequence): string {
-	return '{\n  type: "(...)", start: number, end: number, count: number, ref: null | _Shared.ReferenceRange,\n  value: [\n' +
+function CompileSequenceOnce(expr: Sequence, name?: string): string {
+	return `{\n  type: "${name || "(...)"}", start: number, end: number, count: number, ref: null | _Shared.ReferenceRange,\n  value: [\n` +
 		expr.exprs
 			.map(x => CompileExpression(x))
 			.filter(x => x.length > 0)
@@ -117,6 +117,9 @@ function CompileLiteralOnce(expr: Literal): string {
 
 function CompileRepeat(innerType: string, repetitions: Count): string {
 	if (repetitions === "1") throw new Error("Don't compile repetitions for 1 to 1 repetition");
+
+	if (repetitions === "?") return TemplateNode(`"(...)"`, `[] | [${innerType}]`);
+
 	return TemplateNode(`"(...)"`, innerType+"[]");
 }
 
@@ -155,7 +158,7 @@ function CompileRule(rule: Rule) {
 	}
 
 	const typeName = `Term_${rule.name[0].toUpperCase()}${rule.name.slice(1)}`;
-	return `export type ${typeName} = ${CompileExpression(inner)}\n` +
+	return `export type ${typeName} = ${CompileExpression(inner, rule.name)}\n` +
 		`export declare function ${rule.name} (i: string): _Shared.ParseError | { root: _Shared.SyntaxNode & ${typeName}, reachBytes: number, inputBytes: number }\n`;
 }
 
