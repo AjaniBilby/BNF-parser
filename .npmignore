@@ -2,6 +2,7 @@
 
 !bin/*
 !bin/lib/*
+!dist/*
 !changelog.md
 !package.json
 !readme.md

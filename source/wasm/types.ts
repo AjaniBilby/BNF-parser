@@ -29,7 +29,7 @@ function CompileSequence(expr: Sequence): string {
 }
 
 function CompileSequenceOnce(expr: Sequence): string {
-	return "_Shared.SyntaxNode & {\n  type: \"(...)\", value: [\n" +
+	return '{\n  type: "(...)", start: number, end: number, count: number, ref: null | _Shared.ReferenceRange,\n  value: [\n' +
 		expr.exprs
 			.map(x => CompileExpression(x))
 			.filter(x => x.length > 0)
@@ -64,7 +64,7 @@ function CompileOmit(): string {
 }
 
 function CompileGather(): string {
-	return "(_Shared.SyntaxNode & { type: \"literal\", value: string })";
+	return TemplateNode(`"literal"`, "string");
 }
 
 
@@ -84,11 +84,11 @@ function CompileTermOnce(expr: Term): string {
 
 
 function CompileNot(): string {
-	return "(_Shared.SyntaxNode & { type: \"literal\", value: string })";
+	return TemplateNode(`"literal"`, "string");
 }
 
 function CompileRange(): string {
-	return "(_Shared.SyntaxNode & { type: \"literal\", value: string })";
+	return TemplateNode(`"literal"`, "string");
 }
 
 
@@ -108,7 +108,7 @@ function CompileLiteralOnce(expr: Literal): string {
 		(char) => "\\x" + char.charCodeAt(0).toString(16).padStart(2, "0")
 	);
 
-	return `(_Shared.SyntaxNode & { type: "literal", value: "${safe}" })`;
+	return TemplateNode(`"literal"`, `"${safe}"`);
 }
 
 
@@ -117,9 +117,13 @@ function CompileLiteralOnce(expr: Literal): string {
 
 function CompileRepeat(innerType: string, repetitions: Count): string {
 	if (repetitions === "1") throw new Error("Don't compile repetitions for 1 to 1 repetition");
-	return `_Shared.SyntaxNode & { type: "(...)${repetitions}", value: ${innerType}[] }`;
+	return TemplateNode(`"(...)"`, innerType+"[]");
 }
 
+
+function TemplateNode(type: string, value: string) {
+	return `{ type: ${type}, value: ${value}, start: number, end: number, count: number, ref: null | _Shared.ReferenceRange }`
+}
 
 
 
@@ -152,7 +156,7 @@ function CompileRule(rule: Rule) {
 
 	const typeName = `Term_${rule.name[0].toUpperCase()}${rule.name.slice(1)}`;
 	return `export type ${typeName} = ${CompileExpression(inner)}\n` +
-		`export declare function ${rule.name} (i: string): _Shared.ParseError | { root: ${typeName}, reachBytes: number, inputBytes: number }\n`;
+		`export declare function ${rule.name} (i: string): _Shared.ParseError | { root: _Shared.SyntaxNode & ${typeName}, reachBytes: number, inputBytes: number }\n`;
 }
 
 

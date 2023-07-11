@@ -208,6 +208,7 @@ function Decode(ctx: WasmParser, heap: number, readBoundary = false) {
 export function toString() {
 	return `import "./shared.js";\n` +
 		`const OFFSET = ${JSON.stringify(OFFSET)};` +
+		"\nexport "+InitParse.toString()+
 		"\nexport "+MapBytes2String.toString()+
 		"\nexport "+MapTreeRefs.toString()+
 		"\nexport "+Parse.toString()+

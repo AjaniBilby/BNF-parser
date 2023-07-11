@@ -9,9 +9,13 @@ import { legacy, wasm } from "./index.js";
 const dirname = join(process.argv[1], "../");
 
 function GenerateRunner(lang: legacy.Parser, wasm: Uint8Array) {
-	let out = 'import * as _Shared from "./shared.js";\n';
-	out += `const _module = new WebAssembly.Module(atob("${Buffer.from(wasm).toString('base64')}"));\n`
-	out += `const _ctx = new WebAssembly.Instance(_module, {js: {print_i32: console.log}});\n`;
+	let out = 'import * as _Shared from "./shared.js";\n' +
+		`const _ctx = new WebAssembly.Instance(\n` +
+		`  new WebAssembly.Module(\n` +
+		`    _Shared.DecodeBase64("${Buffer.from(wasm).toString('base64')}")\n`+
+		`  ),\n` +
+		`  {js: {print_i32: console.log}}\n`+
+		`);\n`;
 
 	for (const [name, rule] of lang.terms) {
 		out += `export function ${rule.name} (data, refMapping = true) {\n`;
