@@ -100,7 +100,7 @@ nav:
   - Artifacts:
     - artifact/index.md
     - Shared: artifact/shared.md
-    - Individual: artifact/bnf.md
+    - Individual: artifact/individual.md
   - Legacy:
     - legacy/index.md
     - Introduction: legacy/introduction.md
