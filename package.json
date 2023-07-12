@@ -6,7 +6,7 @@
 	"main": "./bin/index.js",
 	"type": "module",
 	"bin": {
-		"bnf-compile": "bin/cli.js"
+		"bnf-parser": "bin/cli.js"
 	},
 	"scripts": {
 		"test": "node ./test/index.js",
