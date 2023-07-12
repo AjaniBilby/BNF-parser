@@ -25,7 +25,7 @@ function GenerateRunner(lang: legacy.Parser, wasm: Uint8Array) {
 		`);\n`;
 
 	for (const [name, rule] of lang.terms) {
-		out += `export function ${rule.name} (data, refMapping = true) {\n`;
+		out += `export function Parse_${rule.name[0].toUpperCase()}${rule.name.slice(1)} (data, refMapping = true) {\n`;
 		out += `  return _Shared.Parse(_ctx, data, refMapping, "${name}");\n`;
 		out += `}\n`;
 	}
@@ -35,7 +35,8 @@ function GenerateRunner(lang: legacy.Parser, wasm: Uint8Array) {
 
 
 const root = process.argv[2] || "./";
-const root_dir = dirname(root);
+const isFile = statSync(root).isFile();
+const root_dir = isFile ? dirname(root) : root.slice(0, -1);
 
 if (!existsSync(root)) {
 	console.error(`Unknown path ${root}`);
@@ -43,10 +44,10 @@ if (!existsSync(root)) {
 }
 
 const files = (
-	statSync(root).isFile() ?
+	isFile ?
 		[root] :
 		readdirSync(root)
-			.map(file => `${root}/${file}`)
+			.map(file => `${root}${file}`)
 	).filter(x => extname(x) === ".bnf");
 
 if (files.length === 0) {
