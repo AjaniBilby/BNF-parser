@@ -68,7 +68,7 @@ access_static  ::= %("." ) ...name %w* ;
 access_dynamic ::= %("[" w* ) call_args %( w* "]" ) %w* ;
 
 access_template ::= %( "#[" w* ) template_args %( w* "]" ) %w* ;
-	access_template_args ::= template_arg %w* ( %( "," w* ) template_arg %w* )* %","? ;
+	access_template_args ::= access_template_arg %w* ( %( "," w* ) access_template_arg %w* )* %","? ;
 	access_template_arg  ::= constant | data_type ;
 
 

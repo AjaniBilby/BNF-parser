@@ -2,14 +2,10 @@ import { execSync } from "child_process";
 import * as path from "path";
 
 const cwd = path.dirname(process.argv[1]);
-
 let tests = {
-	// "BNF compilations": ['npx bnf-compile ./bnfs/', { cwd }],
-	"Double Parse": ['node double-parse.js', { cwd }],
-	// "Uniview": ['ts-node run.ts', {
-	// 	cwd: path.join(__dirname, "/uv")
-	// }],
-	// "Sequelize": ['ts-node index.ts', { cwd: path.join(cwd, "./sequelize") }]
+	"BNF compilations": ['npx bnf-compile ./bnfs/', { cwd }],
+	"Double Parse":     ['node double-parse.js',    { cwd }],
+	"Uniview Parse":    ['node ./uv/index.js',      { cwd }],
 };
 
 let failed = false;

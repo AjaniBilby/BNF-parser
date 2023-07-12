@@ -3,29 +3,29 @@
 
 # Entry points
 ## Used when parsing the attribute
-attribute ::= ( ...association | ...identifier ) jsonPath? castOrModifiers?;
+attribute ::= ( ...association | ...identifier ) jsonpath? castormodifiers?;
 
 ## Used when parsing a nested JSON path used inside of an attribute
 ## Difference with "attribute" is in the first part. Instead of accepting:
 ##  $association.attribute$ & attribute
 ## It accepts:
 ##  key, "quotedKey", and [0] (index access)
-partialJsonPath ::= ( ...indexAccess | ...key ) jsonPath? castOrModifiers? ;
+partialjsonpath ::= ( ...indexaccess | ...key ) jsonpath? castormodifiers? ;
 
 # Internals
 identifier ::= ( "A"->"Z" | "a"->"z" | digit | "_" )+ ;
 digit ::= "0"->"9" ;
 number ::= ...digit+ ;
 association ::= %"$" identifier ("." identifier)* %"$" ;
-jsonPath ::= ( ...indexAccess | ...keyAccess )+ ;
-indexAccess ::= %"[" number %"]" ;
+jsonpath ::= ( ...indexaccess | ...keyaccess )+ ;
+indexaccess ::= %"[" number %"]" ;
 
-keyAccess ::= %"." key ;
-	nonEmptyString ::= ...(%"\\" (anyExceptQuoteOrBackslash | escapedCharacter)+ %"\\") ;
-	key ::= nonEmptyString | ( "A"->"Z" | "a"->"z" | digit | "_" | "-" )+ ;
-escapedCharacter ::= %"\\\\" ( "\\" | "\\\\" );
+keyaccess ::= %"." key ;
+	nonemptystring ::= ...(%"\\" (anyexceptquoteorbackslash | escapedcharacter)+ %"\\") ;
+	key ::= nonemptystring | ( "A"->"Z" | "a"->"z" | digit | "_" | "-" )+ ;
+escapedcharacter ::= %"\\\\" ( "\\" | "\\\\" );
 any ::= !"" ;
-anyExceptQuoteOrBackslash ::= !("\\" | "\\\\");
-castOrModifiers ::= (...cast | ...modifier)+;
+anyexceptquoteorbackslash ::= !("\\" | "\\\\");
+castormodifiers ::= (...cast | ...modifier)+;
 cast ::= %"::" identifier ;
 modifier ::= %":" identifier ;
