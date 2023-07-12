@@ -10,7 +10,7 @@
       
       
       
-        <link rel="canonical" href="https://bnf-parser.ajanibilby.me/artifact/bnf/">
+        <link rel="canonical" href="https://bnf-parser.ajanibilby.me/artifact/individual/">
       
       
         <link rel="prev" href="../shared/">
@@ -109,7 +109,7 @@
     <meta property="og:type" content="website" />
     <meta property="og:meta_title" content="" />
     <meta property="og:description" content="BNF-Parser docs" />
-    <meta property="og:url" content="https://bnf-parser.ajanibilby.me/artifact/bnf/" />
+    <meta property="og:url" content="https://bnf-parser.ajanibilby.me/artifact/individual/" />
     <!-- <meta property="og:image" content="<url>" /> -->
     <!-- <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
@@ -529,26 +529,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#functions" class="md-nav__link">
-    Functions
-  </a>
-  
-    <nav class="md-nav" aria-label="Functions">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#argument-mapsource" class="md-nav__link">
-    Argument mapSource
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#types" class="md-nav__link">
     Types
   </a>
@@ -559,6 +539,26 @@
           <li class="md-nav__item">
   <a href="#nodes" class="md-nav__link">
     Nodes
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#functions" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#argument-mapsource" class="md-nav__link">
+    Argument mapSource
   </a>
   
 </li>
@@ -723,26 +723,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#functions" class="md-nav__link">
-    Functions
-  </a>
-  
-    <nav class="md-nav" aria-label="Functions">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#argument-mapsource" class="md-nav__link">
-    Argument mapSource
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#types" class="md-nav__link">
     Types
   </a>
@@ -753,6 +733,26 @@
           <li class="md-nav__item">
   <a href="#nodes" class="md-nav__link">
     Nodes
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#functions" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#argument-mapsource" class="md-nav__link">
+    Argument mapSource
   </a>
   
 </li>
@@ -781,26 +781,12 @@
 
 
 <h1 id="using-the-bnf-generated-artifact">Using the BNF generated Artifact</h1>
-<h2 id="functions">Functions</h2>
-<p>For every term in your BNF there will be a function with the following syntax.
-When you supply this function with a string it will attempt to parse the string starting from the specific term in the BNF.</p>
-<p>This means that you could actually group multiple different parsers into one artifact by including them all in the same BNF, then you just call the specific entry points for each one.</p>
-<div class="highlight"><pre><span></span><code><span class="kd">function</span><span class="w"> </span><span class="nx">program</span><span class="p">(</span><span class="nx">input</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">mapSource</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="nx">root</span><span class="w">       </span><span class="o">:</span><span class="w"> </span><span class="kt">Term_Program</span><span class="p">;</span><span class="w"> </span><span class="c1">// the root node of the syntax tree</span>
-<span class="w">  </span><span class="nx">reachBytes</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span><span class="w">       </span><span class="c1">// how many bytes where consumed</span>
-<span class="w">  </span><span class="nx">isPartial</span><span class="w">  </span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w">      </span><span class="c1">// did only part of the input parse?</span>
-<span class="p">}</span>
-</code></pre></div>
-<h3 id="argument-mapsource">Argument <code>mapSource</code></h3>
-<p>This is enabled by default, however if it is not enabled the <code>.ref</code> attribute will be left as <code>null</code>,
-and byte to javascript string indices will not be calculated which can save time,
-especially if you don't care about where the error occurred, and instead just on the syntax tree result.</p>
 <h2 id="types">Types</h2>
 <p>For every term in the BNF node there will also be a type, that type name will start with <code>Term_</code>;
 with the first letter of the term name capitalized. This will be a type representing the syntax structure at that node.</p>
 <p><strong>Examples</strong>
-<div class="highlight"><pre><span></span><code>program -&gt; Term_Program
-name -&gt; Term_Name
+<div class="highlight"><pre><span></span><code>program  -&gt; Term_Program
+name     -&gt; Term_Name
 expr_arg -&gt; Term_Expr_arg
 </code></pre></div></p>
 <h3 id="nodes">Nodes</h3>
@@ -813,6 +799,20 @@ expr_arg -&gt; Term_Expr_arg
 <span class="w">  </span><span class="nx">ref</span><span class="w">   </span><span class="o">:</span><span class="w"> </span><span class="kt">null</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nx">ReferenceRange</span><span class="w">  </span><span class="c1">// see shared artifact</span>
 <span class="p">}</span>
 </code></pre></div></p>
+<h2 id="functions">Functions</h2>
+<p>For every term in your BNF there will be a function with the following syntax.
+When you supply this function with a string it will attempt to parse the string starting from the specific term in the BNF.</p>
+<p>This means that you could actually group multiple different parsers into one artifact by including them all in the same BNF, then you just call the specific entry points for each one.</p>
+<div class="highlight"><pre><span></span><code><span class="kd">function</span><span class="w"> </span><span class="nx">Parse_Program</span><span class="p">(</span><span class="nx">input</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">mapSource</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">root</span><span class="w">       </span><span class="o">:</span><span class="w"> </span><span class="kt">Term_Program</span><span class="p">;</span><span class="w"> </span><span class="c1">// the root node of the syntax tree</span>
+<span class="w">  </span><span class="nx">reachBytes</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span><span class="w">       </span><span class="c1">// how many bytes where consumed</span>
+<span class="w">  </span><span class="nx">isPartial</span><span class="w">  </span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">;</span><span class="w">      </span><span class="c1">// did only part of the input parse?</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="argument-mapsource">Argument <code>mapSource</code></h3>
+<p>This is enabled by default, however if it is not enabled the <code>.ref</code> attribute will be left as <code>null</code>,
+and byte to javascript string indices will not be calculated which can save time,
+especially if you don't care about where the error occurred, and instead just on the syntax tree result.</p>
 
   <hr>
 <div class="md-source-file">
