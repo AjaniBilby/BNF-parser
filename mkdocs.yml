@@ -3,7 +3,7 @@ site_url: https://bnf-parser.ajanibilby.me/
 site_description: BNF-Parser docs
 repo_name: bnf-parser
 repo_url: https://github.com/ajanibilby/bnf-parser
-edit_uri: https://github.com/ajanibilby/bnf-parser/tree/master/docs/source
+edit_uri: https://github.com/ajanibilby/bnf-parser/tree/main/docs/source
 theme:
   name: material
   # favicon: /icon/unicycle.png
