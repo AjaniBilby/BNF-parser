@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+         <loc>https://bnf-parser.ajanibilby.me/</loc>
+         <lastmod>2023-07-12</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bnf-parser.ajanibilby.me/legacy/</loc>
+         <lastmod>2023-07-12</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+</urlset>
