@@ -13,9 +13,12 @@ import * as bnf from "../dist/bnf.js";       // pre-compiled JS with WASM embedd
 
 
 const dirname = join(process.argv[1], "../");
+const isCommonJS = process.argv.includes("--commonjs");
 
 function GenerateRunner(lang: legacy.Parser, wasm: Uint8Array) {
-	let out = 'import * as _Shared from "./shared.js";\n' +
+	let out = isCommonJS ?
+			`const _Shared = require("./shared.js");\n` :
+			'import * as _Shared from "./shared.js";\n' +
 		`const _ctx = new WebAssembly.Instance(\n` +
 		`  new WebAssembly.Module(\n` +
 		`    _Shared.DecodeBase64("${Buffer.from(wasm).toString('base64')}")\n`+
