@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 "use strict";
 
-import { readdirSync, existsSync, readFileSync, writeFileSync, appendFileSync } from "fs";
-import { basename, extname, join } from "path";
+import { readdirSync, existsSync, readFileSync, writeFileSync, appendFileSync, statSync } from "fs";
+import { basename, extname, join, dirname } from "path";
 import { legacy, wasm } from "./index.js";
 
 import { ParseError } from "./artifacts/shared.js";
@@ -12,7 +12,7 @@ import * as _Shared from "../dist/shared.js"; // things shared between multiple 
 import * as bnf from "../dist/bnf.js";       // pre-compiled JS with WASM embedded
 
 
-const dirname = join(process.argv[1], "../");
+const script = join(process.argv[1], "../");
 const isCommonJS = process.argv.includes("--commonjs");
 
 function GenerateRunner(lang: legacy.Parser, wasm: Uint8Array) {
@@ -35,14 +35,19 @@ function GenerateRunner(lang: legacy.Parser, wasm: Uint8Array) {
 
 
 const root = process.argv[2] || "./";
+const root_dir = dirname(root);
 
 if (!existsSync(root)) {
 	console.error(`Unknown path ${root}`);
 	process.exit(1);
 }
 
-const files = readdirSync(root)
-	.filter(x => extname(x) === ".bnf");
+const files = (
+	statSync(root).isFile() ?
+		[root] :
+		readdirSync(root)
+			.map(file => `${root}/${file}`)
+	).filter(x => extname(x) === ".bnf");
 
 if (files.length === 0) {
 	console.error(`No BNF files found in ${root}`);
@@ -54,12 +59,12 @@ console.log(`Found: ${files.join(', ')}`)
 let failure = false;
 for (const file of files) {
 	const name = basename(file, '.bnf');
-	const data = readFileSync(`${root}/${file}`, 'utf8');
+	const data = readFileSync(file, 'utf8');
 
 	// Ingest input BNF
 	const syntax = bnf.program(data);
 	if (syntax instanceof _Shared.ParseError) {
-		console.error(`Failed to parse ${file}`);
+		console.error(`Failed to parse ${name}`);
 		console.error(syntax.toString());
 		console.error("");
 		failure = true;
@@ -89,16 +94,16 @@ for (const file of files) {
 
 	// Generate type headers
 	const types = wasm.CompileTypes(lang);
-	writeFileSync(`${root}/${name}.d.ts`, types);
+	writeFileSync(`${root_dir}/${name}.d.ts`, types);
 
 	// Generate web assembly
 	try {
 		const module = wasm.GenerateWasm(lang);
 		if (process.argv.includes("--emit-wat"))
-			writeFileSync(`${root}/${name}.wat`, module.emitText());
+			writeFileSync(`${root_dir}/${name}.wat`, module.emitText());
 
 		// Generate JS runner
-		writeFileSync(`${root}/${name}.js`,
+		writeFileSync(`${root_dir}/${name}.js`,
 			GenerateRunner(lang, module.emitBinary())
 		);
 	} catch (e) {
@@ -110,8 +115,8 @@ for (const file of files) {
 	console.log(`  - Compiled: ${file}`);
 }
 
-writeFileSync(`${root}/shared.js`, wasm.Runner.toString());
-writeFileSync(`${root}/shared.d.ts`, readFileSync(`${dirname}/artifacts/shared.d.ts`, "utf8"));
-appendFileSync(`${root}/shared.js`, readFileSync(`${dirname}/artifacts/shared.js`, "utf8"));
+writeFileSync(`${root_dir}/shared.js`, wasm.Runner.toString());
+writeFileSync(`${root_dir}/shared.d.ts`, readFileSync(`${script}/artifacts/shared.d.ts`, "utf8"));
+appendFileSync(`${root_dir}/shared.js`, readFileSync(`${script}/artifacts/shared.js`, "utf8"));
 
 if (failure) process.exit(1);
