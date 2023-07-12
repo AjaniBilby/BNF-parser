@@ -3,7 +3,7 @@ import * as path from "path";
 
 const cwd = path.dirname(process.argv[1]);
 let tests = {
-	"BNF compilations": ['npx bnf-parser ./bnfs/', { cwd }],
+	"BNF compilations": ['node ../bin/cli.js ./bnfs/', { cwd }],
 	"Double Parse":     ['node double-parse.js',    { cwd }],
 	// "Uniview Parse":    ['node ./uv/index.js',      { cwd }],
 };
