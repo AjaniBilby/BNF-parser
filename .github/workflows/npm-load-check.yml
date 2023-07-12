@@ -2,7 +2,7 @@ name: Reflection Test (via NPM)
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
   run-linux:
