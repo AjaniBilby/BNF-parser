@@ -2,7 +2,7 @@ program ::= %w* def+ ;
 w ::= comment | " " | "\t" | "\n" | "\r" ;
 	comment ::= "#" !"\n"* "\n" ;
 
-name ::= ( letter ( letter | digit | "_" )* ) ;
+name ::= letter ( letter | digit | "_" )* ;
 	letter ::= "a"->"z" | "A"->"Z" ;
 	digit ::= "0"->"9" ;
 	hex   ::= "0"->"9" | "a"->"f" | "A"->"F" ;
