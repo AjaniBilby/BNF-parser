@@ -20,8 +20,8 @@ const name: string = block.value[0]; // typescript knows this **will** be a stri
 
 ## Documentation
 
-See [https://bnf-parser.ajanibilby.com/]
+See [https://bnf-parser.ajanibilby.com/](https://bnf-parser.ajanibilby.com/)
 
 ## API
 
-See [https://bnf-parser.ajanibilby.com/api]
+See [https://bnf-parser.ajanibilby.com/api](https://bnf-parser.ajanibilby.com/)
