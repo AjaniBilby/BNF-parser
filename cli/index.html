@@ -10,21 +10,27 @@
       
       
       
+        <link rel="canonical" href="https://bnf-parser.ajanibilby.me/cli/">
       
       
-      <link rel="icon" href="/assets/images/favicon.png">
+        <link rel="prev" href="../setup/">
+      
+      
+        <link rel="next" href="../artifact/">
+      
+      <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.18">
     
     
       
-        <title>BNF Parser Docs</title>
+        <title>Getting Started - BNF Parser Docs</title>
       
     
     
-      <link rel="stylesheet" href="/assets/stylesheets/main.26e3688c.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.26e3688c.min.css">
       
         
-        <link rel="stylesheet" href="/assets/stylesheets/palette.ecc896b0.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ecc896b0.min.css">
       
       
   
@@ -81,9 +87,9 @@
       
     
     
-      <link rel="stylesheet" href="/styles/extra.css">
+      <link rel="stylesheet" href="../styles/extra.css">
     
-    <script>__md_scope=new URL("/",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -94,6 +100,8 @@
 
     
     
+      
+    
 
     
     
@@ -101,7 +109,7 @@
     <meta property="og:type" content="website" />
     <meta property="og:meta_title" content="" />
     <meta property="og:description" content="BNF-Parser docs" />
-    <meta property="og:url" content="" />
+    <meta property="og:url" content="https://bnf-parser.ajanibilby.me/cli/" />
     <!-- <meta property="og:image" content="<url>" /> -->
     <!-- <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
@@ -128,6 +136,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#cli-usage" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -138,7 +151,7 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="/." title="BNF Parser Docs" class="md-header__button md-logo" aria-label="BNF Parser Docs" data-md-component="logo">
+    <a href=".." title="BNF Parser Docs" class="md-header__button md-logo" aria-label="BNF Parser Docs" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17.8 20c-.4 1.2-1.5 2-2.8 2H5c-1.7 0-3-1.3-3-3v-1h12.2c.4 1.2 1.5 2 2.8 2h.8M19 2c1.7 0 3 1.3 3 3v1h-2V5c0-.6-.4-1-1-1s-1 .4-1 1v13h-1c-.6 0-1-.4-1-1v-1H5V5c0-1.7 1.3-3 3-3h11M8 6v2h7V6H8m0 4v2h6v-2H8Z"/></svg>
@@ -157,7 +170,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              
+              Getting Started
             
           </span>
         </div>
@@ -260,7 +273,7 @@
 
 
   <li class="md-tabs__item">
-    <a href="/." class="md-tabs__link">
+    <a href=".." class="md-tabs__link">
       Home
     </a>
   </li>
@@ -272,7 +285,7 @@
 
 
   <li class="md-tabs__item">
-    <a href="/setup/" class="md-tabs__link">
+    <a href="../setup/" class="md-tabs__link">
       Getting Started
     </a>
   </li>
@@ -281,10 +294,12 @@
         
   
   
+    
+  
 
 
   <li class="md-tabs__item">
-    <a href="/cli/" class="md-tabs__link">
+    <a href="./" class="md-tabs__link md-tabs__link--active">
       CLI
     </a>
   </li>
@@ -299,7 +314,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="/artifact/" class="md-tabs__link">
+      <a href="../artifact/" class="md-tabs__link">
         Artifacts
       </a>
     </li>
@@ -315,7 +330,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="/legacy/" class="md-tabs__link">
+      <a href="../legacy/" class="md-tabs__link">
         Legacy
       </a>
     </li>
@@ -333,7 +348,9 @@
           
             
               
-              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" hidden>
                 <div class="md-sidebar__scrollwrap">
                   <div class="md-sidebar__inner">
                     
@@ -343,7 +360,7 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="/." title="BNF Parser Docs" class="md-nav__button md-logo" aria-label="BNF Parser Docs" data-md-component="logo">
+    <a href=".." title="BNF Parser Docs" class="md-nav__button md-logo" aria-label="BNF Parser Docs" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17.8 20c-.4 1.2-1.5 2-2.8 2H5c-1.7 0-3-1.3-3-3v-1h12.2c.4 1.2 1.5 2 2.8 2h.8M19 2c1.7 0 3 1.3 3 3v1h-2V5c0-.6-.4-1-1-1s-1 .4-1 1v13h-1c-.6 0-1-.4-1-1v-1H5V5c0-1.7 1.3-3 3-3h11M8 6v2h7V6H8m0 4v2h6v-2H8Z"/></svg>
@@ -374,7 +391,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/." class="md-nav__link">
+      <a href=".." class="md-nav__link">
         Home
       </a>
     </li>
@@ -389,7 +406,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/setup/" class="md-nav__link">
+      <a href="../setup/" class="md-nav__link">
         Getting Started
       </a>
     </li>
@@ -402,11 +419,21 @@
 
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="/cli/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         CLI
       </a>
+      
     </li>
   
 
@@ -441,7 +468,7 @@
         
         
         <div class="md-nav__link md-nav__link--index ">
-          <a href="/artifact/">Artifacts</a>
+          <a href="../artifact/">Artifacts</a>
           
             <label for="__nav_4">
               <span class="md-nav__icon md-icon"></span>
@@ -464,7 +491,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/artifact/shared/" class="md-nav__link">
+      <a href="../artifact/shared/" class="md-nav__link">
         Shared
       </a>
     </li>
@@ -478,7 +505,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/artifact/bnf/" class="md-nav__link">
+      <a href="../artifact/bnf/" class="md-nav__link">
         Individual
       </a>
     </li>
@@ -526,7 +553,7 @@
         
         
         <div class="md-nav__link md-nav__link--index ">
-          <a href="/legacy/">Legacy</a>
+          <a href="../legacy/">Legacy</a>
           
             <label for="__nav_5">
               <span class="md-nav__icon md-icon"></span>
@@ -549,7 +576,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/legacy/introduction/" class="md-nav__link">
+      <a href="../legacy/introduction/" class="md-nav__link">
         Introduction
       </a>
     </li>
@@ -563,7 +590,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/legacy/syntax/" class="md-nav__link">
+      <a href="../legacy/syntax/" class="md-nav__link">
         Syntax
       </a>
     </li>
@@ -577,7 +604,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/legacy/tree-structure/" class="md-nav__link">
+      <a href="../legacy/tree-structure/" class="md-nav__link">
         Tree Structure
       </a>
     </li>
@@ -591,7 +618,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/legacy/api/" class="md-nav__link">
+      <a href="../legacy/api/" class="md-nav__link">
         API
       </a>
     </li>
@@ -613,6 +640,8 @@
             
             
               
+                
+              
               <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
                 <div class="md-sidebar__scrollwrap">
                   <div class="md-sidebar__inner">
@@ -621,6 +650,8 @@
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
+  
+    
   
   
 </nav>
@@ -633,8 +664,37 @@
             <div class="md-content" data-md-component="content">
               <article class="md-content__inner md-typeset">
                 
-  <h1>404 - Not found</h1>
+                  
 
+  
+  
+
+
+<h1 id="cli-usage">CLI Usage</h1>
+<div class="highlight"><pre><span></span><code>npx<span class="w"> </span>bnf-compile<span class="w"> </span>./bnf/
+</code></pre></div>
+<p>Once you have <code>bnf-parser</code> installed simply run <code>npx bnf-compile ./bnf/</code> where <code>./bnf/</code> is actually the folder where your bnfs are stored.
+After running this you will notice multiple artifacts will be generated which is what you will then <code>import</code>/<code>require</code> into your project.</p>
+<p>Please note that by default this command will generate javascript modules using the <code>import</code>/<code>export</code> syntax, if you are running an environment which <strong>does not support</strong> <code>import</code>/<code>export</code>, the CLI will not currently be able export artifacts useable in your project.</p>
+
+  <hr>
+<div class="md-source-file">
+  <small>
+    
+      Last update:
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">July 12, 2023</span>
+      
+    
+  </small>
+</div>
+
+
+
+  
+
+
+
+                
               </article>
             </div>
           
@@ -650,6 +710,44 @@
       
         <footer class="md-footer">
   
+    
+      
+        
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../setup/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Getting Started" rel="prev">
+            <div class="md-footer__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Getting Started
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../artifact/" class="md-footer__link md-footer__link--next" aria-label="Next: Artifacts" rel="next">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Artifacts
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
     
   
   <div class="md-footer-meta md-typeset">
@@ -703,10 +801,10 @@
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "/", "features": ["search.suggest", "header.autohide", "content.code.annotate", "navigation.tabs", "navigation.indexes", "navigation.instant", "navigation.sections", "navigation.top", "navigation.footer"], "search": "/assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["search.suggest", "header.autohide", "content.code.annotate", "navigation.tabs", "navigation.indexes", "navigation.instant", "navigation.sections", "navigation.top", "navigation.footer"], "search": "../assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="/assets/javascripts/bundle.220ee61c.min.js"></script>
+      <script src="../assets/javascripts/bundle.220ee61c.min.js"></script>
       
     
   </body>

@@ -6,7 +6,52 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://bnf-parser.ajanibilby.me/cli/</loc>
+         <lastmod>2023-07-12</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bnf-parser.ajanibilby.me/setup/</loc>
+         <lastmod>2023-07-12</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bnf-parser.ajanibilby.me/artifact/</loc>
+         <lastmod>2023-07-12</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bnf-parser.ajanibilby.me/artifact/bnf/</loc>
+         <lastmod>2023-07-12</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bnf-parser.ajanibilby.me/artifact/shared/</loc>
+         <lastmod>2023-07-12</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://bnf-parser.ajanibilby.me/legacy/</loc>
+         <lastmod>2023-07-12</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bnf-parser.ajanibilby.me/legacy/api/</loc>
+         <lastmod>2023-07-12</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bnf-parser.ajanibilby.me/legacy/introduction/</loc>
+         <lastmod>2023-07-12</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bnf-parser.ajanibilby.me/legacy/syntax/</loc>
+         <lastmod>2023-07-12</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bnf-parser.ajanibilby.me/legacy/tree-structure/</loc>
          <lastmod>2023-07-12</lastmod>
          <changefreq>daily</changefreq>
     </url>

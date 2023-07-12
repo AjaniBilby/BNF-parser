@@ -10,21 +10,27 @@
       
       
       
+        <link rel="canonical" href="https://bnf-parser.ajanibilby.me/legacy/tree-structure/">
       
       
-      <link rel="icon" href="/assets/images/favicon.png">
+        <link rel="prev" href="../syntax/">
+      
+      
+        <link rel="next" href="../api/">
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.18">
     
     
       
-        <title>BNF Parser Docs</title>
+        <title>Legacy Syntax Tree Structure - BNF Parser Docs</title>
       
     
     
-      <link rel="stylesheet" href="/assets/stylesheets/main.26e3688c.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.26e3688c.min.css">
       
         
-        <link rel="stylesheet" href="/assets/stylesheets/palette.ecc896b0.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ecc896b0.min.css">
       
       
   
@@ -81,9 +87,9 @@
       
     
     
-      <link rel="stylesheet" href="/styles/extra.css">
+      <link rel="stylesheet" href="../../styles/extra.css">
     
-    <script>__md_scope=new URL("/",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -94,6 +100,8 @@
 
     
     
+      
+    
 
     
     
@@ -101,7 +109,7 @@
     <meta property="og:type" content="website" />
     <meta property="og:meta_title" content="" />
     <meta property="og:description" content="BNF-Parser docs" />
-    <meta property="og:url" content="" />
+    <meta property="og:url" content="https://bnf-parser.ajanibilby.me/legacy/tree-structure/" />
     <!-- <meta property="og:image" content="<url>" /> -->
     <!-- <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
@@ -128,6 +136,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#legacy-syntax-tree-structure" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -138,7 +151,7 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="/." title="BNF Parser Docs" class="md-header__button md-logo" aria-label="BNF Parser Docs" data-md-component="logo">
+    <a href="../.." title="BNF Parser Docs" class="md-header__button md-logo" aria-label="BNF Parser Docs" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17.8 20c-.4 1.2-1.5 2-2.8 2H5c-1.7 0-3-1.3-3-3v-1h12.2c.4 1.2 1.5 2 2.8 2h.8M19 2c1.7 0 3 1.3 3 3v1h-2V5c0-.6-.4-1-1-1s-1 .4-1 1v13h-1c-.6 0-1-.4-1-1v-1H5V5c0-1.7 1.3-3 3-3h11M8 6v2h7V6H8m0 4v2h6v-2H8Z"/></svg>
@@ -157,7 +170,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              
+              Legacy Syntax Tree Structure
             
           </span>
         </div>
@@ -260,7 +273,7 @@
 
 
   <li class="md-tabs__item">
-    <a href="/." class="md-tabs__link">
+    <a href="../.." class="md-tabs__link">
       Home
     </a>
   </li>
@@ -272,7 +285,7 @@
 
 
   <li class="md-tabs__item">
-    <a href="/setup/" class="md-tabs__link">
+    <a href="../../setup/" class="md-tabs__link">
       Getting Started
     </a>
   </li>
@@ -284,7 +297,7 @@
 
 
   <li class="md-tabs__item">
-    <a href="/cli/" class="md-tabs__link">
+    <a href="../../cli/" class="md-tabs__link">
       CLI
     </a>
   </li>
@@ -299,7 +312,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="/artifact/" class="md-tabs__link">
+      <a href="../../artifact/" class="md-tabs__link">
         Artifacts
       </a>
     </li>
@@ -309,13 +322,15 @@
         
   
   
+    
+  
 
 
   
   
   
     <li class="md-tabs__item">
-      <a href="/legacy/" class="md-tabs__link">
+      <a href="../" class="md-tabs__link md-tabs__link--active">
         Legacy
       </a>
     </li>
@@ -343,7 +358,7 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="/." title="BNF Parser Docs" class="md-nav__button md-logo" aria-label="BNF Parser Docs" data-md-component="logo">
+    <a href="../.." title="BNF Parser Docs" class="md-nav__button md-logo" aria-label="BNF Parser Docs" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17.8 20c-.4 1.2-1.5 2-2.8 2H5c-1.7 0-3-1.3-3-3v-1h12.2c.4 1.2 1.5 2 2.8 2h.8M19 2c1.7 0 3 1.3 3 3v1h-2V5c0-.6-.4-1-1-1s-1 .4-1 1v13h-1c-.6 0-1-.4-1-1v-1H5V5c0-1.7 1.3-3 3-3h11M8 6v2h7V6H8m0 4v2h6v-2H8Z"/></svg>
@@ -374,7 +389,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/." class="md-nav__link">
+      <a href="../.." class="md-nav__link">
         Home
       </a>
     </li>
@@ -389,7 +404,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/setup/" class="md-nav__link">
+      <a href="../../setup/" class="md-nav__link">
         Getting Started
       </a>
     </li>
@@ -404,7 +419,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/cli/" class="md-nav__link">
+      <a href="../../cli/" class="md-nav__link">
         CLI
       </a>
     </li>
@@ -441,7 +456,7 @@
         
         
         <div class="md-nav__link md-nav__link--index ">
-          <a href="/artifact/">Artifacts</a>
+          <a href="../../artifact/">Artifacts</a>
           
             <label for="__nav_4">
               <span class="md-nav__icon md-icon"></span>
@@ -464,7 +479,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/artifact/shared/" class="md-nav__link">
+      <a href="../../artifact/shared/" class="md-nav__link">
         Shared
       </a>
     </li>
@@ -478,7 +493,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/artifact/bnf/" class="md-nav__link">
+      <a href="../../artifact/bnf/" class="md-nav__link">
         Individual
       </a>
     </li>
@@ -498,14 +513,16 @@
 
   
   
+    
+  
   
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
       
       
-      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+      <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
       
       
         
@@ -526,7 +543,7 @@
         
         
         <div class="md-nav__link md-nav__link--index ">
-          <a href="/legacy/">Legacy</a>
+          <a href="../">Legacy</a>
           
             <label for="__nav_5">
               <span class="md-nav__icon md-icon"></span>
@@ -534,7 +551,7 @@
           
         </div>
       
-      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+      <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
         <label class="md-nav__title" for="__nav_5">
           <span class="md-nav__icon md-icon"></span>
           Legacy
@@ -549,7 +566,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/legacy/introduction/" class="md-nav__link">
+      <a href="../introduction/" class="md-nav__link">
         Introduction
       </a>
     </li>
@@ -563,7 +580,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/legacy/syntax/" class="md-nav__link">
+      <a href="../syntax/" class="md-nav__link">
         Syntax
       </a>
     </li>
@@ -575,11 +592,101 @@
               
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="/legacy/tree-structure/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Tree Structure
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         Tree Structure
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#sequences" class="md-nav__link">
+    Sequences
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#select" class="md-nav__link">
+    Select
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#omit" class="md-nav__link">
+    Omit
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#gather" class="md-nav__link">
+    Gather
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#not" class="md-nav__link">
+    Not
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#range" class="md-nav__link">
+    Range
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#repetition" class="md-nav__link">
+    Repetition
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#literal" class="md-nav__link">
+    Literal
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -591,7 +698,7 @@
   
   
     <li class="md-nav__item">
-      <a href="/legacy/api/" class="md-nav__link">
+      <a href="../api/" class="md-nav__link">
         API
       </a>
     </li>
@@ -622,6 +729,72 @@
   
   
   
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#sequences" class="md-nav__link">
+    Sequences
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#select" class="md-nav__link">
+    Select
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#omit" class="md-nav__link">
+    Omit
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#gather" class="md-nav__link">
+    Gather
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#not" class="md-nav__link">
+    Not
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#range" class="md-nav__link">
+    Range
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#repetition" class="md-nav__link">
+    Repetition
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#literal" class="md-nav__link">
+    Literal
+  </a>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -633,8 +806,62 @@
             <div class="md-content" data-md-component="content">
               <article class="md-content__inner md-typeset">
                 
-  <h1>404 - Not found</h1>
+                  
 
+  
+  
+
+
+<h1 id="legacy-syntax-tree-structure">Legacy Syntax Tree Structure</h1>
+<div class="admonition warning">
+<p class="admonition-title">Deprecated</p>
+<p>These features are all deprecated and will not be updated<br />
+While they are still available within <code>v4.0</code> under the <code>legacy</code> namespace<br />
+However they will be phased out by the next major release</p>
+</div>
+<p>There are two primary abstractions in generating syntax trees from BNF: sequences and selections.</p>
+<h2 id="sequences">Sequences</h2>
+<p>A sequence is an ordered list of elements that form a match. A top-level sequence (right side of the <code>::=</code>) will resolve with the <code>SyntaxNode.type</code> of the matching name (the name on the left of the <code>::=</code>). Sub-sequences within parentheses <code>()</code> will appear as a syntax node with the name <code>(...)</code> and will be evaluated similarly to the top level.</p>
+<p>If a repetition marker like name+ is used, additional nodes with the type <code>(...)+</code> will be added, and their children will represent the number of times the pattern matched.</p>
+<h2 id="select">Select</h2>
+<p>A selection will resolve as the syntax tree of the first matching option. For example, if you have the selection statement <code>variable | number</code>, and the parser matches a <code>variable</code>, it would be the same as having a <code>variable</code> in that position in the sequence.</p>
+<blockquote>
+<p>The selection statement will always consume the first valid option, so you should order your selection statements accordingly. For example:
+i.e.
+<div class="highlight"><pre><span></span><code>program <span class="o">::=</span> &quot;a&quot; | &quot;aa&quot; ;
+</code></pre></div>
+In this case, providing the input "aa" will fail, as it will consume the single "a", and since there is no repetition, the program will end, leaving the second "a" unconsumed. As the syntax did not parse the whole string, this is considered an error. 
+See <a href="/legacy/api#parser">Parser</a> for information on allowing partial matches.</p>
+</blockquote>
+<h2 id="omit">Omit</h2>
+<p>Omit statements within a sequence will be removed, and they will not be present in the output syntax tree. However, they are still crucial for a successful match. If they are within a selection, they will be visible with <code>SyntaxNode.type</code> of <code>omit</code> and no child nodes.</p>
+<h2 id="gather">Gather</h2>
+<p>Gather does not change the output syntax tree structure relative to the sequence or selection it is within. However, it combines all of its child nodes into a single string. Note that this reflects the effects of any omit operations within the child nodes.</p>
+<h2 id="not">Not</h2>
+<p>The <code>SyntaxNode.values</code> will be a single string containing all characters consumed until it matched the target expression of the repetition limit is reached.</p>
+<h2 id="range">Range</h2>
+<p>Ranges will appear with the <code>SyntaxNode.type</code> of <code>range</code> with <code>SyntaxNode.value</code> being a single string with the characters consumed by this expression, accounting for any repetition markers (so a range with <code>+</code> will be a string of length at least one).</p>
+<h2 id="repetition">Repetition</h2>
+<p>A repetition marker creates its own node in the syntax tree, with its children representing the value of each repetition. The <code>SyntaxNode.type</code> value of this node will be the <code>(...)</code> followed by the repetition marker used, such as: <code>(...)+</code>, <code>(...)*</code>, or <code>(...)?</code>.</p>
+<h2 id="literal">Literal</h2>
+<p>Literals will appear with the <code>SyntaxNode.type</code> of <code>literal</code> and <code>SyntaxNode.value</code> as an exact copy of the literal as a string.</p>
+
+  <hr>
+<div class="md-source-file">
+  <small>
+    
+      Last update:
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">July 12, 2023</span>
+      
+    
+  </small>
+</div>
+
+
+
+
+
+                
               </article>
             </div>
           
@@ -650,6 +877,42 @@
       
         <footer class="md-footer">
   
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../syntax/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Syntax" rel="prev">
+            <div class="md-footer__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Syntax
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../api/" class="md-footer__link md-footer__link--next" aria-label="Next: API" rel="next">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                API
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
     
   
   <div class="md-footer-meta md-typeset">
@@ -703,10 +966,10 @@
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "/", "features": ["search.suggest", "header.autohide", "content.code.annotate", "navigation.tabs", "navigation.indexes", "navigation.instant", "navigation.sections", "navigation.top", "navigation.footer"], "search": "/assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["search.suggest", "header.autohide", "content.code.annotate", "navigation.tabs", "navigation.indexes", "navigation.instant", "navigation.sections", "navigation.top", "navigation.footer"], "search": "../../assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="/assets/javascripts/bundle.220ee61c.min.js"></script>
+      <script src="../../assets/javascripts/bundle.220ee61c.min.js"></script>
       
     
   </body>
