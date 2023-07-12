@@ -157,9 +157,10 @@ function CompileRule(rule: Rule) {
 		inner.exprs = [ rule.seq ];
 	}
 
-	const typeName = `Term_${rule.name[0].toUpperCase()}${rule.name.slice(1)}`;
+	const capName = rule.name[0].toUpperCase() + rule.name.slice(1);
+	const typeName = `Term_${capName}`;
 	return `export type ${typeName} = ${CompileExpression(inner, rule.name)}\n` +
-		`export declare function ${rule.name} (i: string): _Shared.ParseError | { root: _Shared.SyntaxNode & ${typeName}, reachBytes: number, isPartial: boolean }\n`;
+		`export declare function Parse_${capName} (i: string): _Shared.ParseError | { root: _Shared.SyntaxNode & ${typeName}, reachBytes: number, isPartial: boolean }\n`;
 }
 
 

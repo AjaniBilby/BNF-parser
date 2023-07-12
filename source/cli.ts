@@ -63,7 +63,7 @@ for (const file of files) {
 	const data = readFileSync(file, 'utf8');
 
 	// Ingest input BNF
-	const syntax = bnf.program(data);
+	const syntax = bnf.Parse_Program(data);
 	if (syntax instanceof _Shared.ParseError) {
 		console.error(`Failed to parse ${name}`);
 		console.error(syntax.toString());

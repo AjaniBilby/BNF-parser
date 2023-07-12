@@ -1,5 +1,4 @@
-import * as Shared from "../dist/shared.js"; // things shared between multiple pre-compiled BNFs
-import * as bnf from "../dist/bnf.js";       // pre-compiled JS with WASM embedded
+import type * as bnf from "../dist/bnf.js";       // pre-compiled JS with WASM embedded
 
 import * as legacy from "./legacy/parser.js";
 
