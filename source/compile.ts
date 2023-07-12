@@ -3,14 +3,14 @@ import * as bnf from "../dist/bnf.js";       // pre-compiled JS with WASM embedd
 
 import * as legacy from "./legacy/parser.js";
 
-import { readFileSync, writeFileSync } from "fs";
+import { ParseError, ReferenceRange, Reference } from "./artifacts/shared.js";
 
 
-type ExprUnit = {
+type ExpressionJSON = {
 	type: string;
 	count: legacy.Count;
-	expr?: ExprUnit;
-	exprs?: ExprUnit[];
+	expr?: ExpressionJSON;
+	exprs?: ExpressionJSON[];
 	value?: string;
 };
 
@@ -51,7 +51,7 @@ function BuildOperand(syntax: bnf.Term_Expr_arg, namespace: string[]) {
 	const prefixes  = syntax.value[0];
 	const component = syntax.value[1];
 
-	let base: ExprUnit = {
+	let base: ExpressionJSON = {
 		type: "constant",
 		value: "",
 		count: legacy.ParseCount(syntax.value[2].value || "1")
@@ -104,46 +104,82 @@ function BuildOperand(syntax: bnf.Term_Expr_arg, namespace: string[]) {
 
 
 function BuildExpr(syntax: bnf.Term_Expr, namespace: string[]) {
-	let base: ExprUnit = {
+	let base: ExpressionJSON = {
 		type: "sequence",
 		count: "1" as legacy.Count,
 		exprs: [BuildOperand(syntax.value[0], namespace)]
 	};
+
+	for (const pair of syntax.value[1].value) {
+		const operand = BuildOperand(pair.value[1], namespace);
+
+		const infix = pair.value[0].value;
+		switch (infix) {
+			case "": // fall through
+			case "|":
+				const desire = infix == "|" ? "select" : "sequence";
+				if (desire != base.type) {
+					base = {
+						type: desire,
+						count: "1" as legacy.Count,
+						exprs: [
+							base.type === "sequence" && base.exprs?.length === 1 ? base.exprs[0] : base,
+							operand
+						]
+					}
+				} else {
+					base.exprs?.push(operand);
+				}
+				break;
+			case "->":
+				const a = base.exprs?.pop();
+				if (a?.type != "literal" || operand.type != "literal") {
+					throw new ParseError("Attempting to make a range between two non literals", pair.value[0].ref || ReferenceRange.blank());
+				}
+				if (a?.type != "literal" || operand.type != "literal") {
+					throw new ParseError("Attempting to make a range non single characters", pair.value[0].ref || ReferenceRange.blank());
+				}
+
+				if (a?.count != "1") {
+					throw new ParseError("Unexpected count on left-hand-side of range", pair.value[0].ref || ReferenceRange.blank());
+				}
+
+				let action = {
+					type: "range",
+					value: a.value,
+					to: operand.value,
+					count: operand.count
+				};
+				base.exprs?.push(action);
+
+				break;
+			default: throw new ParseError(`Unknown operator "${infix}"`, pair.value[0].ref || ReferenceRange.blank());
+		}
+	}
 
 	return base;
 }
 
 
 function CompileDefinition(syntax: bnf.Term_Def, namespace: string[]) {
+	const name = syntax.value[0].value;
 	const expr = BuildExpr(syntax.value[1], namespace);
+
+	return new legacy.Rule(name, expr);
 }
 
 
-function Compile(syntax: bnf.Term_Program): legacy.Parser {
+export function CompileProgram(syntax: bnf.Term_Program): legacy.Parser {
 	const ctx = new legacy.Parser({});
 	const defs = syntax.value[0];
 	const namespace = defs.value.map(def => def.value[0].value);
 
 	for (const def of defs.value) {
-		CompileDefinition(def, namespace);
+		const rule = CompileDefinition(def, namespace);
+		ctx.addRule(rule.name, rule);
 
-		break;
+		// break;
 	}
 
 	return ctx;
 }
-
-
-
-const data = readFileSync("./bnf.bnf", "utf8");
-
-// console.log(bnf.program);
-const syntax = bnf.program(data);
-if (syntax instanceof Shared.ParseError) {
-	console.error(syntax.toString());
-	process.exit(1);
-}
-
-writeFileSync("./dump.json", JSON.stringify(syntax, null, 2));
-
-Compile(syntax.root);
