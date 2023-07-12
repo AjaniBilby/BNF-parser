@@ -3,7 +3,7 @@ import * as bnf from "../dist/bnf.js";       // pre-compiled JS with WASM embedd
 
 import * as legacy from "./legacy/parser.js";
 
-import { ParseError, ReferenceRange, Reference } from "./artifacts/shared.js";
+import { ParseError, ReferenceRange } from "./artifacts/shared.js";
 
 
 type ExpressionJSON = {
@@ -177,8 +177,6 @@ export function CompileProgram(syntax: bnf.Term_Program): legacy.Parser {
 	for (const def of defs.value) {
 		const rule = CompileDefinition(def, namespace);
 		ctx.addRule(rule.name, rule);
-
-		// break;
 	}
 
 	return ctx;

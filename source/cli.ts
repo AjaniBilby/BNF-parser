@@ -5,6 +5,12 @@ import { readdirSync, existsSync, readFileSync, writeFileSync, appendFileSync } 
 import { basename, extname, join } from "path";
 import { legacy, wasm } from "./index.js";
 
+import { ParseError } from "./artifacts/shared.js";
+import { CompileProgram } from "./compile.js";
+
+import * as _Shared from "../dist/shared.js"; // things shared between multiple pre-compiled BNFs
+import * as bnf from "../dist/bnf.js";       // pre-compiled JS with WASM embedded
+
 
 const dirname = join(process.argv[1], "../");
 
@@ -50,15 +56,28 @@ for (const file of files) {
 	const data = readFileSync(`${root}/${file}`, 'utf8');
 
 	// Ingest input BNF
-	const syntax = legacy.BNF.parse(data);
-	if (syntax instanceof legacy.ParseError) {
+	const syntax = bnf.program(data);
+	if (syntax instanceof _Shared.ParseError) {
 		console.error(`Failed to parse ${file}`);
 		console.error(syntax.toString());
 		console.error("");
 		failure = true;
 		continue;
 	}
-	const lang = legacy.Compile(syntax);
+
+
+	let lang: null | legacy.Parser = null;
+	try {
+		lang = CompileProgram(syntax.root)
+	} catch(e) {
+		if (e instanceof ParseError) {
+			console.error(e.toString());
+		} else {
+			console.error(e);
+		}
+
+		process.exit(1);
+	}
 	if (syntax instanceof legacy.ParseError) {
 		console.error(`Compile ${file} syntax into graph`);
 		console.error(syntax.toString());
