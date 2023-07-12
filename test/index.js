@@ -1,20 +1,15 @@
-const { execSync }  = require('child_process');
-const path = require('path');
+import { execSync } from "child_process";
+import * as path from "path";
 
+const cwd = path.dirname(process.argv[1]);
 
 let tests = {
-	"Single Parse": ['ts-node single-parse.ts', {
-		cwd: __dirname
-	}],
-	"Double Parse": ['node double-parse.js', {
-		cwd: __dirname
-	}],
-	"Uniview": ['ts-node run.ts', {
-		cwd: path.join(__dirname, "/uv")
-	}],
-	"Sequelize": ['ts-node index.ts', {
-		cwd: path.join(__dirname, "/sequelize")
-	}]
+	"BNF compilations": ['npx bnf-compile ./bnfs/', { cwd }],
+	"Double Parse": ['node double-parse.js', { cwd }],
+	// "Uniview": ['ts-node run.ts', {
+	// 	cwd: path.join(__dirname, "/uv")
+	// }],
+	// "Sequelize": ['ts-node index.ts', { cwd: path.join(cwd, "./sequelize") }]
 };
 
 let failed = false;
