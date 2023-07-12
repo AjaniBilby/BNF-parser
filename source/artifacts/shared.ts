@@ -75,6 +75,10 @@ export class Reference {
 	toString(): string {
 		return `(${this.line}:${this.col})`;
 	}
+
+	static blank() {
+		return new Reference(0,0,0);
+	}
 }
 
 
@@ -107,6 +111,28 @@ export class ReferenceRange {
 
 	toString(): string {
 		return `${this.start.toString()} -> ${this.end.toString()}`;
+	}
+
+	static union(a: ReferenceRange, b: ReferenceRange){
+		return new ReferenceRange(
+			a.start.index < b.start.index ? a.start.clone() : b.start.clone(), // Smallest
+			a.end.index   > b.end.index   ? a.end.clone()   : b.end.clone(),   // Largest
+		);
+	}
+
+	static intersection(a: ReferenceRange, b: ReferenceRange){
+		let start = a.start.index > b.start.index ? a.start.clone() : b.start.clone() // Largest
+		let end   = a.end.index   < b.end.index   ? a.end.clone()   : b.end.clone()   // Smallest
+
+		return new ReferenceRange(
+			// Make sure start and end haven't switched
+			start.index > end.index ? start : end,
+			start.index > end.index ? end   : start,
+		);
+	}
+
+	static blank() {
+		return new ReferenceRange(Reference.blank(), Reference.blank());
 	}
 }
 

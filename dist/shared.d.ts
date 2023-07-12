@@ -25,6 +25,7 @@ export declare class Reference {
     valueOf(): number;
     clone(): Reference;
     toString(): string;
+    static blank(): Reference;
 }
 export declare class ReferenceRange {
     start: Reference;
@@ -34,5 +35,6 @@ export declare class ReferenceRange {
     valueOf(): number;
     clone(): ReferenceRange;
     toString(): string;
+    static blank(): ReferenceRange;
 }
 export declare function DecodeBase64(base64: string): Uint8Array;

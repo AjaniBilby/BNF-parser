@@ -190,6 +190,9 @@ export class Reference {
     toString() {
         return `(${this.line}:${this.col})`;
     }
+    static blank() {
+        return new Reference(0, 0, 0);
+    }
 }
 export class ReferenceRange {
     constructor(from, to) {
@@ -212,6 +215,9 @@ export class ReferenceRange {
     }
     toString() {
         return `${this.start.toString()} -> ${this.end.toString()}`;
+    }
+    static blank() {
+        return new ReferenceRange(Reference.blank(), Reference.blank());
     }
 }
 export function DecodeBase64(base64) {
