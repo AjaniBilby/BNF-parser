@@ -160,7 +160,7 @@ function CompileRule(rule: Rule) {
 	const capName = rule.name[0].toUpperCase() + rule.name.slice(1);
 	const typeName = `Term_${capName}`;
 	return `export type ${typeName} = ${CompileExpression(inner, rule.name)}\n` +
-		`export declare function Parse_${capName} (i: string, refMapping = true): _Shared.ParseError | { root: _Shared.SyntaxNode & ${typeName}, reachBytes: number, reach: null | _Shared.Reference, isPartial: boolean }\n`;
+		`export declare function Parse_${capName} (i: string, refMapping?: boolean): _Shared.ParseError | { root: _Shared.SyntaxNode & ${typeName}, reachBytes: number, reach: null | _Shared.Reference, isPartial: boolean }\n`;
 }
 
 
