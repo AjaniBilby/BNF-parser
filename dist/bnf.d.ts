@@ -10,7 +10,7 @@ export declare function program (i: string): _Shared.ParseError | { root: _Share
 export type Term_W = {
   type: "w", start: number, end: number, count: number, ref: null | _Shared.ReferenceRange,
   value: [
-    (Term_Comment | { type: "literal", value: "\x20", start: number, end: number, count: number, ref: null | _Shared.ReferenceRange } | { type: "literal", value: "\x09", start: number, end: number, count: number, ref: null | _Shared.ReferenceRange } | { type: "literal", value: "\x0a", start: number, end: number, count: number, ref: null | _Shared.ReferenceRange } | { type: "literal", value: "\x0d", start: number, end: number, count: number, ref: null | _Shared.ReferenceRange })
+    (Term_Comment | { type: "literal", value: "\x20", start: number, end: number, count: number, ref: null | _Shared.ReferenceRange } | { type: "literal", value: "\x09", start: number, end: number, count: number, ref: null | _Shared.ReferenceRange } | { type: "literal", value: "\x0a", start: number, end: number, count: number, ref: null | _Shared.ReferenceRange } | { type: "literal", value: "\x0d\x0a", start: number, end: number, count: number, ref: null | _Shared.ReferenceRange })
   ]
 }
 export declare function w (i: string): _Shared.ParseError | { root: _Shared.SyntaxNode & Term_W, reachBytes: number, isPartial: boolean }

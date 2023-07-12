@@ -1,5 +1,5 @@
 program ::= %w* def+ ;
-w ::= comment | " " | "\t" | "\n" | "\r" ;
+w ::= comment | " " | "\t" | "\n" | "\r\n" ;
 	comment ::= "#" !"\n"* "\n" ;
 
 name ::= letter ( letter | digit | "_" )* ;
