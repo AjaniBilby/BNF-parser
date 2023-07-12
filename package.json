@@ -1,15 +1,20 @@
 {
 	"name": "bnf-parser",
-	"version": "3.1.6",
+	"version": "4.0.0-preview1",
 	"description": "Deterministic BNF compiler/parser",
 	"homepage": "https://bnf-parser.ajanibilby.com",
 	"main": "./bin/index.js",
+	"type": "module",
+	"bin": {
+		"bnf-compile": "bin/cli.js"
+	},
 	"scripts": {
-		"test": "npm run build & node ./test",
+		"test": "node ./test/index.js",
 		"build": "run-s build:*",
 		"build:ts": "tsc",
-		"build:syntax": "ts-node ./tools/build-syntax",
-		"build:preload": "ts-node ./tools/post-build.ts"
+		"build:syntax": "node ./tools/build-syntax.js",
+		"build:preload": "node ./tools/post-build.js",
+		"build:bnfs": "node ./bin/cli.js ./bnf/"
 	},
 	"repository": {
 		"type": "git",
@@ -21,7 +26,10 @@
 		"compile",
 		"parse",
 		"typescript",
-		"webpack ready"
+		"webpack ready",
+		"precompiled",
+		"webassembly",
+		"wasm"
 	],
 	"author": "Ajani Bilby",
 	"license": "ISC",
@@ -30,5 +38,8 @@
 		"npm-run-all": "^4.1.5",
 		"ts-node": "^10.9.1",
 		"typescript": "^4.8.4"
+	},
+	"dependencies": {
+		"binaryen": "^113.0.0"
 	}
 }

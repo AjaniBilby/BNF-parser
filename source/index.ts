@@ -1,26 +1,11 @@
-import { SyntaxNode, ParseError, Reference, ReferenceRange } from "./syntax";
-import { Compile } from "./compiler";
-import { Parser } from "./parser";
-
-import { bnf_json } from "./preload";
-
-const BNF = new Parser( bnf_json );
-
-
-import { PromiseQueue } from "./lib/promise-queue";
-import { StreamCache } from "./lib/cache";
-const experimental = {
-	StreamCache,
-	PromiseQueue
-};
+import * as Shared from "./artifacts/shared.js";
+import * as legacy from "./legacy/index.js";
+import * as wasm from "./wasm/index.js";
+import * as types from "./types.js";
 
 export {
-	BNF,
-	Parser,
-	Compile,
-	SyntaxNode,
-	ParseError,
-	Reference,
-	ReferenceRange,
-	experimental
+	wasm,
+	legacy,
+	Shared,
+	types
 };

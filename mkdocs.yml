@@ -3,7 +3,7 @@ site_url: https://bnf-parser.ajanibilby.me/
 site_description: BNF-Parser docs
 repo_name: bnf-parser
 repo_url: https://github.com/ajanibilby/bnf-parser
-edit_uri: https://github.com/ajanibilby/bnf-parser/tree/master/docs
+edit_uri: https://github.com/ajanibilby/bnf-parser/tree/master/docs/source
 theme:
   name: material
   # favicon: /icon/unicycle.png
@@ -33,6 +33,7 @@ theme:
     - navigation.instant
     - navigation.sections
     - navigation.top
+    - navigation.footer
   palette:
     - scheme: default
       toggle:
@@ -94,4 +95,15 @@ copyright: Copyright &copy; 2023 Ajani James Bilby
 docs_dir: docs/source
 nav:
   - Home: index.md
-  - Legacy: legacy.md
+  - Getting Started: setup.md
+  - CLI: cli.md
+  - Artifacts:
+    - artifact/index.md
+    - Shared: artifact/shared.md
+    - Individual: artifact/bnf.md
+  - Legacy:
+    - legacy/index.md
+    - Introduction: legacy/introduction.md
+    - Syntax: legacy/syntax.md
+    - Tree Structure: legacy/tree-structure.md
+    - API: legacy/api.md

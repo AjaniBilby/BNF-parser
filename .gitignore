@@ -4,3 +4,11 @@ node_modules/*
 bin/*
 
 *.tgz
+*.wat
+*.wasm
+*.wat
+*.wasm
+*.json
+
+!bnf-hand.json
+!bnf.json

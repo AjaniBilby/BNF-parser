@@ -8,10 +8,9 @@
  *
  */
 
-import * as path from "path";
 import * as fs from "fs";
 
 export const bnf_json = JSON.parse(fs.readFileSync(
-	path.join(__dirname, '../bnf.json'),
+	'./bnf.json',
 	'utf8'
 ));
