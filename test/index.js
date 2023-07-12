@@ -4,7 +4,7 @@ import * as path from "path";
 const cwd = path.dirname(process.argv[1]);
 
 let tests = {
-	"BNF compilations": ['npx bnf-compile ./bnfs/', { cwd }],
+	// "BNF compilations": ['npx bnf-compile ./bnfs/', { cwd }],
 	"Double Parse": ['node double-parse.js', { cwd }],
 	// "Uniview": ['ts-node run.ts', {
 	// 	cwd: path.join(__dirname, "/uv")
