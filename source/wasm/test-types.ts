@@ -3,7 +3,7 @@ import { readFileSync, writeFileSync } from "fs";
 import { ParseError } from "../legacy/index.js";
 import { helper } from "../legacy/index.js";
 
-import * as types from "./types.js";
+import * as types from "../types.js";
 
 const bnf = `
 program ::= %w* def+ ;

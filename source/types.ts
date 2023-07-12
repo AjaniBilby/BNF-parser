@@ -1,4 +1,4 @@
-import { CharRange, Count, Expression, Gather, Literal, Not, Omit, Parser, Rule, Select, Sequence, Term } from "../legacy/parser.js";
+import { CharRange, Count, Expression, Gather, Literal, Not, Omit, Parser, Rule, Select, Sequence, Term } from "./legacy/parser.js";
 
 
 

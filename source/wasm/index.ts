@@ -1,5 +1,5 @@
 import { GenerateWasm } from "./compile.js";
-import { CompileTypes } from "./types.js";
+import { CompileTypes } from "../types.js";
 import { CompileProgram } from "../compile.js";
 import * as Runner from "./run.js";
 
