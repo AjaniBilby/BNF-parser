@@ -1,0 +1,97 @@
+site_name: BNF Parser Docs
+site_url: https://bnf-parser.ajanibilby.me/
+site_description: BNF-Parser docs
+repo_name: bnf-parser
+repo_url: https://github.com/ajanibilby/bnf-parser
+edit_uri: https://github.com/ajanibilby/bnf-parser/tree/master/docs
+theme:
+  name: material
+  # favicon: /icon/unicycle.png
+  custom_dir: docs/overrides
+  icon:
+    admonition:
+      note: octicons/tag-16
+      abstract: octicons/checklist-16
+      info: octicons/info-16
+      tip: octicons/squirrel-16
+      success: octicons/check-16
+      question: octicons/question-16
+      warning: octicons/alert-16
+      failure: octicons/x-circle-16
+      danger: octicons/zap-16
+      bug: octicons/bug-16
+      example: octicons/beaker-16
+      quote: octicons/quote-16
+    repo: fontawesome/brands/github
+    logo: material/script-text
+  features:
+    - search.suggest
+    - header.autohide
+    - content.code.annotate
+    - navigation.tabs
+    - navigation.indexes
+    - navigation.instant
+    - navigation.sections
+    - navigation.top
+  palette:
+    - scheme: default
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+      primary: pink
+      accent: purple
+    - scheme: slate
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+      primary: pink
+      accent: purple
+  language: en
+plugins:
+  - search:
+      prebuild_index: true
+  # - offline
+  - git-revision-date:
+      enabled_if_env: CI
+  - git-revision-date-localized:
+      fallback_to_build_date: true
+markdown_extensions:
+  - admonition
+  - attr_list
+  - footnotes
+  - md_in_html
+  - meta
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - pymdownx.highlight:
+      use_pygments: true
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.critic
+  - pymdownx.caret
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.tilde
+
+extra_css:
+  - styles/extra.css
+extra:
+  social:
+    - icon: fontawesome/brands/npm
+      link: https://www.npmjs.com/package/bnf-parser
+    - icon: fontawesome/brands/github
+      link: https://github.com/ajanibilby/bnf-parser
+copyright: Copyright &copy; 2023 Ajani James Bilby
+
+
+docs_dir: docs/source
+nav:
+  - Home: index.md
+  - Legacy: legacy.md
