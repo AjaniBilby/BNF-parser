@@ -135,7 +135,7 @@ export function Parse(ctx: WasmParser, data: string, refMapping = true, entry = 
 	return {
 		root,
 		reachBytes: reach,
-		isPartial: root.end != ctx.exports.inputLength.value
+		isPartial: root.end < ctx.exports.inputLength.value
 	};
 }
 
@@ -173,8 +173,8 @@ function Decode(ctx: WasmParser, heap: number, readBoundary = false) {
 
 		const next = new SyntaxNode(
 			type,
-			readBoundary ? memoryArray.at(offset + OFFSET.START/4) || 0 : -1,
-			readBoundary ? memoryArray.at(offset + OFFSET.END/4) || 0   : -1,
+			memoryArray.at(offset + OFFSET.START/4) || 0,
+			memoryArray.at(offset + OFFSET.END/4)   || 0,
 			memoryArray.at(offset + OFFSET.COUNT/4) || 0
 		);
 		offset += OFFSET.DATA/4;

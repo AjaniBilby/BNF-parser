@@ -7,7 +7,7 @@ import { ParseError, ReferenceRange, Reference } from "../artifacts/shared.js";
 
 // Pre-compiled bnf parser components
 import * as Shared from "../../dist/shared.js"; // things shared between multiple pre-compiled BNFs
-import * as bnf from "../../dist/bnf.js";        // pre-compiled JS with WASM embedded
+import * as bnf from "../../dist/bnf.js";       // pre-compiled JS with WASM embedded
 
 export function Compile2Wasm(inputBnf: string) {
 	const syntax = bnf.program(inputBnf);
@@ -17,7 +17,7 @@ export function Compile2Wasm(inputBnf: string) {
 		return convert;
 	}
 
-	if (syntax.root.ref?.end.index != inputBnf.length) {
+	if (syntax.isPartial) {
 		return new ParseError("Unexpected syntax at", new ReferenceRange(
 			syntax.root.ref?.end || new Reference(0,0,0),
 			new Reference(0,0, syntax.reachBytes)

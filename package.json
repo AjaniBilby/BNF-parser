@@ -9,11 +9,12 @@
 		"bnf-compile": "bin/cli.js"
 	},
 	"scripts": {
-		"test": "npm run build & node ./test",
+		"test": "npm run build & node ./test/index.js",
 		"build": "run-s build:*",
 		"build:ts": "tsc",
 		"build:syntax": "node ./tools/build-syntax.js",
-		"build:preload": "node ./tools/post-build.js"
+		"build:preload": "node ./tools/post-build.js",
+		"build:bnfs": "npx bnf-compile ./bnf/"
 	},
 	"repository": {
 		"type": "git",

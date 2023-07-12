@@ -82,7 +82,7 @@ export function Parse(ctx, data, refMapping = true, entry = "program") {
     return {
         root,
         reachBytes: reach,
-        inputBytes: ctx.exports.inputLength.value
+        isPartial: root.end < ctx.exports.inputLength.value
     };
 }
 export function Decode(ctx, heap, readBoundary = false) {
