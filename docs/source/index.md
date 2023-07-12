@@ -21,11 +21,13 @@ Compile your bnfs down to WebAssembly for maximum parsing speed; with generated 
 
 ```bnf title="BNF"
 program ::= %w* statement+ ;
-block ::= %("block" w+) ...name %(w* "{" w*) seq_stmt* %("}" w*) ;
+block   ::= %("block" w+) ...name %(w* "{" w*) seq_stmt* %("}" w*) ;
 ```
 ```ts title="Typescript"
-const tree  /*(1)!*/ = syntax.program(input).root;
-const block /*(2)!*/ = program.value[0];
+import * as syntax from "./bnf/example.js";
+
+const tree  /*(1)!*/    = syntax.Parse_Program(input).root;
+const block /*(2)!*/    = program.value[0];
 const name: string = block.value[0]; // (3)!
 ```
 
