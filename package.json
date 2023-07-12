@@ -14,7 +14,7 @@
 		"build:ts": "tsc",
 		"build:syntax": "node ./tools/build-syntax.js",
 		"build:preload": "node ./tools/post-build.js",
-		"build:bnfs": "npx bnf-compile ./bnf/"
+		"build:bnfs": "node ./bin/cli.js ./bnf/"
 	},
 	"repository": {
 		"type": "git",
