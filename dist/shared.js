@@ -216,6 +216,17 @@ export class ReferenceRange {
     toString() {
         return `${this.start.toString()} -> ${this.end.toString()}`;
     }
+    static union(a, b) {
+        return new ReferenceRange(a.start.index < b.start.index ? a.start.clone() : b.start.clone(), // Smallest
+        a.end.index > b.end.index ? a.end.clone() : b.end.clone());
+    }
+    static intersection(a, b) {
+        let start = a.start.index > b.start.index ? a.start.clone() : b.start.clone(); // Largest
+        let end = a.end.index < b.end.index ? a.end.clone() : b.end.clone(); // Smallest
+        return new ReferenceRange(
+        // Make sure start and end haven't switched
+        start.index > end.index ? start : end, start.index > end.index ? end : start);
+    }
     static blank() {
         return new ReferenceRange(Reference.blank(), Reference.blank());
     }

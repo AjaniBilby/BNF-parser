@@ -35,6 +35,8 @@ export declare class ReferenceRange {
     valueOf(): number;
     clone(): ReferenceRange;
     toString(): string;
+    static union(a: ReferenceRange, b: ReferenceRange): ReferenceRange;
+    static intersection(a: ReferenceRange, b: ReferenceRange): ReferenceRange;
     static blank(): ReferenceRange;
 }
 export declare function DecodeBase64(base64: string): Uint8Array;
