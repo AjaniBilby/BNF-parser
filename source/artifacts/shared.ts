@@ -77,7 +77,7 @@ export class Reference {
 	}
 
 	static blank() {
-		return new Reference(0,0,0);
+		return new Reference(1,1,0);
 	}
 }
 

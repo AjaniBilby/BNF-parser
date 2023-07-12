@@ -113,7 +113,7 @@ export function Parse(ctx: WasmParser, data: string, refMapping = true, entry = 
 				"Unable to parse",
 				new ReferenceRange(
 					new Reference(0, 0, 0),
-					MapBytes2String(data, reach, 0, new Reference(1,1,0)).ref
+					MapBytes2String(data, reach, 0, Reference.blank()).ref
 				)
 			)
 		} else {
@@ -121,7 +121,7 @@ export function Parse(ctx: WasmParser, data: string, refMapping = true, entry = 
 				"Unable to parse",
 				new ReferenceRange(
 					new Reference(0, 0, 0),
-					new Reference(0, 0, reach)
+					MapBytes2String(data, reach, 0, Reference.blank()).ref
 				)
 			)
 		}
@@ -135,6 +135,14 @@ export function Parse(ctx: WasmParser, data: string, refMapping = true, entry = 
 	return {
 		root,
 		reachBytes: reach,
+		reach: refMapping ?
+			MapBytes2String(
+				data,
+				reach,
+				root.end,
+				root.ref?.end.clone() || Reference.blank()
+			).ref :
+			null,
 		isPartial: root.end < ctx.exports.inputLength.value
 	};
 }

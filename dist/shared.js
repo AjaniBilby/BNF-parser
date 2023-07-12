@@ -62,15 +62,16 @@ export function MapTreeRefs(tree, str) {
     }
 }
 export function Parse(ctx, data, refMapping = true, entry = "program") {
+    var _a;
     const heap = InitParse(ctx, data);
     const statusCode = ctx.exports[entry]();
     let reach = Number(ctx.exports.reach);
     if (statusCode == 1) {
         if (refMapping) {
-            return new ParseError("Unable to parse", new ReferenceRange(new Reference(0, 0, 0), MapBytes2String(data, reach, 0, new Reference(1, 1, 0)).ref));
+            return new ParseError("Unable to parse", new ReferenceRange(new Reference(0, 0, 0), MapBytes2String(data, reach, 0, Reference.blank()).ref));
         }
         else {
-            return new ParseError("Unable to parse", new ReferenceRange(new Reference(0, 0, 0), new Reference(0, 0, reach)));
+            return new ParseError("Unable to parse", new ReferenceRange(new Reference(0, 0, 0), MapBytes2String(data, reach, 0, Reference.blank()).ref));
         }
     }
     ;
@@ -82,6 +83,9 @@ export function Parse(ctx, data, refMapping = true, entry = "program") {
     return {
         root,
         reachBytes: reach,
+        reach: refMapping ?
+            MapBytes2String(data, reach, root.end, ((_a = root.ref) === null || _a === void 0 ? void 0 : _a.end.clone()) || Reference.blank()).ref :
+            null,
         isPartial: root.end < ctx.exports.inputLength.value
     };
 }
@@ -191,7 +195,7 @@ export class Reference {
         return `(${this.line}:${this.col})`;
     }
     static blank() {
-        return new Reference(0, 0, 0);
+        return new Reference(1, 1, 0);
     }
 }
 export class ReferenceRange {
