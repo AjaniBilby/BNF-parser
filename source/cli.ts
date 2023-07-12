@@ -37,6 +37,13 @@ if (!existsSync(root)) {
 const files = readdirSync(root)
 	.filter(x => extname(x) === ".bnf");
 
+if (files.length === 0) {
+	console.error(`No BNF files found in ${root}`);
+	process.exit(1);
+}
+
+console.log(`Found: ${files.join(', ')}`)
+
 let failure = false;
 for (const file of files) {
 	const name = basename(file, '.bnf');
