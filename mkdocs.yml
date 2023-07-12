@@ -23,7 +23,7 @@ theme:
       example: octicons/beaker-16
       quote: octicons/quote-16
     repo: fontawesome/brands/github
-    logo: material/unicycle
+    logo: material/script-text
   features:
     - search.suggest
     - header.autohide
@@ -67,9 +67,6 @@ markdown_extensions:
   - pymdownx.emoji:
       emoji_index: !!python/name:materialx.emoji.twemoji
       emoji_generator: !!python/name:materialx.emoji.to_svg
-      options:
-        custom_icons:
-          - overrides/.icons
   - pymdownx.highlight:
       use_pygments: true
   - pymdownx.superfences
@@ -85,6 +82,12 @@ markdown_extensions:
 
 extra_css:
   - styles/extra.css
+extra:
+  social:
+    - icon: fontawesome/brands/npm
+      link: https://www.npmjs.com/package/bnf-parser
+    - icon: fontawesome/brands/github
+      link: https://github.com/ajanibilby/bnf-parser
 copyright: Copyright &copy; 2023 Ajani James Bilby
 
 
