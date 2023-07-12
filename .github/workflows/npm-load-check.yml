@@ -1,4 +1,4 @@
-name: Test via NPM
+name: Reflection Test (via NPM)
 
 on:
   push:
