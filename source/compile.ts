@@ -59,6 +59,8 @@ function BuildOperand(syntax: bnf.Term_Expr_arg, namespace: string[]) {
 
 	switch (component.type) {
 		case "literal":
+			if (!namespace.includes(component.value))
+				throw new ParseError(`Unknown term name "${component.value}"`, component.ref || ReferenceRange.blank());
 			base.value = component.value;
 			base.type  = "term";
 			break;
