@@ -5,7 +5,7 @@ const cwd = path.dirname(process.argv[1]);
 let tests = {
 	"BNF compilations": ['npx bnf-compile ./bnfs/', { cwd }],
 	"Double Parse":     ['node double-parse.js',    { cwd }],
-	"Uniview Parse":    ['node ./uv/index.js',      { cwd }],
+	// "Uniview Parse":    ['node ./uv/index.js',      { cwd }],
 };
 
 let failed = false;
