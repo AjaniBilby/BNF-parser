@@ -556,11 +556,9 @@ function CompileRange(ctx: CompilerContext, expr: CharRange): number {
 					ctx.m.i32.const(1)
 				)),
 
-				// Break loop if hit count limit
+				// Break loop since hit count limit
 				expr.count == "?" || expr.count == "1" ?
-					ctx.m.br(block,
-						ctx.m.i32.eq(ctx.m.local.get(count, binaryen.i32), ctx.m.i32.const(1))
-					) :
+					ctx.m.br(block) :
 					ctx.m.nop(),
 
 				// Continue loop
@@ -586,13 +584,16 @@ function CompileRange(ctx: CompilerContext, expr: CharRange): number {
 					ctx.m.i32.const(1)
 				),
 				ctx.m.block(null, [
+
 					// mark failed + rollback ALL progress
 					ctx.m.local.set(error, ctx.m.i32.const(1)),
 					ctx.m.global.set("index",
-						ctx.m.i32.load(4, 4,
+						ctx.m.i32.load(
+							OFFSET.START, 4,
 							ctx.m.local.get(rewind, binaryen.i32)
 						)
 					),
+
 					ctx.m.global.set("heap", ctx.m.local.get(rewind, binaryen.i32)),
 					ctx.m.br(outer)
 				])
