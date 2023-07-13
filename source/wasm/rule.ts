@@ -318,8 +318,8 @@ function CompileNot(ctx: CompilerContext, expr: Not): number {
 
 	return ctx.m.block(outer, [
 		// Store information for failure reversion
-		ctx.m.local.set(rewind,  ctx.m.global.get("heap", binaryen.i32)),
-		ctx.m.local.set(count, ctx.m.i32.const(0)),
+		ctx.m.local.set(rewind, ctx.m.global.get("heap", binaryen.i32)),
+		ctx.m.local.set(count,  ctx.m.i32.const(0)),
 
 		// Start index
 		ctx.m.i32.store(
@@ -366,11 +366,9 @@ function CompileNot(ctx: CompilerContext, expr: Not): number {
 					ctx.m.i32.const(1)
 				)),
 
-				// Break loop if hit count limit
+				// Hit limit count, break loop
 				expr.count == "?" || expr.count == "1" ?
-					ctx.m.br(block,
-						ctx.m.i32.eq(ctx.m.local.get(count, binaryen.i32), ctx.m.i32.const(1))
-					) :
+					ctx.m.br(block) :
 					ctx.m.nop(),
 
 				// Continue loop
