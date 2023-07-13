@@ -21,6 +21,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://bnf-parser.ajanibilby.com/test/</loc>
+         <lastmod>2023-07-13</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://bnf-parser.ajanibilby.com/artifact/</loc>
          <lastmod>2023-07-13</lastmod>
          <changefreq>daily</changefreq>

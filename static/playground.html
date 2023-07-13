@@ -1,0 +1,201 @@
+<html>
+	<head>
+		<script type="module">
+			import * as binaryen_loader from 'https://unpkg.com/binaryen@113.0.0/index.js';
+			window.binaryen = binaryen_loader.default;
+
+			import * as bnf_loader from "/static/dist/bnf-parser.js";
+			window.bnf_parser = bnf_loader;
+
+			const ParseError = bnf_parser.Shared.ParseError;
+
+			function Run() {
+
+				monaco.editor.setModelMarkers(editor.getModel(), 'owner', []);
+
+				const mod = bnf_parser.wasm.Compile2Wasm(editor.getValue());
+				if (mod instanceof ParseError) {
+					console.error(mod);
+					monaco.editor.setModelMarkers(editor.getModel(), 'owner', [
+						{
+							startLineNumber: mod.ref.end.line,
+							startColumn:     mod.ref.end.col,
+							endLineNumber: mod.ref.end.line,
+							endColumn:     mod.ref.end.col,
+							// severity: monaco.MarkerSeverity.Error,
+							message: mod.msg,
+						},
+					]);
+					output.setValue(JSON.stringify(mod, null, 2));
+					return;
+				}
+
+				const bin = mod.emitBinary();
+				const wasm = bnf_parser.wasm.Runner.Create(bin);
+
+				const input = document.getElementById("input").value || "";
+				const result = bnf_parser.wasm.Runner.Parse(wasm, input, false);
+				if (result instanceof ParseError) {
+					console.error(result.toString());
+				}
+
+				output.setValue(JSON.stringify(result, null, 2));
+			}
+			window.Run = Run;
+		</script>
+		<script>
+			const THEME = {
+				base: 'vs-dark',
+				inherit: true,
+				rules: [
+					{ token: 'comment', foreground: '75715E', fontStyle: 'italic' },
+					{ token: 'string', foreground: 'E6DB74' },
+					{ token: 'keyword', foreground: 'F92672' },
+					{ token: 'number', foreground: 'AE81FF' },
+					{ token: 'type', foreground: '66D9EF' },
+					{ token: 'function', foreground: 'A6E22E' },
+					{ token: 'identifier', foreground: 'F8F8F2' },
+					{ token: 'variable', foreground: 'F8F8F2' },
+					{ token: 'variable.predefined', foreground: 'FD971F' },
+					{ token: 'constant', foreground: 'AE81FF' },
+					{ token: 'tag', foreground: 'F92672' },
+					{ token: 'attribute.name', foreground: 'A6E22E' },
+					{ token: 'attribute.value', foreground: 'E6DB74' },
+					{ token: 'meta', foreground: '75715E' },
+					{ token: 'regexp', foreground: '#A6E22E' },
+					{ token: 'punctuation', foreground: 'F8F8F2' },
+					{ token: 'delimiter', foreground: 'F8F8F2' },
+					{ token: 'operator', foreground: 'F92672' },
+					{ token: 'namespace', foreground: 'A6E22E' },
+					{ token: 'invalid', foreground: 'F8F8F0', background: 'F92672' },
+				],
+				colors: {
+					'editor.foreground': '#F8F8F2',
+					'editor.background': '#272822',
+					'editor.selectionBackground': '#49483E',
+					'editor.lineHighlightBackground': '#3E3D32',
+					'editorCursor.foreground': '#F8F8F0',
+					'editorWhitespace.foreground': '#3B3A32',
+					'editorIndentGuide.background': '#3B3A32',
+					'editorIndentGuide.activeBackground': '#9D550FB0',
+				}
+			};
+
+			const TOKENIZER = {
+				keywords: [ ],
+				operators: [ '&', '|', "->", "::=", "%", "+", "*", "?" ],
+
+				// Common expressions
+				symbols: /[:&|]+/,
+				tokenizer: {
+					root: [
+						// Identifiers and keywords
+						[/[a-z_$][\w$]*/, {
+							cases: {
+								'@keywords': 'keyword',
+								'@default': 'identifier'
+							}
+						}],
+
+						[/"/, { token: 'string.quote', bracket: '@open', next: '@string' }],
+
+						{ include: '@whitespace' },
+
+						// Delimiters and operators
+						[/[{}()\[\]]/, '@brackets'],
+						[/@symbols/, {
+							cases: {
+								'@operators': 'operator',
+								'@default': ''
+							}
+						}],
+					],
+					comment: [
+						[/[^\/*]+/, 'comment'],
+						[/\/\*/, 'comment', '@push'],
+						[/\*\//, 'comment', '@pop'],
+						[/[\/*]/, 'comment']
+					],
+					string: [
+						[/[^\\"]+/, 'string'],
+						[/\\./, 'string.escape'],
+						[/"/, { token: 'string.quote', bracket: '@close', next: '@pop' }]
+					],
+					whitespace: [
+						[/[ \t\r\n]+/, ''],
+						[/#.*$/, 'comment'],
+					],
+				}
+			};
+
+			let editor = null;
+			let output = null;
+		</script>
+	</head>
+	<body style="background-color: #272822;">
+		<div style="position: fixed; inset: 0 0 0 0; display: grid; grid-template-rows: 2fr 3fr;">
+			<div id="code" style="padding: 10px 5px 0px 0px"></div>
+			<div style="display: grid; grid-template-columns: 2fr 3fr; overflow: hidden; border-top: 1px solid #3E3D32">
+				<div style="position: relative; border-right: 1px solid #3E3D32">
+					<textarea id="input" style="color: #F8F8F2; background-color: inherit; border: none; width: 100%; height: 100%; padding: 10px; resize: none;">Hello World</textarea>
+					<button style="position: absolute; right: 0px; top: 0px; z-index: 1;" onClick="Run()">Run</button>
+				</div>
+				<div id="output"></div>
+			</div>
+		</div>
+
+		<!-- Load the Monaco Editor Loader script -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.20.0/min/vs/loader.min.js"></script>
+		<script>
+			require.config({
+					paths: {
+							'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.20.0/min/vs'
+					}
+			});
+
+			require(['vs/editor/editor.main'], function() {
+				monaco.languages.register({ id: 'bnf' });
+				monaco.languages.setMonarchTokensProvider('bnf', TOKENIZER);
+				monaco.languages.setLanguageConfiguration("bnf", {
+					autoClosingPairs: [
+						{ open: "(", close: ")" },
+					],
+					comments: {
+						lineComment : "#"
+					}
+				});
+
+				editor = monaco.editor.create(document.getElementById('code'), {
+					value: `program ::= "Hello" " World" ;`,
+					language: 'bnf'
+				});
+				editor.updateOptions({
+					insertSpaces: false,
+					tabSize: 2,
+					renderWhitespace: "boundary",
+					minimap: { enabled: false }
+				});
+
+				output = monaco.editor.create(document.getElementById('output'), {
+					value: `{}`,
+					language: 'json'
+				});
+				output.updateOptions({
+					insertSpaces: false,
+					tabSize: 2,
+					renderWhitespace: "boundary",
+					minimap: { enabled: false },
+				});
+
+				// Attach the event listener for the window resize event
+				window.addEventListener('resize', ()=>{
+					editor.layout();
+					output.layout();
+				});
+
+				monaco.editor.defineTheme('monokai', THEME);
+				monaco.editor.setTheme('monokai');
+			});
+		</script>
+	</body>
+</html>
