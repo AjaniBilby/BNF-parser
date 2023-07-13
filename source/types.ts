@@ -29,7 +29,7 @@ function CompileSequence(expr: Sequence, name?: string): string {
 }
 
 function CompileSequenceOnce(expr: Sequence, name?: string): string {
-	return `{\n  type: "${name || "(...)"}", start: number, end: number, count: number, ref: null | _Shared.ReferenceRange,\n  value: [\n` +
+	return `{\n  type: "${name || "(...)"}", start: number, end: number, count: number, ref: _Shared.ReferenceRange,\n  value: [\n` +
 		expr.exprs
 			.map(x => CompileExpression(x))
 			.filter(x => x.length > 0)
@@ -125,7 +125,7 @@ function CompileRepeat(innerType: string, repetitions: Count): string {
 
 
 function TemplateNode(type: string, value: string) {
-	return `{ type: ${type}, value: ${value}, start: number, end: number, count: number, ref: null | _Shared.ReferenceRange }`
+	return `{ type: ${type}, value: ${value}, start: number, end: number, count: number, ref: _Shared.ReferenceRange }`
 }
 
 

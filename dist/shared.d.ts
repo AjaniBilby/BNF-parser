@@ -13,8 +13,8 @@ export declare class SyntaxNode {
     end: number;
     count: number;
     value: SyntaxNode[] | string;
-    ref: null | ReferenceRange;
-    constructor(type: string, start: number, end: number, count: number);
+    ref: ReferenceRange;
+    constructor(type: string, start: number, end: number, count: number, ref: ReferenceRange);
 }
 export declare class Reference {
     line: number;

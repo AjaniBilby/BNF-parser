@@ -98,6 +98,7 @@ export function Decode(ctx, heap, readBoundary = false) {
     let root = null;
     let offset = (heap / 4);
     const typeCache = new Map();
+    const sharedRef = ReferenceRange.blank();
     while (root === null || stack.length > 0) {
         const curr = stack[stack.length - 1];
         // Has current stack element been satisfied?
@@ -113,7 +114,7 @@ export function Decode(ctx, heap, readBoundary = false) {
             type = decoder.decode(byteArray.slice(type_ptr, type_ptr + type_len));
             typeCache.set(type_ptr, type);
         }
-        const next = new SyntaxNode(type, memoryArray.at(offset + OFFSET.START / 4) || 0, memoryArray.at(offset + OFFSET.END / 4) || 0, memoryArray.at(offset + OFFSET.COUNT / 4) || 0);
+        const next = new SyntaxNode(type, memoryArray.at(offset + OFFSET.START / 4) || 0, memoryArray.at(offset + OFFSET.END / 4) || 0, memoryArray.at(offset + OFFSET.COUNT / 4) || 0, sharedRef);
         offset += OFFSET.DATA / 4;
         // Add child to current top of stack
         //  or make it the root
@@ -159,13 +160,13 @@ export class ParseError {
     }
 }
 export class SyntaxNode {
-    constructor(type, start, end, count) {
+    constructor(type, start, end, count, ref) {
         this.type = type;
         this.start = start;
         this.end = end;
         this.count = count;
         this.value = [];
-        this.ref = null;
+        this.ref = ref;
     }
 }
 export class Reference {

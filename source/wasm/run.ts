@@ -1,4 +1,5 @@
 import { ParseError, Reference, ReferenceRange, SyntaxNode } from "../artifacts/shared.js";
+import { Shared } from "../index.js";
 import { OFFSET } from "./layout.js";
 
 
@@ -161,6 +162,8 @@ function Decode(ctx: WasmParser, heap: number, readBoundary = false) {
 
 	const typeCache = new Map<number, string>();
 
+	const sharedRef = ReferenceRange.blank();
+
 	while (root === null || stack.length > 0) {
 		const curr = stack[stack.length-1];
 
@@ -183,7 +186,8 @@ function Decode(ctx: WasmParser, heap: number, readBoundary = false) {
 			type,
 			memoryArray.at(offset + OFFSET.START/4) || 0,
 			memoryArray.at(offset + OFFSET.END/4)   || 0,
-			memoryArray.at(offset + OFFSET.COUNT/4) || 0
+			memoryArray.at(offset + OFFSET.COUNT/4) || 0,
+			sharedRef
 		);
 		offset += OFFSET.DATA/4;
 

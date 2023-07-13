@@ -1,157 +1,157 @@
 import * as _Shared from "./shared.js";
 export type Term_Program = {
-  type: "program", start: number, end: number, count: number, ref: null | _Shared.ReferenceRange,
+  type: "program", start: number, end: number, count: number, ref: _Shared.ReferenceRange,
   value: [
-    { type: "(...)", value: Term_Def[], start: number, end: number, count: number, ref: null | _Shared.ReferenceRange }
+    { type: "(...)", value: Term_Def[], start: number, end: number, count: number, ref: _Shared.ReferenceRange }
   ]
 }
 export declare function Parse_Program (i: string, refMapping?: boolean): _Shared.ParseError | { root: _Shared.SyntaxNode & Term_Program, reachBytes: number, reach: null | _Shared.Reference, isPartial: boolean }
 
 export type Term_W = {
-  type: "w", start: number, end: number, count: number, ref: null | _Shared.ReferenceRange,
+  type: "w", start: number, end: number, count: number, ref: _Shared.ReferenceRange,
   value: [
-    (Term_Comment | { type: "literal", value: "\x20", start: number, end: number, count: number, ref: null | _Shared.ReferenceRange } | { type: "literal", value: "\x09", start: number, end: number, count: number, ref: null | _Shared.ReferenceRange } | { type: "literal", value: "\x0a", start: number, end: number, count: number, ref: null | _Shared.ReferenceRange } | { type: "literal", value: "\x0d\x0a", start: number, end: number, count: number, ref: null | _Shared.ReferenceRange })
+    (Term_Comment | { type: "literal", value: "\x20", start: number, end: number, count: number, ref: _Shared.ReferenceRange } | { type: "literal", value: "\x09", start: number, end: number, count: number, ref: _Shared.ReferenceRange } | { type: "literal", value: "\x0a", start: number, end: number, count: number, ref: _Shared.ReferenceRange } | { type: "literal", value: "\x0d\x0a", start: number, end: number, count: number, ref: _Shared.ReferenceRange })
   ]
 }
 export declare function Parse_W (i: string, refMapping?: boolean): _Shared.ParseError | { root: _Shared.SyntaxNode & Term_W, reachBytes: number, reach: null | _Shared.Reference, isPartial: boolean }
 
 export type Term_Comment = {
-  type: "comment", start: number, end: number, count: number, ref: null | _Shared.ReferenceRange,
+  type: "comment", start: number, end: number, count: number, ref: _Shared.ReferenceRange,
   value: [
-    { type: "literal", value: "\x23", start: number, end: number, count: number, ref: null | _Shared.ReferenceRange },
-    { type: "literal", value: string, start: number, end: number, count: number, ref: null | _Shared.ReferenceRange },
-    { type: "literal", value: "\x0a", start: number, end: number, count: number, ref: null | _Shared.ReferenceRange }
+    { type: "literal", value: "\x23", start: number, end: number, count: number, ref: _Shared.ReferenceRange },
+    { type: "literal", value: string, start: number, end: number, count: number, ref: _Shared.ReferenceRange },
+    { type: "literal", value: "\x0a", start: number, end: number, count: number, ref: _Shared.ReferenceRange }
   ]
 }
 export declare function Parse_Comment (i: string, refMapping?: boolean): _Shared.ParseError | { root: _Shared.SyntaxNode & Term_Comment, reachBytes: number, reach: null | _Shared.Reference, isPartial: boolean }
 
 export type Term_Name = {
-  type: "name", start: number, end: number, count: number, ref: null | _Shared.ReferenceRange,
+  type: "name", start: number, end: number, count: number, ref: _Shared.ReferenceRange,
   value: [
     Term_Letter,
-    { type: "(...)", value: (Term_Letter | Term_Digit | { type: "literal", value: "\x5f", start: number, end: number, count: number, ref: null | _Shared.ReferenceRange })[], start: number, end: number, count: number, ref: null | _Shared.ReferenceRange }
+    { type: "(...)", value: (Term_Letter | Term_Digit | { type: "literal", value: "\x5f", start: number, end: number, count: number, ref: _Shared.ReferenceRange })[], start: number, end: number, count: number, ref: _Shared.ReferenceRange }
   ]
 }
 export declare function Parse_Name (i: string, refMapping?: boolean): _Shared.ParseError | { root: _Shared.SyntaxNode & Term_Name, reachBytes: number, reach: null | _Shared.Reference, isPartial: boolean }
 
 export type Term_Letter = {
-  type: "letter", start: number, end: number, count: number, ref: null | _Shared.ReferenceRange,
+  type: "letter", start: number, end: number, count: number, ref: _Shared.ReferenceRange,
   value: [
-    ({ type: "literal", value: string, start: number, end: number, count: number, ref: null | _Shared.ReferenceRange } | { type: "literal", value: string, start: number, end: number, count: number, ref: null | _Shared.ReferenceRange })
+    ({ type: "literal", value: string, start: number, end: number, count: number, ref: _Shared.ReferenceRange } | { type: "literal", value: string, start: number, end: number, count: number, ref: _Shared.ReferenceRange })
   ]
 }
 export declare function Parse_Letter (i: string, refMapping?: boolean): _Shared.ParseError | { root: _Shared.SyntaxNode & Term_Letter, reachBytes: number, reach: null | _Shared.Reference, isPartial: boolean }
 
 export type Term_Digit = {
-  type: "digit", start: number, end: number, count: number, ref: null | _Shared.ReferenceRange,
+  type: "digit", start: number, end: number, count: number, ref: _Shared.ReferenceRange,
   value: [
-    { type: "literal", value: string, start: number, end: number, count: number, ref: null | _Shared.ReferenceRange }
+    { type: "literal", value: string, start: number, end: number, count: number, ref: _Shared.ReferenceRange }
   ]
 }
 export declare function Parse_Digit (i: string, refMapping?: boolean): _Shared.ParseError | { root: _Shared.SyntaxNode & Term_Digit, reachBytes: number, reach: null | _Shared.Reference, isPartial: boolean }
 
 export type Term_Hex = {
-  type: "hex", start: number, end: number, count: number, ref: null | _Shared.ReferenceRange,
+  type: "hex", start: number, end: number, count: number, ref: _Shared.ReferenceRange,
   value: [
-    ({ type: "literal", value: string, start: number, end: number, count: number, ref: null | _Shared.ReferenceRange } | { type: "literal", value: string, start: number, end: number, count: number, ref: null | _Shared.ReferenceRange } | { type: "literal", value: string, start: number, end: number, count: number, ref: null | _Shared.ReferenceRange })
+    ({ type: "literal", value: string, start: number, end: number, count: number, ref: _Shared.ReferenceRange } | { type: "literal", value: string, start: number, end: number, count: number, ref: _Shared.ReferenceRange } | { type: "literal", value: string, start: number, end: number, count: number, ref: _Shared.ReferenceRange })
   ]
 }
 export declare function Parse_Hex (i: string, refMapping?: boolean): _Shared.ParseError | { root: _Shared.SyntaxNode & Term_Hex, reachBytes: number, reach: null | _Shared.Reference, isPartial: boolean }
 
 export type Term_Constant = {
-  type: "constant", start: number, end: number, count: number, ref: null | _Shared.ReferenceRange,
+  type: "constant", start: number, end: number, count: number, ref: _Shared.ReferenceRange,
   value: [
-    { type: "(...)", value: Term_Frag[], start: number, end: number, count: number, ref: null | _Shared.ReferenceRange }
+    { type: "(...)", value: Term_Frag[], start: number, end: number, count: number, ref: _Shared.ReferenceRange }
   ]
 }
 export declare function Parse_Constant (i: string, refMapping?: boolean): _Shared.ParseError | { root: _Shared.SyntaxNode & Term_Constant, reachBytes: number, reach: null | _Shared.Reference, isPartial: boolean }
 
 export type Term_Frag = {
-  type: "frag", start: number, end: number, count: number, ref: null | _Shared.ReferenceRange,
+  type: "frag", start: number, end: number, count: number, ref: _Shared.ReferenceRange,
   value: [
-    (Term_Escape | Term_Byte | { type: "literal", value: string, start: number, end: number, count: number, ref: null | _Shared.ReferenceRange })
+    (Term_Escape | Term_Byte | { type: "literal", value: string, start: number, end: number, count: number, ref: _Shared.ReferenceRange })
   ]
 }
 export declare function Parse_Frag (i: string, refMapping?: boolean): _Shared.ParseError | { root: _Shared.SyntaxNode & Term_Frag, reachBytes: number, reach: null | _Shared.Reference, isPartial: boolean }
 
 export type Term_Escape = {
-  type: "escape", start: number, end: number, count: number, ref: null | _Shared.ReferenceRange,
+  type: "escape", start: number, end: number, count: number, ref: _Shared.ReferenceRange,
   value: [
-    { type: "literal", value: string, start: number, end: number, count: number, ref: null | _Shared.ReferenceRange }
+    { type: "literal", value: string, start: number, end: number, count: number, ref: _Shared.ReferenceRange }
   ]
 }
 export declare function Parse_Escape (i: string, refMapping?: boolean): _Shared.ParseError | { root: _Shared.SyntaxNode & Term_Escape, reachBytes: number, reach: null | _Shared.Reference, isPartial: boolean }
 
 export type Term_Byte = {
-  type: "byte", start: number, end: number, count: number, ref: null | _Shared.ReferenceRange,
+  type: "byte", start: number, end: number, count: number, ref: _Shared.ReferenceRange,
   value: [
-    { type: "literal", value: string, start: number, end: number, count: number, ref: null | _Shared.ReferenceRange }
+    { type: "literal", value: string, start: number, end: number, count: number, ref: _Shared.ReferenceRange }
   ]
 }
 export declare function Parse_Byte (i: string, refMapping?: boolean): _Shared.ParseError | { root: _Shared.SyntaxNode & Term_Byte, reachBytes: number, reach: null | _Shared.Reference, isPartial: boolean }
 
 export type Term_Def = {
-  type: "def", start: number, end: number, count: number, ref: null | _Shared.ReferenceRange,
+  type: "def", start: number, end: number, count: number, ref: _Shared.ReferenceRange,
   value: [
-    { type: "literal", value: string, start: number, end: number, count: number, ref: null | _Shared.ReferenceRange },
+    { type: "literal", value: string, start: number, end: number, count: number, ref: _Shared.ReferenceRange },
     Term_Expr
   ]
 }
 export declare function Parse_Def (i: string, refMapping?: boolean): _Shared.ParseError | { root: _Shared.SyntaxNode & Term_Def, reachBytes: number, reach: null | _Shared.Reference, isPartial: boolean }
 
 export type Term_Expr = {
-  type: "expr", start: number, end: number, count: number, ref: null | _Shared.ReferenceRange,
+  type: "expr", start: number, end: number, count: number, ref: _Shared.ReferenceRange,
   value: [
     Term_Expr_arg,
     { type: "(...)", value: {
-  type: "(...)", start: number, end: number, count: number, ref: null | _Shared.ReferenceRange,
+  type: "(...)", start: number, end: number, count: number, ref: _Shared.ReferenceRange,
   value: [
-    { type: "literal", value: string, start: number, end: number, count: number, ref: null | _Shared.ReferenceRange },
+    { type: "literal", value: string, start: number, end: number, count: number, ref: _Shared.ReferenceRange },
     Term_Expr_arg
   ]
-}[], start: number, end: number, count: number, ref: null | _Shared.ReferenceRange }
+}[], start: number, end: number, count: number, ref: _Shared.ReferenceRange }
   ]
 }
 export declare function Parse_Expr (i: string, refMapping?: boolean): _Shared.ParseError | { root: _Shared.SyntaxNode & Term_Expr, reachBytes: number, reach: null | _Shared.Reference, isPartial: boolean }
 
 export type Term_Expr_arg = {
-  type: "expr_arg", start: number, end: number, count: number, ref: null | _Shared.ReferenceRange,
+  type: "expr_arg", start: number, end: number, count: number, ref: _Shared.ReferenceRange,
   value: [
     Term_Expr_prefix,
-    (Term_Constant | Term_Expr_brackets | { type: "literal", value: string, start: number, end: number, count: number, ref: null | _Shared.ReferenceRange }),
-    { type: "literal", value: string, start: number, end: number, count: number, ref: null | _Shared.ReferenceRange }
+    (Term_Constant | Term_Expr_brackets | { type: "literal", value: string, start: number, end: number, count: number, ref: _Shared.ReferenceRange }),
+    { type: "literal", value: string, start: number, end: number, count: number, ref: _Shared.ReferenceRange }
   ]
 }
 export declare function Parse_Expr_arg (i: string, refMapping?: boolean): _Shared.ParseError | { root: _Shared.SyntaxNode & Term_Expr_arg, reachBytes: number, reach: null | _Shared.Reference, isPartial: boolean }
 
 export type Term_Expr_prefix = {
-  type: "expr_prefix", start: number, end: number, count: number, ref: null | _Shared.ReferenceRange,
+  type: "expr_prefix", start: number, end: number, count: number, ref: _Shared.ReferenceRange,
   value: [
-    { type: "literal", value: string, start: number, end: number, count: number, ref: null | _Shared.ReferenceRange },
-    { type: "literal", value: string, start: number, end: number, count: number, ref: null | _Shared.ReferenceRange },
-    { type: "literal", value: string, start: number, end: number, count: number, ref: null | _Shared.ReferenceRange }
+    { type: "literal", value: string, start: number, end: number, count: number, ref: _Shared.ReferenceRange },
+    { type: "literal", value: string, start: number, end: number, count: number, ref: _Shared.ReferenceRange },
+    { type: "literal", value: string, start: number, end: number, count: number, ref: _Shared.ReferenceRange }
   ]
 }
 export declare function Parse_Expr_prefix (i: string, refMapping?: boolean): _Shared.ParseError | { root: _Shared.SyntaxNode & Term_Expr_prefix, reachBytes: number, reach: null | _Shared.Reference, isPartial: boolean }
 
 export type Term_Expr_infix = {
-  type: "expr_infix", start: number, end: number, count: number, ref: null | _Shared.ReferenceRange,
+  type: "expr_infix", start: number, end: number, count: number, ref: _Shared.ReferenceRange,
   value: [
-    ({ type: "literal", value: "\x2d\x3e", start: number, end: number, count: number, ref: null | _Shared.ReferenceRange } | { type: "literal", value: "\x7c", start: number, end: number, count: number, ref: null | _Shared.ReferenceRange })
+    ({ type: "literal", value: "\x2d\x3e", start: number, end: number, count: number, ref: _Shared.ReferenceRange } | { type: "literal", value: "\x7c", start: number, end: number, count: number, ref: _Shared.ReferenceRange })
   ]
 }
 export declare function Parse_Expr_infix (i: string, refMapping?: boolean): _Shared.ParseError | { root: _Shared.SyntaxNode & Term_Expr_infix, reachBytes: number, reach: null | _Shared.Reference, isPartial: boolean }
 
 export type Term_Expr_suffix = {
-  type: "expr_suffix", start: number, end: number, count: number, ref: null | _Shared.ReferenceRange,
+  type: "expr_suffix", start: number, end: number, count: number, ref: _Shared.ReferenceRange,
   value: [
-    ({ type: "literal", value: "\x2a", start: number, end: number, count: number, ref: null | _Shared.ReferenceRange } | { type: "literal", value: "\x3f", start: number, end: number, count: number, ref: null | _Shared.ReferenceRange } | { type: "literal", value: "\x2b", start: number, end: number, count: number, ref: null | _Shared.ReferenceRange })
+    ({ type: "literal", value: "\x2a", start: number, end: number, count: number, ref: _Shared.ReferenceRange } | { type: "literal", value: "\x3f", start: number, end: number, count: number, ref: _Shared.ReferenceRange } | { type: "literal", value: "\x2b", start: number, end: number, count: number, ref: _Shared.ReferenceRange })
   ]
 }
 export declare function Parse_Expr_suffix (i: string, refMapping?: boolean): _Shared.ParseError | { root: _Shared.SyntaxNode & Term_Expr_suffix, reachBytes: number, reach: null | _Shared.Reference, isPartial: boolean }
 
 export type Term_Expr_brackets = {
-  type: "expr_brackets", start: number, end: number, count: number, ref: null | _Shared.ReferenceRange,
+  type: "expr_brackets", start: number, end: number, count: number, ref: _Shared.ReferenceRange,
   value: [
     Term_Expr
   ]

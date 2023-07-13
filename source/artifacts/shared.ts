@@ -30,15 +30,15 @@ export class SyntaxNode {
 	end  : number;
 	count: number;
 	value: SyntaxNode[] | string;
-	ref: null | ReferenceRange
+	ref: ReferenceRange
 
-	constructor (type: string, start: number, end: number, count: number) {
+	constructor (type: string, start: number, end: number, count: number, ref: ReferenceRange) {
 		this.type  = type;
 		this.start = start;
 		this.end   = end;
 		this.count = count;
 		this.value = [];
-		this.ref = null;
+		this.ref   = ref;
 	}
 }
 
