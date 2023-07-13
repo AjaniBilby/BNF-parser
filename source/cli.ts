@@ -13,16 +13,33 @@ import * as bnf from "../dist/bnf.js";       // pre-compiled JS with WASM embedd
 
 
 const script = join(process.argv[1], "../");
-const isCommonJS = process.argv.includes("--commonjs");
 
 function GenerateRunner(lang: legacy.Parser, wasm: Uint8Array) {
-	let out = 'import * as _Shared from "./shared.js";\n' +
-		`const _ctx = new WebAssembly.Instance(\n` +
-		`  new WebAssembly.Module(\n` +
-		`    _Shared.DecodeBase64("${Buffer.from(wasm).toString('base64')}")\n`+
-		`  ),\n` +
-		`  {js: {print_i32: console.log}}\n`+
-		`);\n`;
+	let out =
+`import * as _Shared from "./shared.js";
+export let onLoad = null;
+let _rawWasm = _Shared.DecodeBase64("${Buffer.from(wasm).toString('base64')}");
+let _ctx = null;
+if (typeof window === 'undefined') {
+	_ctx = new WebAssembly.Instance(
+		new WebAssembly.Module(
+			_rawWasm
+		), {js: {print_i32: console.log}}
+	);
+	_rawWasm = null;
+	Object.freeze(_ctx);
+} else {
+	WebAssembly.compile(_rawWasm)
+		.then(wasm => {
+			WebAssembly.instantiate(wasm, {js: {print_i32: console.log}})
+				.then((inst)=>{
+					_ctx = inst;
+					Object.freeze(_ctx);
+					if (typeof onLoad === 'function') onLoad();
+				})
+			_rawWasm = null;
+		})
+}`;
 
 	for (const [name, rule] of lang.terms) {
 		out += `export function Parse_${rule.name[0].toUpperCase()}${rule.name.slice(1)} (data, refMapping = true) {\n`;
