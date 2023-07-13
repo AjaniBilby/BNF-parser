@@ -2,7 +2,7 @@ import type * as bnf from "../dist/bnf.js";       // pre-compiled JS with WASM e
 
 import * as legacy from "./legacy/parser.js";
 
-import { ParseError, ReferenceRange } from "./artifacts/shared.js";
+import { ParseError, ReferenceRange, AssertUnreachable } from "./artifacts/shared.js";
 
 
 type ExpressionJSON = {
@@ -12,11 +12,6 @@ type ExpressionJSON = {
 	exprs?: ExpressionJSON[];
 	value?: string;
 };
-
-
-function assertUnreachable(x: never): never {
-	throw new Error("Unreachable code path reachable");
-}
 
 
 function FlattenConstant(syntax: bnf.Term_Constant) {
@@ -38,7 +33,7 @@ function FlattenConstant(syntax: bnf.Term_Constant) {
 					default: str += inner.value[0].value;
 				}
 				break;
-			default: assertUnreachable(inner);
+			default: AssertUnreachable(inner);
 		}
 	}
 
@@ -73,7 +68,7 @@ function BuildOperand(syntax: bnf.Term_Expr_arg, namespace: string[]) {
 			res.count = base.count;
 			base = res;
 			break;
-		default: assertUnreachable(component);
+		default: AssertUnreachable(component);
 	}
 
 	if (prefixes.value[2].value === "!") {

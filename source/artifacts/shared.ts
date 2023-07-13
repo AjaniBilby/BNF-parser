@@ -136,6 +136,11 @@ export class ReferenceRange {
 	}
 }
 
+
+export function AssertUnreachable(x: never): never {
+	throw new Error("Unreachable code path reachable");
+}
+
 export function DecodeBase64(base64: string) {
 	const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 	let bufferLength = base64.length * 0.75,

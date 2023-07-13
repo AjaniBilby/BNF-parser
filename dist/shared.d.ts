@@ -39,4 +39,5 @@ export declare class ReferenceRange {
     static intersection(a: ReferenceRange, b: ReferenceRange): ReferenceRange;
     static blank(): ReferenceRange;
 }
+export declare function AssertUnreachable(x: never): never;
 export declare function DecodeBase64(base64: string): Uint8Array;
