@@ -15,7 +15,7 @@
 		"build:syntax": "node ./tools/build-syntax.js",
 		"build:preload": "node ./tools/post-build.js",
 		"build:bnfs": "node ./bin/cli.js ./bnf/",
-		"build:bundle": "npx rollup ./bnf/bnf.js --file ./docs/source/static/dist/bnf-bundle.js --format umd --name Parser"
+		"build:bundle": "npx rollup -c"
 	},
 	"repository": {
 		"type": "git",
