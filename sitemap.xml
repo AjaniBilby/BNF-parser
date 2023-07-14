@@ -26,6 +26,31 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://bnf-parser.ajanibilby.com/api/</loc>
+         <lastmod>2023-07-14</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bnf-parser.ajanibilby.com/api/bnf/</loc>
+         <lastmod>2023-07-14</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bnf-parser.ajanibilby.com/api/shared/</loc>
+         <lastmod>2023-07-14</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bnf-parser.ajanibilby.com/api/types/</loc>
+         <lastmod>2023-07-14</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://bnf-parser.ajanibilby.com/api/wasm/</loc>
+         <lastmod>2023-07-14</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://bnf-parser.ajanibilby.com/artifact/</loc>
          <lastmod>2023-07-14</lastmod>
          <changefreq>daily</changefreq>
