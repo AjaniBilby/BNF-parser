@@ -30,7 +30,7 @@ export class SyntaxNode {
 	end  : number;
 	count: number;
 	value: SyntaxNode[] | string;
-	ref: ReferenceRange
+	ref: ReferenceRange;
 
 	constructor (type: string, start: number, end: number, count: number, ref: ReferenceRange) {
 		this.type  = type;
