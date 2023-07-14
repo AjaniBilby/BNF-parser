@@ -2219,7 +2219,7 @@ if (typeof window === 'undefined') {
 
 function Compile2Wasm(inputBnf) {
     var _a;
-    const syntax = Parse_Program(inputBnf);
+    const syntax = Parse_Program(inputBnf, true);
     if (syntax instanceof ParseError) {
         const convert = new ParseError$1(syntax.msg, syntax.ref);
         convert.stack = syntax.stack;
