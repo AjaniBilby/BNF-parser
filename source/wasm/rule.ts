@@ -386,7 +386,8 @@ function CompileNot(ctx: CompilerContext, expr: Not): number {
 		// Update to true reach
 		ctx.m.call("_reach_update", [
 			ctx.m.i32.add(
-				ctx.m.i32.load(4, 4,
+				ctx.m.i32.load(
+					OFFSET.START, 4,
 					ctx.m.local.get(rewind, binaryen.i32)
 				),
 				ctx.m.local.get(count, binaryen.i32)
@@ -409,7 +410,8 @@ function CompileNot(ctx: CompilerContext, expr: Not): number {
 					// mark failed + rollback ALL progress
 					ctx.m.local.set(error, ctx.m.i32.const(1)),
 					ctx.m.global.set("index",
-						ctx.m.i32.load(4, 4,
+						ctx.m.i32.load(
+							OFFSET.START, 4,
 							ctx.m.local.get(rewind, binaryen.i32)
 						)
 					),
@@ -862,7 +864,8 @@ function CompileRepeat(ctx: CompilerContext, innerWasm: number, repetitions: Cou
 					// mark failed + rollback ALL progress
 					ctx.m.local.set(error, ctx.m.i32.const(1)),
 					ctx.m.global.set("index",
-						ctx.m.i32.load(4, 4,
+						ctx.m.i32.load(
+							OFFSET.START, 4,
 							ctx.m.local.get(rewind, binaryen.i32)
 						)
 					),

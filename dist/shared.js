@@ -85,10 +85,10 @@ export function Parse(ctx, data, refMapping = true, entry = "program") {
         reachRef = cursor.ref;
     }
     return {
-        root,
         reachBytes: reach,
+        isPartial: root.end < ctx.exports.inputLength.value,
         reach: reachRef,
-        isPartial: root.end < ctx.exports.inputLength.value
+        root,
     };
 }
 export function Decode(ctx, heap, sharedRef) {
