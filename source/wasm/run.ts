@@ -1,5 +1,4 @@
 import { ParseError, Reference, ReferenceRange, SyntaxNode } from "../artifacts/shared.js";
-import { Shared } from "../index.js";
 import { OFFSET } from "./layout.js";
 
 
