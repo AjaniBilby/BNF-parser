@@ -17,7 +17,6 @@ const script = join(process.argv[1], "../");
 function GenerateRunner(lang: legacy.Parser, wasm: Uint8Array) {
 	let out =
 `import * as _Shared from "./shared.js";
-export let onLoad = null;
 let _rawWasm = _Shared.DecodeBase64("${Buffer.from(wasm).toString('base64')}");
 let _ctx = null;
 if (typeof window === 'undefined') {
@@ -26,20 +25,20 @@ if (typeof window === 'undefined') {
 			_rawWasm
 		), {js: {print_i32: console.log}}
 	);
-	_rawWasm = null;
+}
+let ready = new Promise(async (res, rej) => {
+	if (typeof window !== 'undefined') {
+		_ctx = await WebAssembly.instantiate(
+			await WebAssembly.compile(_rawWasm),
+			{js: {print_i32: console.log}}
+		);
+	}
+
 	Object.freeze(_ctx);
-} else {
-	WebAssembly.compile(_rawWasm)
-		.then(wasm => {
-			WebAssembly.instantiate(wasm, {js: {print_i32: console.log}})
-				.then((inst)=>{
-					_ctx = inst;
-					Object.freeze(_ctx);
-					if (typeof onLoad === 'function') onLoad();
-				})
-			_rawWasm = null;
-		})
-}`;
+	_rawWasm = null;
+	res();
+});
+export { ready };`;
 
 	for (const [name, rule] of lang.terms) {
 		out += `export function Parse_${rule.name[0].toUpperCase()}${rule.name.slice(1)} (data, refMapping = true) {\n`;

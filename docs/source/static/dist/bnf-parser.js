@@ -2204,19 +2204,19 @@ if (typeof window === 'undefined') {
 			_rawWasm
 		), {js: {print_i32: console.log}}
 	);
-	_rawWasm = null;
+}
+new Promise(async (res, rej) => {
+	if (typeof window !== 'undefined') {
+		_ctx = await WebAssembly.instantiate(
+			await WebAssembly.compile(_rawWasm),
+			{js: {print_i32: console.log}}
+		);
+	}
+
 	Object.freeze(_ctx);
-} else {
-	WebAssembly.compile(_rawWasm)
-		.then(wasm => {
-			WebAssembly.instantiate(wasm, {js: {print_i32: console.log}})
-				.then((inst)=>{
-					_ctx = inst;
-					Object.freeze(_ctx);
-				});
-			_rawWasm = null;
-		});
-}function Parse_Program (data, refMapping = true) {
+	_rawWasm = null;
+	res();
+});function Parse_Program (data, refMapping = true) {
   return Parse(_ctx, data, refMapping, "program");
 }
 
