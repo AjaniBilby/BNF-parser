@@ -109,3 +109,4 @@ nav:
     - Syntax: legacy/syntax.md
     - Tree Structure: legacy/tree-structure.md
     - API: legacy/api.md
+  - Test: test.md
