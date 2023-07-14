@@ -1810,7 +1810,7 @@ function ProgressCursor$1(str, bytes, cursorRef) {
 function MapTreeRefs$1(tree, str, sharedRef) {
     let stack = [tree];
     let cursor = {
-        ref: new Reference$1(1, 1, 0),
+        ref: Reference$1.blank(),
         bytes: 0
     };
     while (stack.length > 0) {
@@ -1826,7 +1826,7 @@ function MapTreeRefs$1(tree, str, sharedRef) {
             stack.push(curr); // revisit node for ref.end mapping (after children)
             if (typeof (curr.value) !== "string") {
                 // Reverse order concat children to stack for FIFO
-                for (let i = curr.value.length; i > 0; i--) {
+                for (let i = curr.value.length - 1; i >= 0; i--) {
                     stack.push(curr.value[i]);
                 }
             }
@@ -1854,7 +1854,7 @@ function Parse$1(ctx, data, refMapping = true, entry = "program") {
             return new ParseError$1("Unable to parse", new ReferenceRange$1(new Reference$1(0, 0, 0), new Reference$1(0, 0, reach)));
         }
     }
-    const sharedRef = ReferenceRange$1.blank();
+    const sharedRef = new ReferenceRange$1(new Reference$1(0, 0, 0), new Reference$1(0, 0, 0));
     const root = Decode$1(ctx, heap, sharedRef);
     if (refMapping) {
         MapTreeRefs$1(root, data, sharedRef);
@@ -1967,7 +1967,7 @@ function ProgressCursor(str, bytes, cursorRef) {
 function MapTreeRefs(tree, str, sharedRef) {
     let stack = [tree];
     let cursor = {
-        ref: new Reference(1, 1, 0),
+        ref: Reference.blank(),
         bytes: 0
     };
     while (stack.length > 0) {
@@ -1983,7 +1983,7 @@ function MapTreeRefs(tree, str, sharedRef) {
             stack.push(curr); // revisit node for ref.end mapping (after children)
             if (typeof (curr.value) !== "string") {
                 // Reverse order concat children to stack for FIFO
-                for (let i = curr.value.length; i > 0; i--) {
+                for (let i = curr.value.length - 1; i >= 0; i--) {
                     stack.push(curr.value[i]);
                 }
             }
@@ -2011,7 +2011,7 @@ function Parse(ctx, data, refMapping = true, entry = "program") {
             return new ParseError("Unable to parse", new ReferenceRange(new Reference(0, 0, 0), new Reference(0, 0, reach)));
         }
     }
-    const sharedRef = ReferenceRange.blank();
+    const sharedRef = new ReferenceRange(new Reference(0, 0, 0), new Reference(0, 0, 0));
     const root = Decode(ctx, heap, sharedRef);
     if (refMapping) {
         MapTreeRefs(root, data, sharedRef);
@@ -2204,19 +2204,19 @@ if (typeof window === 'undefined') {
 			_rawWasm
 		), {js: {print_i32: console.log}}
 	);
-	_rawWasm = null;
+}
+new Promise(async (res, rej) => {
+	if (typeof window !== 'undefined') {
+		_ctx = await WebAssembly.instantiate(
+			await WebAssembly.compile(_rawWasm),
+			{js: {print_i32: console.log}}
+		);
+	}
+
 	Object.freeze(_ctx);
-} else {
-	WebAssembly.compile(_rawWasm)
-		.then(wasm => {
-			WebAssembly.instantiate(wasm, {js: {print_i32: console.log}})
-				.then((inst)=>{
-					_ctx = inst;
-					Object.freeze(_ctx);
-				});
-			_rawWasm = null;
-		});
-}function Parse_Program (data, refMapping = true) {
+	_rawWasm = null;
+	res();
+});function Parse_Program (data, refMapping = true) {
   return Parse(_ctx, data, refMapping, "program");
 }
 
