@@ -145,10 +145,10 @@ export function Parse(ctx: WasmParser, data: string, refMapping = true, entry = 
 	}
 
 	return {
-		root,
 		reachBytes: reach,
+		isPartial: root.end < ctx.exports.inputLength.value,
 		reach: reachRef,
-		isPartial: root.end < ctx.exports.inputLength.value
+		root,
 	};
 }
 
