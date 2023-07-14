@@ -4,30 +4,7 @@ import { ParseError } from "../legacy/index.js";
 import { Compile2Wasm } from "./index.js";
 import * as Runner from "./run.js";
 
-const bnf = `
-program ::= %w* def+ ;
-w ::= comment | " " | "\\t" | "\\n" | "\\r" ;
-	comment ::= "#" !"\\n"* "\\n" ;
-
-name ::= ...( letter ( letter | digit | "_" )* ) ;
-	letter ::= "a"->"z" | "A"->"Z" ;
-	digit ::= "0"->"9" ;
-	hex   ::= "0"->"9" | "a"->"f" | "A"->"F" ;
-
-constant ::= %"\\"" frag* %"\\"" ;
-	frag   ::= escape | !"\\""+ ;
-	escape ::= %"\\\\" !"" ;
-	byte   ::= %"x" ...(hex hex) ;
-
-def ::= name %(w+ "::=" w*) expr %(w* ";" w*) ;
-
-expr ::= expr_arg %w* ( ...expr_infix? %w* expr_arg %w* )* ;
-	expr_arg ::= expr_prefix ( ...constant | expr_brackets | name ) ...expr_suffix? ;
-	expr_prefix ::= ..."%"? ..."..."? ..."!"? ;
-	expr_infix  ::= "->" | "|" ;
-	expr_suffix ::= "*" | "?" | "+" ;
-	expr_brackets ::= %( "(" w* ) expr %( w* ")" ) ;
-`;
+const bnf = `program ::= ("a"+ | "b")+ ;`;
 
 let wasm: Runner.WasmParser | null = null;
 
@@ -62,7 +39,7 @@ console.log(" ");
 console.time('total');
 
 wasm = Runner.Create(bin);
-const output = Runner.Parse(wasm, bnf, false);
+const output = Runner.Parse(wasm, "abbaaaba", false);
 
 // const output = Runner.Parse(wasm, bnf, false);
 if (output instanceof ParseError) {
@@ -83,4 +60,4 @@ if (output instanceof ParseError) {
 // console.log(`Start: ${output.root.start} End: ${output.root.end} Reached: ${Number(output.reach)}`);
 
 writeFileSync("dump.json", JSON.stringify(output.root, null, 2));
-writeFileSync("dump.js", Runner.toString());
+// writeFileSync("dump.js", Runner.toString());
