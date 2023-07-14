@@ -27,7 +27,7 @@ export function ProgressCursor(str, bytes, cursorRef) {
 export function MapTreeRefs(tree, str, sharedRef) {
     let stack = [tree];
     let cursor = {
-        ref: new Reference(1, 1, 0),
+        ref: Reference.blank(),
         bytes: 0
     };
     while (stack.length > 0) {
@@ -43,7 +43,7 @@ export function MapTreeRefs(tree, str, sharedRef) {
             stack.push(curr); // revisit node for ref.end mapping (after children)
             if (typeof (curr.value) !== "string") {
                 // Reverse order concat children to stack for FIFO
-                for (let i = curr.value.length; i > 0; i--) {
+                for (let i = curr.value.length - 1; i >= 0; i--) {
                     stack.push(curr.value[i]);
                 }
             }
@@ -72,7 +72,7 @@ export function Parse(ctx, data, refMapping = true, entry = "program") {
         }
     }
     ;
-    const sharedRef = ReferenceRange.blank();
+    const sharedRef = new ReferenceRange(new Reference(0, 0, 0), new Reference(0, 0, 0));
     const root = Decode(ctx, heap, sharedRef);
     if (refMapping) {
         MapTreeRefs(root, data, sharedRef);

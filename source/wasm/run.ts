@@ -69,7 +69,7 @@ function MapTreeRefs(tree: SyntaxNode, str: string, sharedRef: ReferenceRange) {
 	let stack = [tree];
 
 	let cursor: Cursor = {
-		ref: new Reference(1,1,0),
+		ref: Reference.blank(),
 		bytes: 0
 	};
 
@@ -89,7 +89,7 @@ function MapTreeRefs(tree: SyntaxNode, str: string, sharedRef: ReferenceRange) {
 			stack.push(curr); // revisit node for ref.end mapping (after children)
 			if (typeof(curr.value) !== "string") {
 				// Reverse order concat children to stack for FIFO
-				for (let i=curr.value.length; i>0; i--) {
+				for (let i=curr.value.length-1; i >= 0; i--) {
 					stack.push(curr.value[i]);
 				}
 			}
@@ -131,7 +131,10 @@ export function Parse(ctx: WasmParser, data: string, refMapping = true, entry = 
 		}
 	};
 
-	const sharedRef = ReferenceRange.blank();
+	const sharedRef = new ReferenceRange(
+		new Reference(0,0,0),
+		new Reference(0,0,0)
+	);
 	const root = Decode(ctx, heap, sharedRef);
 	if (refMapping) {
 		MapTreeRefs(root, data, sharedRef);
