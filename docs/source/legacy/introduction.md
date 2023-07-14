@@ -1,7 +1,5 @@
 ---
 title: Legacy Introduction
-search:
-  exclude: true
 ---
 
 # Introduction
