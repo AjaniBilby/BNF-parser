@@ -43,34 +43,32 @@ function InitParse(ctx: WasmParser, data: string) {
 	return ctx.exports._init();
 }
 
-function MapBytes2String(str: string, bytes: number, byteOffset: number = 0, ref: Reference) {
+
+type Cursor = {
+	bytes: number,
+	ref: Reference
+};
+// Cursor utilizes object parse by reference to reduce allocations
+function ProgressCursor(str: string, bytes: number, cursorRef: Cursor) {
 	const encoder = new TextEncoder();
 
-	// const ref = from.clone();
-
-	while(byteOffset <= bytes && ref.index < str.length) {
-		const char = str[ref.index];
+	while(cursorRef.bytes <= bytes && cursorRef.ref.index < str.length) {
+		const char = str[cursorRef.ref.index];
 		const byteSize = encoder.encode(char).byteLength;
 
-		if (byteOffset + byteSize > bytes) {
+		if (cursorRef.bytes + byteSize > bytes) {
 			break;
 		}
 
-		ref.advance(char === "\n");
-		byteOffset += byteSize;
+		cursorRef.ref.advance(char === "\n");
+		cursorRef.bytes += byteSize;
 	}
-
-	return {
-		bytes: byteOffset,
-		ref: ref
-	};
 }
 
-function MapTreeRefs(tree: SyntaxNode, str: string) {
-	let stack  = [tree];
-	let byteOffset = 0;
+function MapTreeRefs(tree: SyntaxNode, str: string, sharedRef: ReferenceRange) {
+	let stack = [tree];
 
-	let overlap = {
+	let cursor: Cursor = {
 		ref: new Reference(1,1,0),
 		bytes: 0
 	};
@@ -79,26 +77,28 @@ function MapTreeRefs(tree: SyntaxNode, str: string) {
 		const curr = stack.pop();
 		if (!curr) continue;
 
-		if (!curr.ref) {
-			overlap = overlap.bytes === curr.start ? overlap :
-				MapBytes2String(str, curr.start, byteOffset, overlap.ref);
-			curr.ref = new ReferenceRange(
-				overlap.ref.clone(),
-				new Reference(0,0,0)
-			);
-			byteOffset = overlap.bytes;
+		if (curr.ref === sharedRef) {
+			// Don't calculate forward progression if not needed
+			if (cursor.bytes !== curr.end) ProgressCursor(str, curr.end, cursor);
 
-			if (typeof(curr.value) === "string") {
-				stack.push(curr);
-			} else {
-				stack = stack.concat([ curr, ...[...curr.value].reverse()]);
+			curr.ref = new ReferenceRange(
+				cursor.ref.clone(),
+				cursor.ref // no alloc fill in
+			);
+
+			stack.push(curr); // revisit node for ref.end mapping (after children)
+			if (typeof(curr.value) !== "string") {
+				// Reverse order concat children to stack for FIFO
+				for (let i=curr.value.length; i>0; i--) {
+					stack.push(curr.value[i]);
+				}
 			}
 		} else {
-			overlap = overlap.bytes === curr.end ? overlap :
-				MapBytes2String(str, curr.end, byteOffset, overlap.ref);
-			curr.ref.end = overlap.ref.clone();
-			curr.ref.end.advance(false);
-			byteOffset = overlap.bytes;
+			// Don't calculate forward progression if not needed
+			if (cursor.bytes !== curr.end) ProgressCursor(str, curr.end, cursor);
+
+			curr.ref.end = cursor.ref.clone();
+			curr.ref.end.advance(false); // end ref refers to the index after the final char
 		}
 	}
 }
@@ -110,11 +110,14 @@ export function Parse(ctx: WasmParser, data: string, refMapping = true, entry = 
 	let reach = Number(ctx.exports.reach);
 	if (statusCode == 1) {
 		if (refMapping) {
+			const cursor = {bytes: 0, ref: Reference.blank()};
+			ProgressCursor(data, reach, cursor);
+
 			return new ParseError(
 				"Unable to parse",
 				new ReferenceRange(
 					new Reference(0, 0, 0),
-					MapBytes2String(data, reach, 0, Reference.blank()).ref
+					cursor.ref
 				)
 			)
 		} else {
@@ -122,34 +125,35 @@ export function Parse(ctx: WasmParser, data: string, refMapping = true, entry = 
 				"Unable to parse",
 				new ReferenceRange(
 					new Reference(0, 0, 0),
-					MapBytes2String(data, reach, 0, Reference.blank()).ref
+					new Reference(0, 0, reach)
 				)
 			)
 		}
 	};
 
-	const root = Decode(ctx, heap, refMapping);
+	const sharedRef = ReferenceRange.blank();
+	const root = Decode(ctx, heap, sharedRef);
 	if (refMapping) {
-		MapTreeRefs(root, data);
+		MapTreeRefs(root, data, sharedRef);
 	};
+
+	let reachRef: Reference | null = null;
+	if (refMapping) {
+		const cursor = {bytes: 0, ref: root.ref.end.clone()};
+		ProgressCursor(data, reach, cursor);
+		reachRef = cursor.ref;
+	}
 
 	return {
 		root,
 		reachBytes: reach,
-		reach: refMapping ?
-			MapBytes2String(
-				data,
-				reach,
-				root.end,
-				root.ref?.end.clone() || Reference.blank()
-			).ref :
-			null,
+		reach: reachRef,
 		isPartial: root.end < ctx.exports.inputLength.value
 	};
 }
 
 
-function Decode(ctx: WasmParser, heap: number, readBoundary = false) {
+function Decode(ctx: WasmParser, heap: number, sharedRef: ReferenceRange) {
 	const memory = ctx.exports.memory;
 	const memoryArray = new Int32Array(memory.buffer);
 	const byteArray   = new Int8Array(memory.buffer);
@@ -161,8 +165,6 @@ function Decode(ctx: WasmParser, heap: number, readBoundary = false) {
 	let offset = (heap / 4);
 
 	const typeCache = new Map<number, string>();
-
-	const sharedRef = ReferenceRange.blank();
 
 	while (root === null || stack.length > 0) {
 		const curr = stack[stack.length-1];
@@ -221,7 +223,7 @@ export function toString() {
 	return `import "./shared.js";\n` +
 		`const OFFSET = ${JSON.stringify(OFFSET)};` +
 		"\nexport "+InitParse.toString()+
-		"\nexport "+MapBytes2String.toString()+
+		"\nexport "+ProgressCursor.toString()+
 		"\nexport "+MapTreeRefs.toString()+
 		"\nexport "+Parse.toString()+
 		"\nexport "+Decode.toString()+"\n\n";
