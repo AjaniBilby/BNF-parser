@@ -88,6 +88,13 @@ for (const file of files) {
 		failure = true;
 		continue;
 	}
+	if (syntax.isPartial) {
+		console.error(`Failed to finish parsing ${name}`);
+		console.error(syntax.reach?.toString());
+		console.error("");
+		failure = true;
+		continue;
+	}
 
 
 	let lang: null | legacy.Parser = null;
