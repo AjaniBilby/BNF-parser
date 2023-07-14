@@ -10,7 +10,7 @@
 			const ParseError = bnf_parser.Shared.ParseError;
 
 			function Run() {
-
+				const output = document.getElementById("output");
 				monaco.editor.setModelMarkers(editor.getModel(), 'owner', []);
 
 				const mod = bnf_parser.wasm.Compile2Wasm(editor.getValue());
@@ -26,7 +26,7 @@
 							message: mod.msg,
 						},
 					]);
-					output.setValue(JSON.stringify(mod, null, 2));
+					output.innerHTML = "Compile Error " + JSON.stringify(mod, null, 2);
 					return;
 				}
 
@@ -34,13 +34,17 @@
 				const wasm = bnf_parser.wasm.Runner.Create(bin);
 
 				const input = document.getElementById("input").value || "";
-				const result = bnf_parser.wasm.Runner.Parse(wasm, input, false);
+				const result = bnf_parser.wasm.Runner.Parse(wasm, input, true);
 				if (result instanceof ParseError) {
 					console.error(result.toString());
+					output.innerHTML = "ParserError " + JSON.stringify(result, null, 2);
+					return;
 				}
 
-				output.setValue(JSON.stringify(result, null, 2));
+				output.innerHTML = JSON.stringify(result, null, 2);
 			}
+
+			document.getElementById("run").removeAttribute("disabled");
 			window.Run = Run;
 		</script>
 		<script>
@@ -132,15 +136,15 @@
 			let output = null;
 		</script>
 	</head>
-	<body style="background-color: #272822;">
+	<body style="background-color: #272822; font-family: monospace;">
 		<div style="position: fixed; inset: 0 0 0 0; display: grid; grid-template-rows: 2fr 3fr;">
 			<div id="code" style="padding: 10px 5px 0px 0px"></div>
 			<div style="display: grid; grid-template-columns: 2fr 3fr; overflow: hidden; border-top: 1px solid #3E3D32">
 				<div style="position: relative; border-right: 1px solid #3E3D32">
 					<textarea id="input" style="color: #F8F8F2; background-color: inherit; border: none; width: 100%; height: 100%; padding: 10px; resize: none;">Hello World</textarea>
-					<button style="position: absolute; right: 0px; top: 0px; z-index: 1;" onClick="Run()">Run</button>
+					<button id="run" disabled style="position: absolute; right: 0px; top: 0px; z-index: 1;" onClick="Run()">Run</button>
 				</div>
-				<div id="output"></div>
+				<div id="output" style="color: #F8F8F2; white-space: pre-wrap; overflow-y: auto;"></div>
 			</div>
 		</div>
 
@@ -174,17 +178,6 @@
 					tabSize: 2,
 					renderWhitespace: "boundary",
 					minimap: { enabled: false }
-				});
-
-				output = monaco.editor.create(document.getElementById('output'), {
-					value: `{}`,
-					language: 'json'
-				});
-				output.updateOptions({
-					insertSpaces: false,
-					tabSize: 2,
-					renderWhitespace: "boundary",
-					minimap: { enabled: false },
 				});
 
 				// Attach the event listener for the window resize event
