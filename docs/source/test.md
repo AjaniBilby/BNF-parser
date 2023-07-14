@@ -17,4 +17,6 @@ hide:
     This is not indicative of the performance you can expect by actually using this library properly,
     and the entire compilation step is skipped at runtime as it's already been completed during pre-compilation.
 
+If you want to try with code in your browser use [RunKit+:fontawesome-brands-npm:](https://npm.runkit.com/bnf-parser)
+
 <iframe src="/static/playground.html" style="width: 100%; min-height: 600px; height: 90vh; border: none; border-radius: 10px;"></iframe>
