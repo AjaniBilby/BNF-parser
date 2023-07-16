@@ -126,6 +126,8 @@ for (const file of files) {
 		if (process.argv.includes("--emit-wat"))
 			writeFileSync(`${root_dir}/${name}.wat`, module.emitText());
 
+		module.optimize();
+
 		// Generate JS runner
 		writeFileSync(`${root_dir}/${name}.js`,
 			GenerateRunner(lang, module.emitBinary())
