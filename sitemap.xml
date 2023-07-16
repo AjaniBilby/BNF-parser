@@ -86,6 +86,11 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://bnf-parser.ajanibilby.com/migrate/v4/</loc>
+         <lastmod>2023-07-16</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://bnf-parser.ajanibilby.com/syntax/</loc>
          <lastmod>2023-07-16</lastmod>
          <changefreq>daily</changefreq>
