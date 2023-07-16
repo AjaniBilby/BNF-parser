@@ -26,6 +26,10 @@ See [https://bnf-parser.ajanibilby.com/](https://bnf-parser.ajanibilby.com/)
 
 See [https://bnf-parser.ajanibilby.com/api](https://bnf-parser.ajanibilby.com/api)
 
+## BNF Syntax
+
+See [https://bnf-parser.ajanibilby.com/api](https://bnf-parser.ajanibilby.com/syntax)
+
 ## Try it Online
 
 Try it in your browser [https://bnf-parser.ajanibilby.com/test](https://bnf-parser.ajanibilby.com/test)

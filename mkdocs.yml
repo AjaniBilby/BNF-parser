@@ -82,6 +82,7 @@ markdown_extensions:
   - pymdownx.keys
   - pymdownx.mark
   - pymdownx.tilde
+  - pymdownx.snippets
 
 extra_css:
   - styles/extra.css
@@ -99,6 +100,8 @@ nav:
   - Home: index.md
   - Getting Started: setup.md
   - CLI: cli.md
+  - Syntax:
+    - index.md
   - Artifacts:
     - artifact/index.md
     - Shared: artifact/shared.md

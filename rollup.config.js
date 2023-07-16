@@ -1,3 +1,8 @@
+import * as fs from "fs";
+
+const bnf = fs.readFileSync('./bnf/bnf.bnf', 'utf8');
+fs.writeFileSync("./docs/source/syntax/bnf.bnf", bnf);
+
 const resolveToUnpkg = {
 	resolveId(source) {
 		if (source === 'binaryen') {
