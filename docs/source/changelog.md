@@ -3,12 +3,13 @@
 ## Version 4.0.0
 
 ### Additions
-  - [x] Ability to compile BNFs down to WebAssembly
-  - [x] Ability to generate type definitions for the syntax tree of a given BNF
+  - [x] Compile BNFs down to WebAssembly
+  - [x] Generate type definitions for the syntax tree of a given BNF
   - [x] Now able to represent characters by char code using hexadecimal in literals (wasm only) `\x41`
 
 ### Changes:
   - [x] All previous APIs moved under the `legacy` namespace
+  - [x] Changed package type to module
 
 ### Fixes:
   - [x] Count not working when applied directly to a range (i.e. `"a"->"z"+`)

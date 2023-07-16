@@ -9,10 +9,10 @@ hide:
 
 # BNF Parser
 
-!!! danger "Pre-Release Warning"
+!!! warning "Migrating from v3.0"
 
-    This documentation is for the 4.0 version of `bnf-parser` which is still in pre-release  
-    For documentation for the current legacy version please go [here](/legacy)
+    If you are looking for the documentation for the older version of the api go [here](/legacy)  
+    Overwise if you are attempting to migrate from `3.0`->`4.0` we recommend reading this [migration guide](/migrate/v4)
 
 !!! note "Built to not be a dependency"
 
