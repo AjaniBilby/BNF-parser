@@ -13,7 +13,7 @@
         <link rel="canonical" href="https://bnf-parser.ajanibilby.com/api/wasm/">
       
       
-        <link rel="prev" href="../types/">
+        <link rel="prev" href="../bnf/">
       
       
         <link rel="next" href="../../legacy/">
@@ -562,8 +562,6 @@
         
           
         
-          
-        
       
       
         
@@ -618,20 +616,6 @@
               
   
   
-  
-    <li class="md-nav__item">
-      <a href="../types/" class="md-nav__link">
-        Types
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
     
   
   
@@ -643,9 +627,115 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Wasm
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         Wasm
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#compile2wasm" class="md-nav__link">
+    Compile2Wasm
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#compiletypes" class="md-nav__link">
+    CompileTypes
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#generatewasm" class="md-nav__link">
+    GenerateWasm
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#runner" class="md-nav__link">
+    Runner
+  </a>
+  
+    <nav class="md-nav" aria-label="Runner">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#runnerwasmparser" class="md-nav__link">
+    Runner.WasmParser
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#runnercreate" class="md-nav__link">
+    Runner.Create
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#runnerparse" class="md-nav__link">
+    Runner.Parse
+  </a>
+  
+    <nav class="md-nav" aria-label="Runner.Parse">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#argument-refmapping" class="md-nav__link">
+    Argument refMapping
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#argument-entry" class="md-nav__link">
+    Argument entry
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#runnertostring" class="md-nav__link">
+    Runner.toString
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -806,6 +896,96 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#compile2wasm" class="md-nav__link">
+    Compile2Wasm
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#compiletypes" class="md-nav__link">
+    CompileTypes
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#generatewasm" class="md-nav__link">
+    GenerateWasm
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#runner" class="md-nav__link">
+    Runner
+  </a>
+  
+    <nav class="md-nav" aria-label="Runner">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#runnerwasmparser" class="md-nav__link">
+    Runner.WasmParser
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#runnercreate" class="md-nav__link">
+    Runner.Create
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#runnerparse" class="md-nav__link">
+    Runner.Parse
+  </a>
+  
+    <nav class="md-nav" aria-label="Runner.Parse">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#argument-refmapping" class="md-nav__link">
+    Argument refMapping
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#argument-entry" class="md-nav__link">
+    Argument entry
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#runnertostring" class="md-nav__link">
+    Runner.toString
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -828,14 +1008,72 @@
 
 
 <h1 id="wasm-namespace"><code>wasm</code> Namespace</h1>
-<p>TODO</p>
+<h2 id="compile2wasm">Compile2Wasm</h2>
+<p>This is a wrapper around <a href="#generatewasm"><code>GenerateWasm</code></a> which allows you to go straight from a string representation of a bnf,
+down to the <a href="https://www.npmjs.com/package/binaryen#module-construction">binaryen.Module</a> without needing to generate a <a href="/legacy/api/#parser"><code>legacy.Parser</code></a> first.</p>
+<div class="highlight"><pre><span></span><code><span class="kd">function</span><span class="w"> </span><span class="nx">Compile2Wasm</span><span class="p">(</span><span class="nx">inputBnf</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nx">Shared</span><span class="p">.</span><span class="nx">ParseError</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nx">binaryen</span><span class="p">.</span><span class="nx">Module</span>
+</code></pre></div>
+<h2 id="compiletypes">CompileTypes</h2>
+<p>Takes in a <a href="/legacy/api/#parser"><code>legacy.Parser</code></a> as input for a bnf syntax,
+and outputs the corresponding typescript definitions as a string for a compiled artifact which would be generated from the same input</p>
+<div class="highlight"><pre><span></span><code><span class="kd">function</span><span class="w"> </span><span class="nx">CompileTypes</span><span class="p">(</span><span class="nx">lang</span><span class="o">:</span><span class="w"> </span><span class="kt">legacy.Parser</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span>
+</code></pre></div>
+<h2 id="generatewasm">GenerateWasm</h2>
+<p>Takes in a <a href="/legacy/api/#parser"><code>legacy.Parser</code></a> as input for a bnf syntax, and compiles it down to a <a href="https://www.npmjs.com/package/binaryen#module-construction">binaryen.Module</a> which can then be used to generate <code>.wat</code> and <code>.wasm</code> outputs.</p>
+<div class="highlight"><pre><span></span><code><span class="kd">function</span><span class="w"> </span><span class="nx">GenerateWasm</span><span class="p">(</span><span class="nx">lang</span><span class="o">:</span><span class="w"> </span><span class="kt">legacy.Parser</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nx">binaryen</span><span class="p">.</span><span class="nx">Module</span>
+</code></pre></div>
+<h2 id="runner">Runner</h2>
+<h3 id="runnerwasmparser">Runner.WasmParser</h3>
+<p>This is just a type interface used by all runners, including ones encoded in an artifact.
+It is simply used to differentiate a wasm instance generated for BNF parsing, from a generic wasm instance.</p>
+<div class="highlight"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">WasmParser</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">WebAssembly</span><span class="p">.</span><span class="nx">Instance</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">exports</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">memory</span><span class="w">      </span><span class="o">:</span><span class="w"> </span><span class="kt">WebAssembly.Memory</span><span class="p">;</span>
+<span class="w">        </span><span class="nx">input</span><span class="w">       </span><span class="o">:</span><span class="w"> </span><span class="kt">WebAssembly.Global</span><span class="p">;</span>
+<span class="w">        </span><span class="nx">inputLength</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kt">WebAssembly.Global</span><span class="p">;</span>
+<span class="w">        </span><span class="nx">heap</span><span class="w">        </span><span class="o">:</span><span class="w"> </span><span class="kt">WebAssembly.Global</span><span class="p">;</span>
+
+<span class="w">        </span><span class="nx">_init</span><span class="o">:</span><span class="w">   </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span>
+<span class="w">        </span><span class="nx">program</span><span class="o">:</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="kt">number</span><span class="p">;</span>
+<span class="w">    </span><span class="c1">// generated artifacts will have extra functions</span>
+<span class="w">    </span><span class="c1">//   bound based on the BNF they are generated from</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="runnercreate">Runner.Create</h3>
+<p>This takes any <code>BufferSource</code> as input (i.e. <code>Uint8Array</code>), and synchronously generates a wasm instance from it.
+This function will error in most browsers, as instantiating any WebAssembly module over <code>4KB</code> in size must be non-blocking.</p>
+<div class="highlight"><pre><span></span><code><span class="kd">function</span><span class="w"> </span><span class="nx">Create</span><span class="p">(</span><span class="nx">wasm</span><span class="o">:</span><span class="w"> </span><span class="kt">BufferSource</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="nx">WasmParser</span><span class="p">;</span>
+</code></pre></div>
+<h3 id="runnerparse">Runner.Parse</h3>
+<p>Supply an already created <a href="#runnerwasmparser"><code>WasmParser</code></a> from <a href="#runnercreate"><code>Runner.Create</code></a>,
+a string input for the data to be parsed, as well as two optional modifiers to attempt to generate a syntax tree
+using the given wasm instance.</p>
+<div class="highlight"><pre><span></span><code><span class="kd">function</span><span class="w"> </span><span class="nx">Parse</span><span class="p">(</span><span class="nx">ctx</span><span class="o">:</span><span class="w"> </span><span class="kt">WasmParser</span><span class="p">,</span><span class="w"> </span><span class="nx">data</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">,</span><span class="w"> </span><span class="nx">refMapping</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"> </span><span class="nx">entry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;program&quot;</span><span class="p">)</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">reachBytes</span><span class="o">:</span><span class="w"> </span><span class="kt">number</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">isPartial</span><span class="o">:</span><span class="w"> </span><span class="kt">boolean</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">reach</span><span class="o">:</span><span class="w"> </span><span class="kt">Shared.Reference</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">root</span><span class="o">:</span><span class="w">  </span><span class="kt">SyntaxNode</span><span class="p">,</span>
+<span class="p">}</span>
+</code></pre></div>
+<h4 id="argument-refmapping">Argument <code>refMapping</code></h4>
+<p>If this is disabled, all SyntaxNodes will share a single <a href="/api/shared/#referencerange"><code>ReferenceRange</code></a> which reduces decode time as the proper references don't need to be calculated during decoding, and nor do new object instances need to be generated reducing allocations.</p>
+<p>If this is enabled a proper reference range will be generated for every <a href="/api/shared/#syntaxnode"><code>SyntaxNode</code></a>.</p>
+<p>You can detect if a <a href="/api/shared/#reference"><code>SyntaxNode</code></a> has been source mapped or not, because a non-source mapped node's <code>.ref</code> will have the start and end points being the exact same object (i.e. <code>start === end</code>), but also all values in the <code>Reference</code> will be zero, which is invalid as col and line numbers both start counting from <code>1</code>.</p>
+<h4 id="argument-entry">Argument <code>entry</code></h4>
+<p>This tells the parser which term in the bnf to start parsing from.</p>
+<h3 id="runnertostring">Runner.toString</h3>
+<p>This function is intended for internal use only.
+It's used to generate the <a href="/artifact/shared">shared artifact</a></p>
+<div class="highlight"><pre><span></span><code><span class="kd">function</span><span class="w"> </span><span class="nx">toString</span><span class="p">()</span><span class="o">:</span><span class="w"> </span><span class="kt">string</span><span class="p">;</span>
+</code></pre></div>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">July 14, 2023</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">July 16, 2023</span>
       
         <br>
         Created:
@@ -870,7 +1108,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../types/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Types" rel="prev">
+          <a href="../bnf/" class="md-footer__link md-footer__link--prev" aria-label="Previous: BNF" rel="prev">
             <div class="md-footer__button md-icon">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
             </div>
@@ -879,7 +1117,7 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                Types
+                BNF
               </div>
             </div>
           </a>

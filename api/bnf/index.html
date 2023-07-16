@@ -16,7 +16,7 @@
         <link rel="prev" href="../shared/">
       
       
-        <link rel="next" href="../types/">
+        <link rel="next" href="../wasm/">
       
       <link rel="icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.18">
@@ -562,8 +562,6 @@
         
           
         
-          
-        
       
       
         
@@ -619,20 +617,6 @@
         BNF
       </a>
       
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../types/" class="md-nav__link">
-        Types
-      </a>
     </li>
   
 
@@ -828,14 +812,19 @@
 
 
 <h1 id="bnf-namespace"><code>bnf</code> Namespace</h1>
-<p>TODO</p>
+<p>This namespace is actually an already instantiated bnf parser compiled with the language itself.
+It shares all similar properties as a regular <a href="/artifact/individual">individual artifact</a>,
+generated on the syntax for <code>bnf</code>s themselves.</p>
+<p>It is used internally in the library to parse <code>bnf</code> inputs into <code>SyntaxNode</code>s
+which are then used for further compilation to either <a href="/api/wasm/#generatewasm"><code>WasmParser</code></a>,
+<a href="/legacy/api/#parser"><code>legacy.Parser</code></a>, or <a href="/api/wasm#compiletypes"><code>type definitions</code></a></p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">July 14, 2023</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">July 16, 2023</span>
       
         <br>
         Created:
@@ -886,13 +875,13 @@
         
         
           
-          <a href="../types/" class="md-footer__link md-footer__link--next" aria-label="Next: Types" rel="next">
+          <a href="../wasm/" class="md-footer__link md-footer__link--next" aria-label="Next: Wasm" rel="next">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                Types
+                Wasm
               </div>
             </div>
             <div class="md-footer__button md-icon">

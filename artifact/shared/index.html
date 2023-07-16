@@ -574,8 +574,6 @@
         
           
         
-          
-        
       
       
         
@@ -620,20 +618,6 @@
     <li class="md-nav__item">
       <a href="../../api/bnf/" class="md-nav__link">
         BNF
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../api/types/" class="md-nav__link">
-        Types
       </a>
     </li>
   
@@ -830,22 +814,24 @@
 
 
 <h1 id="using-the-shared-artifact">Using the Shared Artifact</h1>
-<p>This artifact is actually just a clone of the <code>Shared</code> namespace within <code>bnf-parser</code> with some functions embedded from <code>wasm.Runner</code>.</p>
+<p>This artifact is actually just a clone of the <a href="/api/shared"><code>Shared</code></a> namespace within <code>bnf-parser</code> with some functions embedded from <a href="/api/wasm"><code>wasm.Runner</code></a>.</p>
 <p>Namespaces</p>
 <ul>
-<li><code>ParserError</code></li>
-<li><code>SyntaxNode</code></li>
-<li><code>ReferenceRange</code></li>
-<li><code>Reference</code></li>
-<li><code>DecodeBase64</code></li>
+<li><a href="/api/shared#assertunreachable"><code>AssertUnreachable</code></a></li>
+<li><a href="/api/shared#decodebase64"><code>DecodeBase64</code></a></li>
+<li><a href="/api/shared#parsererror"><code>ParserError</code></a></li>
+<li><a href="/api/shared#reference"><code>Reference</code></a></li>
+<li><a href="/api/shared#referencerange"><code>ReferenceRange</code></a></li>
+<li><a href="/api/shared#syntaxnode"><code>SyntaxNode</code></a></li>
 </ul>
 <p>There are also some extra functions which are purely there for the bnf artifacts to import, and not intended for direct use</p>
 <ul>
+<li><code>Decode</code></li>
 <li><code>InitParse</code></li>
+<li><a href="/api/wasm#runnerparse"><code>Parse</code></a></li>
 <li><code>MapBytes2String</code></li>
 <li><code>MapTreeRefs</code></li>
-<li><code>Parse</code></li>
-<li><code>Decode</code></li>
+<li><code>Offset</code></li>
 </ul>
 
   <hr>
@@ -853,7 +839,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">July 12, 2023</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">July 16, 2023</span>
       
         <br>
         Created:
