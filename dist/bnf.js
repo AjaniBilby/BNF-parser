@@ -8,7 +8,7 @@ if (typeof window === 'undefined') {
 		), {js: {print_i32: console.log}}
 	);
 }
-export let ready = new Promise(async (res, rej) => {
+let ready = new Promise(async (res, rej) => {
 	if (typeof window !== 'undefined') {
 		_ctx = await WebAssembly.instantiate(
 			await WebAssembly.compile(_rawWasm),
@@ -19,7 +19,9 @@ export let ready = new Promise(async (res, rej) => {
 	Object.freeze(_ctx);
 	_rawWasm = null;
 	res();
-});export function Parse_Program (data, refMapping = true) {
+});
+export { ready };
+export function Parse_Program (data, refMapping = true) {
   return _Shared.Parse(_ctx, data, refMapping, "program");
 }
 export function Parse_W (data, refMapping = true) {

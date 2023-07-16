@@ -38,7 +38,7 @@ let ready = new Promise(async (res, rej) => {
 	_rawWasm = null;
 	res();
 });
-export { ready };`;
+export { ready };\n`;
 
 	for (const [name, rule] of lang.terms) {
 		out += `export function Parse_${rule.name[0].toUpperCase()}${rule.name.slice(1)} (data, refMapping = true) {\n`;
