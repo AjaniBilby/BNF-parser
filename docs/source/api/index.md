@@ -17,5 +17,4 @@
 - [`_shared`](/api/shared)
 - [`bnf`](/api/bnf)
 - [`legacy`](/legacy/api)
-- [`types`](/types)
 - [`wasm`](/wasm)

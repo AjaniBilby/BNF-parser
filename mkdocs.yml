@@ -107,7 +107,6 @@ nav:
     - api/index.md
     - Shared: api/shared.md
     - BNF: api/bnf.md
-    - Types: api/types.md
     - Wasm: api/wasm.md
   - Legacy:
     - legacy/index.md
