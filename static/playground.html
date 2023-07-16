@@ -7,7 +7,7 @@
 			import * as bnf_loader from "/static/dist/bnf-parser.js";
 			window.bnf_parser = bnf_loader;
 
-			const ParseError = bnf_parser.Shared.ParseError;
+			const ParseError = bnf_parser._shared.ParseError;
 
 			async function Run() {
 				const output = document.getElementById("output");
