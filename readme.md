@@ -1,6 +1,5 @@
 # BNF-Parser <!-- no toc -->
 
-[![Reflection Test](https://github.com/AjaniBilby/BNF-parser/actions/workflows/npm-load-check.yml/badge.svg?branch=master)](https://github.com/AjaniBilby/BNF-parser/actions/workflows/npm-load-check.yml)
 [![Test](https://github.com/AjaniBilby/BNF-parser/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/AjaniBilby/BNF-parser/actions/workflows/test.yml)
 
 Compile your bnfs down to WebAssembly for maximum parsing speed; with generated type definitions to make using the syntax tree outputs a breeze. The compiled output from this library is platform agnostic, so it can run anywhere `new WebAssembly.Instance()` is a valid function. It bundles the WebAssembly module inside of a single js file so it can be easily incorporated into any bundler. The type definitions for a given bnf are just that, a definitions file - so if you don't want to use typescript or type hints you can go wild by ignoring it.
@@ -10,8 +9,13 @@ Compile your bnfs down to WebAssembly for maximum parsing speed; with generated 
 program ::= %w* statement+ ;
 block ::= %("block" w+) ...name %(w* "{" w*) seq_stmt* %("}" w*) ;
 ```
+```bash
+npx bnf-compile ./syntax.bnf
+```
 ```ts
-const tree = syntax.program(input).root;
+import * as syntax from "syntax.js";
+
+const tree = syntax.Parse_Program(input).root;
 const block = program.value[0];
 const name: string = block.value[0]; // typescript knows this **will** be a string
 ```

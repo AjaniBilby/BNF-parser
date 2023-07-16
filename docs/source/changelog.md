@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 4.0.1
+
+### Fixes:
+  - [x] NPM didn't include some critical files for some reason...
+
 ## Version 4.0.0
 
 ### Additions
