@@ -1,17 +1,18 @@
-import { CharRange, Count, Expression, Gather, Literal, Not, Omit, Parser, Rule, Select, Sequence, Term } from "./legacy/parser.js";
+import type { Count, Expression, Literal, Parser, Rule, Select, Term } from './legacy/parser.js';
+import { Sequence } from './legacy/parser.js';
 
 
 
 function CompileExpression(expr: Expression, name?: string): string {
 	switch (expr.constructor.name) {
-		case "Sequence":  return CompileSequence(expr as Sequence, name);
-		case "Select":    return CompileSelect  (expr as Select);
-		case "Literal":   return CompileLiteral (expr as Literal);
-		case "Term":      return CompileTerm    (expr as Term);
-		case "CharRange": return CompileRange   ();
-		case "Omit":      return CompileOmit    ();
-		case "Not":       return CompileNot     ();
-		case "Gather":    return CompileGather  ();
+		case 'Sequence':  return CompileSequence(expr as Sequence, name);
+		case 'Select':    return CompileSelect  (expr as Select);
+		case 'Literal':   return CompileLiteral (expr as Literal);
+		case 'Term':      return CompileTerm    (expr as Term);
+		case 'CharRange': return CompileRange   ();
+		case 'Omit':      return CompileOmit    ();
+		case 'Not':       return CompileNot     ();
+		case 'Gather':    return CompileGather  ();
 	}
 
 	throw new Error(`Unexpected expression type ${expr.constructor.name} during compilation`);
@@ -21,7 +22,7 @@ function CompileExpression(expr: Expression, name?: string): string {
 function CompileSequence(expr: Sequence, name?: string): string {
 	const once = CompileSequenceOnce(expr, name);
 
-	if (expr.count === "1") {
+	if (expr.count === '1') {
 		return once;
 	} else {
 		return CompileRepeat(once, expr.count);
@@ -29,20 +30,20 @@ function CompileSequence(expr: Sequence, name?: string): string {
 }
 
 function CompileSequenceOnce(expr: Sequence, name?: string): string {
-	return `{\n  type: "${name || "(...)"}", start: number, end: number, count: number, ref: _Shared.ReferenceRange,\n  value: [\n` +
+	return `{\n\ttype: '${name || '(...)'}',\n\tstart: number,\n\tend: number,\n\tcount: number,\n\tref: _Shared.ReferenceRange,\n\tvalue: [\n` +
 		expr.exprs
 			.map(x => CompileExpression(x))
 			.filter(x => x.length > 0)
-			.map(x => "    " + x)
-			.join(",\n") +
-		"\n  ]\n}";
+			.map(x => '\t\t' + x)
+			.join(',\n') +
+		'\n\t]\n}';
 }
 
 
 function CompileSelect(expr: Select): string {
 	const once = CompileSelectOnce(expr);
 
-	if (expr.count === "1") {
+	if (expr.count === '1') {
 		return once;
 	} else {
 		return CompileRepeat(once, expr.count);
@@ -50,28 +51,28 @@ function CompileSelect(expr: Select): string {
 }
 
 function CompileSelectOnce(expr: Select): string {
-	return "(" +
+	return '(' +
 		expr.exprs
 			.map(x => CompileExpression(x))
 			.filter(x => x.length > 0)
-			.join(" | ") +
-		")";
+			.join(' | ') +
+		')';
 }
 
 
 function CompileOmit(): string {
-	return "";
+	return '';
 }
 
 function CompileGather(): string {
-	return TemplateNode(`"literal"`, "string");
+	return TemplateNode(`'literal'`, 'string');
 }
 
 
 function CompileTerm(expr: Term): string {
 	const once = CompileTermOnce(expr);
 
-	if (expr.count === "1") {
+	if (expr.count === '1') {
 		return once;
 	} else {
 		return CompileRepeat(once, expr.count);
@@ -79,16 +80,16 @@ function CompileTerm(expr: Term): string {
 }
 
 function CompileTermOnce(expr: Term): string {
-	return "Term_" + expr.value[0].toUpperCase() + expr.value.slice(1);;
+	return 'Term_' + expr.value[0].toUpperCase() + expr.value.slice(1);;
 }
 
 
 function CompileNot(): string {
-	return TemplateNode(`"literal"`, "string");
+	return TemplateNode(`'literal'`, 'string');
 }
 
 function CompileRange(): string {
-	return TemplateNode(`"literal"`, "string");
+	return TemplateNode(`'literal'`, 'string');
 }
 
 
@@ -96,7 +97,7 @@ function CompileRange(): string {
 function CompileLiteral(expr: Literal): string {
 	const once = CompileLiteralOnce(expr);
 
-	if (expr.count === "1") {
+	if (expr.count === '1') {
 		return once;
 	} else {
 		return CompileRepeat(once, expr.count);
@@ -105,22 +106,21 @@ function CompileLiteral(expr: Literal): string {
 
 function CompileLiteralOnce(expr: Literal): string {
 	let safe = expr.value.replace(/[^a-zA-Z0-9]/g,
-		(char) => "\\x" + char.charCodeAt(0).toString(16).padStart(2, "0")
+		(char) => '\\x' + char.charCodeAt(0).toString(16).padStart(2, '0')
 	);
 
-	return TemplateNode(`"literal"`, `"${safe}"`);
+	return TemplateNode(`'literal'`, `'${safe}'`);
 }
 
 
-
-
-
 function CompileRepeat(innerType: string, repetitions: Count): string {
-	if (repetitions === "1") throw new Error("Don't compile repetitions for 1 to 1 repetition");
-
-	if (repetitions === "?") return TemplateNode(`"(...)"`, `[] | [${innerType}]`);
-
-	return TemplateNode(`"(...)"`, innerType+"[]");
+	switch (repetitions) {
+		case "1": throw new Error(`Don't compile repetitions for 1 to 1 repetition`);
+		case "?": return TemplateNode(`'(...)?'`, `[] | [${innerType}]`);
+		case "+": return TemplateNode(`'(...)+'`, `[${innerType}] & Array<${innerType}>`);
+		case "*": return TemplateNode(`'(...)*'`, `Array<${innerType}>`);
+		default: throw new Error(`Unexpected count type ${repetitions}`);
+	}
 }
 
 
@@ -134,25 +134,20 @@ function TemplateNode(type: string, value: string) {
 
 function CompileRule(rule: Rule) {
 	// Make sure all rules start with a sequence
-	// let inner = rule.seq;
-	// if (inner.constructor.name === "Select") {
-	// 	let child: Expression = inner as Select;
-	// 	if (child.exprs.length === 1) child = child.exprs[0];
-
 	let inner = rule.seq;
-	if (inner.constructor.name === "Select") {
+	if (inner.constructor.name === 'Select') {
 		let child: Expression = inner as Select;
 		if (child.exprs.length === 1) child = child.exprs[0];
 
 		inner = new Sequence({
 			exprs: [],
-			count: "1"
+			count: '1'
 		});
 		inner.exprs = [ child ];
-	} else if (rule.seq.constructor.name !== "Sequence") {
+	} else if (rule.seq.constructor.name !== 'Sequence') {
 		inner = new Sequence({
 			exprs: [],
-			count: "1"
+			count: '1'
 		});
 		inner.exprs = [ rule.seq ];
 	}
@@ -160,12 +155,12 @@ function CompileRule(rule: Rule) {
 	const capName = rule.name[0].toUpperCase() + rule.name.slice(1);
 	const typeName = `Term_${capName}`;
 	return `export type ${typeName} = ${CompileExpression(inner, rule.name)}\n` +
-		`export declare function Parse_${capName} (i: string, refMapping?: boolean): _Shared.ParseError | { root: _Shared.SyntaxNode & ${typeName}, reachBytes: number, reach: null | _Shared.Reference, isPartial: boolean }\n`;
+		`export declare function Parse_${capName} (i: string, refMapping?: boolean): _Shared.ParseError | {\n\troot: _Shared.SyntaxNode & ${typeName},\n\treachBytes: number,\n\treach: null | _Shared.Reference,\n\tisPartial: boolean\n}\n`;
 }
 
 
 export function CompileTypes(lang: Parser) {
-	return `import * as _Shared from "./shared.js";\n`+ [...lang.terms.keys()]
+	return `import type _Shared from './shared.js';\n`+ [...lang.terms.keys()]
 	.map(x => CompileRule(lang.terms.get(x) as any)) // hush Typescript it's okay
-	.join("\n");
+	.join('\n');
 }

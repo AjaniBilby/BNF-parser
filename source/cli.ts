@@ -26,7 +26,7 @@ if (typeof window === 'undefined') {
 		), {js: {print_i32: console.log}}
 	);
 }
-let ready = new Promise(async (res, rej) => {
+let ready = new Promise(async (res) => {
 	if (typeof window !== 'undefined') {
 		_ctx = await WebAssembly.instantiate(
 			await WebAssembly.compile(_rawWasm),
@@ -42,7 +42,7 @@ export { ready };\n`;
 
 	for (const [name, rule] of lang.terms) {
 		out += `export function Parse_${rule.name[0].toUpperCase()}${rule.name.slice(1)} (data, refMapping = true) {\n`;
-		out += `  return _Shared.Parse(_ctx, data, refMapping, "${name}");\n`;
+		out += `\treturn _Shared.Parse(_ctx, data, refMapping, "${name}");\n`;
 		out += `}\n`;
 	}
 
@@ -142,7 +142,13 @@ for (const file of files) {
 }
 
 writeFileSync(`${root_dir}/shared.js`, wasm.Runner.toString());
-writeFileSync(`${root_dir}/shared.d.ts`, readFileSync(`${script}/artifacts/shared.d.ts`, "utf8"));
-appendFileSync(`${root_dir}/shared.js`, readFileSync(`${script}/artifacts/shared.js`, "utf8"));
+writeFileSync(
+	`${root_dir}/shared.d.ts`,
+	readFileSync(`${script}/artifacts/shared.d.ts`, "utf8").replace(/    /gm, "\t")
+);
+appendFileSync(
+	`${root_dir}/shared.js`,
+	readFileSync(`${script}/artifacts/shared.js`, "utf8").replace(/    /gm, "\t")
+);
 
 if (failure) process.exit(1);

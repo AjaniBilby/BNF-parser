@@ -8,7 +8,7 @@ if (typeof window === 'undefined') {
 		), {js: {print_i32: console.log}}
 	);
 }
-let ready = new Promise(async (res, rej) => {
+let ready = new Promise(async (res) => {
 	if (typeof window !== 'undefined') {
 		_ctx = await WebAssembly.instantiate(
 			await WebAssembly.compile(_rawWasm),
@@ -22,56 +22,56 @@ let ready = new Promise(async (res, rej) => {
 });
 export { ready };
 export function Parse_Program (data, refMapping = true) {
-  return _Shared.Parse(_ctx, data, refMapping, "program");
+	return _Shared.Parse(_ctx, data, refMapping, "program");
 }
 export function Parse_W (data, refMapping = true) {
-  return _Shared.Parse(_ctx, data, refMapping, "w");
+	return _Shared.Parse(_ctx, data, refMapping, "w");
 }
 export function Parse_Comment (data, refMapping = true) {
-  return _Shared.Parse(_ctx, data, refMapping, "comment");
+	return _Shared.Parse(_ctx, data, refMapping, "comment");
 }
 export function Parse_Name (data, refMapping = true) {
-  return _Shared.Parse(_ctx, data, refMapping, "name");
+	return _Shared.Parse(_ctx, data, refMapping, "name");
 }
 export function Parse_Letter (data, refMapping = true) {
-  return _Shared.Parse(_ctx, data, refMapping, "letter");
+	return _Shared.Parse(_ctx, data, refMapping, "letter");
 }
 export function Parse_Digit (data, refMapping = true) {
-  return _Shared.Parse(_ctx, data, refMapping, "digit");
+	return _Shared.Parse(_ctx, data, refMapping, "digit");
 }
 export function Parse_Hex (data, refMapping = true) {
-  return _Shared.Parse(_ctx, data, refMapping, "hex");
+	return _Shared.Parse(_ctx, data, refMapping, "hex");
 }
 export function Parse_Constant (data, refMapping = true) {
-  return _Shared.Parse(_ctx, data, refMapping, "constant");
+	return _Shared.Parse(_ctx, data, refMapping, "constant");
 }
 export function Parse_Frag (data, refMapping = true) {
-  return _Shared.Parse(_ctx, data, refMapping, "frag");
+	return _Shared.Parse(_ctx, data, refMapping, "frag");
 }
 export function Parse_Escape (data, refMapping = true) {
-  return _Shared.Parse(_ctx, data, refMapping, "escape");
+	return _Shared.Parse(_ctx, data, refMapping, "escape");
 }
 export function Parse_Byte (data, refMapping = true) {
-  return _Shared.Parse(_ctx, data, refMapping, "byte");
+	return _Shared.Parse(_ctx, data, refMapping, "byte");
 }
 export function Parse_Def (data, refMapping = true) {
-  return _Shared.Parse(_ctx, data, refMapping, "def");
+	return _Shared.Parse(_ctx, data, refMapping, "def");
 }
 export function Parse_Expr (data, refMapping = true) {
-  return _Shared.Parse(_ctx, data, refMapping, "expr");
+	return _Shared.Parse(_ctx, data, refMapping, "expr");
 }
 export function Parse_Expr_arg (data, refMapping = true) {
-  return _Shared.Parse(_ctx, data, refMapping, "expr_arg");
+	return _Shared.Parse(_ctx, data, refMapping, "expr_arg");
 }
 export function Parse_Expr_prefix (data, refMapping = true) {
-  return _Shared.Parse(_ctx, data, refMapping, "expr_prefix");
+	return _Shared.Parse(_ctx, data, refMapping, "expr_prefix");
 }
 export function Parse_Expr_infix (data, refMapping = true) {
-  return _Shared.Parse(_ctx, data, refMapping, "expr_infix");
+	return _Shared.Parse(_ctx, data, refMapping, "expr_infix");
 }
 export function Parse_Expr_suffix (data, refMapping = true) {
-  return _Shared.Parse(_ctx, data, refMapping, "expr_suffix");
+	return _Shared.Parse(_ctx, data, refMapping, "expr_suffix");
 }
 export function Parse_Expr_brackets (data, refMapping = true) {
-  return _Shared.Parse(_ctx, data, refMapping, "expr_brackets");
+	return _Shared.Parse(_ctx, data, refMapping, "expr_brackets");
 }
