@@ -1500,7 +1500,7 @@ function CompileOmit() {
     return '';
 }
 function CompileGather() {
-    return TemplateNode(`'literal'`, 'string');
+    return "_Literal";
 }
 function CompileTerm(expr) {
     const once = CompileTermOnce(expr);
@@ -1515,10 +1515,10 @@ function CompileTermOnce(expr) {
     return 'Term_' + expr.value[0].toUpperCase() + expr.value.slice(1);
 }
 function CompileNot() {
-    return TemplateNode(`'literal'`, 'string');
+    return "_Literal";
 }
 function CompileRange() {
-    return TemplateNode(`'literal'`, 'string');
+    return "_Literal";
 }
 function CompileLiteral(expr) {
     const once = CompileLiteralOnce(expr);
@@ -1531,7 +1531,7 @@ function CompileLiteral(expr) {
 }
 function CompileLiteralOnce(expr) {
     let safe = expr.value.replace(/[^a-zA-Z0-9]/g, (char) => '\\x' + char.charCodeAt(0).toString(16).padStart(2, '0'));
-    return TemplateNode(`'literal'`, `'${safe}'`);
+    return `_Literal & {value: "${safe}"}`;
 }
 function CompileRepeat(innerType, repetitions) {
     switch (repetitions) {
@@ -1571,9 +1571,11 @@ function CompileRule(rule) {
         `export declare function Parse_${capName} (i: string, refMapping?: boolean): _Shared.ParseError | {\n\troot: _Shared.SyntaxNode & ${typeName},\n\treachBytes: number,\n\treach: null | _Shared.Reference,\n\tisPartial: boolean\n}\n`;
 }
 function CompileTypes(lang) {
-    return `import type _Shared from './shared.js';\n` + [...lang.terms.keys()]
-        .map(x => CompileRule(lang.terms.get(x))) // hush Typescript it's okay
-        .join('\n');
+    return `import type _Shared from './shared.js';\n` +
+        `export type _Literal = { type: "literal", value: string, start: number, end: number, count: number, ref: _Shared.ReferenceRange };\n` +
+        [...lang.terms.keys()]
+            .map(x => CompileRule(lang.terms.get(x))) // hush Typescript it's okay
+            .join('\n');
 }
 
 function FlattenConstant(syntax) {
@@ -1745,11 +1747,17 @@ function Create(wasm) {
     return bundle;
 }
 function InitParse$1(ctx, data) {
-    const memory = ctx.exports.memory;
-    memory.grow(1); // grow memory if needed
+    const bytesPerPage = 64 * 1024;
     // Convert the string to UTF-8 bytes
     const utf8Encoder = new TextEncoder();
     const stringBytes = utf8Encoder.encode(data);
+    const memory = ctx.exports.memory;
+    // ONLY grow memory if needed
+    const chunks = memory.buffer.byteLength / bytesPerPage;
+    const desireChunks = stringBytes.byteLength * 6 / bytesPerPage;
+    if (desireChunks > chunks) {
+        memory.grow(desireChunks - chunks);
+    }
     // Copy the string bytes to WebAssembly memory
     const wasmMemory = new Uint8Array(memory.buffer);
     wasmMemory.set(stringBytes, ctx.exports.input.value);
@@ -1902,11 +1910,17 @@ var run = /*#__PURE__*/Object.freeze({
 
 const OFFSET = {"TYPE":0,"TYPE_LEN":4,"START":8,"END":12,"COUNT":16,"DATA":20};
 function InitParse(ctx, data) {
-	const memory = ctx.exports.memory;
-	memory.grow(1); // grow memory if needed
+	const bytesPerPage = 64 * 1024;
 	// Convert the string to UTF-8 bytes
 	const utf8Encoder = new TextEncoder();
 	const stringBytes = utf8Encoder.encode(data);
+	const memory = ctx.exports.memory;
+	// ONLY grow memory if needed
+	const chunks = memory.buffer.byteLength / bytesPerPage;
+	const desireChunks = stringBytes.byteLength * 6 / bytesPerPage;
+	if (desireChunks > chunks) {
+		memory.grow(desireChunks - chunks);
+	}
 	// Copy the string bytes to WebAssembly memory
 	const wasmMemory = new Uint8Array(memory.buffer);
 	wasmMemory.set(stringBytes, ctx.exports.input.value);
