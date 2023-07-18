@@ -101,7 +101,7 @@ nav:
   - Getting Started: setup.md
   - CLI: cli.md
   - Syntax:
-    - index.md
+    - syntax/index.md
   - Artifacts:
     - artifact/index.md
     - Shared: artifact/shared.md
