@@ -1,5 +1,15 @@
 # Changelog
 
+## Version 4.0.2
+
+### Fixes:
+  - [x] More consistent formatting for generated artifacts
+  - [x] More concise types for repetitions (i.e. one to many will always have at least one element according to the type)
+  - [x] Consistent file formatting (everything is LF now)
+
+### Changes:
+  - [x] Changed to MIT license from ISC
+
 ## Version 4.0.1
 
 ### Fixes:
