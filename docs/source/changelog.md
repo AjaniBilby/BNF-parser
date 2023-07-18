@@ -1,5 +1,16 @@
 # Changelog
 
+## Version 4.0.4
+
+### Fixes:
+  - [x] Memory over growth: Available memory kept growing after every single parse
+  - [x] Better error handling for `bnf-compile` when given a bad directory
+
+## Version 4.0.3
+
+### Additions:
+  - [x] `_Literal` helper type in compiled artifacts
+
 ## Version 4.0.2
 
 ### Fixes:

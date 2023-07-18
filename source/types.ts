@@ -65,7 +65,7 @@ function CompileOmit(): string {
 }
 
 function CompileGather(): string {
-	return TemplateNode(`'literal'`, 'string');
+	return "_Literal";
 }
 
 
@@ -85,11 +85,11 @@ function CompileTermOnce(expr: Term): string {
 
 
 function CompileNot(): string {
-	return TemplateNode(`'literal'`, 'string');
+	return "_Literal";
 }
 
 function CompileRange(): string {
-	return TemplateNode(`'literal'`, 'string');
+	return "_Literal";
 }
 
 
@@ -109,7 +109,7 @@ function CompileLiteralOnce(expr: Literal): string {
 		(char) => '\\x' + char.charCodeAt(0).toString(16).padStart(2, '0')
 	);
 
-	return TemplateNode(`'literal'`, `'${safe}'`);
+	return `_Literal & {value: "${safe}"}`;
 }
 
 
@@ -160,7 +160,9 @@ function CompileRule(rule: Rule) {
 
 
 export function CompileTypes(lang: Parser) {
-	return `import type _Shared from './shared.js';\n`+ [...lang.terms.keys()]
-	.map(x => CompileRule(lang.terms.get(x) as any)) // hush Typescript it's okay
-	.join('\n');
+	return `import type _Shared from './shared.js';\n`+
+		`export type _Literal = { type: "literal", value: string, start: number, end: number, count: number, ref: _Shared.ReferenceRange };\n` +
+		[...lang.terms.keys()]
+			.map(x => CompileRule(lang.terms.get(x) as any)) // hush Typescript it's okay
+			.join('\n');
 }

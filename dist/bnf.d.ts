@@ -1,4 +1,5 @@
 import type _Shared from './shared.js';
+export type _Literal = { type: "literal", value: string, start: number, end: number, count: number, ref: _Shared.ReferenceRange };
 export type Term_Program = {
 	type: 'program',
 	start: number,
@@ -23,7 +24,7 @@ export type Term_W = {
 	count: number,
 	ref: _Shared.ReferenceRange,
 	value: [
-		(Term_Comment | { type: 'literal', value: '\x20', start: number, end: number, count: number, ref: _Shared.ReferenceRange } | { type: 'literal', value: '\x09', start: number, end: number, count: number, ref: _Shared.ReferenceRange } | { type: 'literal', value: '\x0a', start: number, end: number, count: number, ref: _Shared.ReferenceRange } | { type: 'literal', value: '\x0d\x0a', start: number, end: number, count: number, ref: _Shared.ReferenceRange })
+		(Term_Comment | _Literal & {value: "\x20"} | _Literal & {value: "\x09"} | _Literal & {value: "\x0a"} | _Literal & {value: "\x0d\x0a"})
 	]
 }
 export declare function Parse_W (i: string, refMapping?: boolean): _Shared.ParseError | {
@@ -40,9 +41,9 @@ export type Term_Comment = {
 	count: number,
 	ref: _Shared.ReferenceRange,
 	value: [
-		{ type: 'literal', value: '\x23', start: number, end: number, count: number, ref: _Shared.ReferenceRange },
-		{ type: 'literal', value: string, start: number, end: number, count: number, ref: _Shared.ReferenceRange },
-		{ type: 'literal', value: '\x0a', start: number, end: number, count: number, ref: _Shared.ReferenceRange }
+		_Literal & {value: "\x23"},
+		_Literal,
+		_Literal & {value: "\x0a"}
 	]
 }
 export declare function Parse_Comment (i: string, refMapping?: boolean): _Shared.ParseError | {
@@ -60,7 +61,7 @@ export type Term_Name = {
 	ref: _Shared.ReferenceRange,
 	value: [
 		Term_Letter,
-		{ type: '(...)*', value: Array<(Term_Letter | Term_Digit | { type: 'literal', value: '\x5f', start: number, end: number, count: number, ref: _Shared.ReferenceRange })>, start: number, end: number, count: number, ref: _Shared.ReferenceRange }
+		{ type: '(...)*', value: Array<(Term_Letter | Term_Digit | _Literal & {value: "\x5f"})>, start: number, end: number, count: number, ref: _Shared.ReferenceRange }
 	]
 }
 export declare function Parse_Name (i: string, refMapping?: boolean): _Shared.ParseError | {
@@ -77,7 +78,7 @@ export type Term_Letter = {
 	count: number,
 	ref: _Shared.ReferenceRange,
 	value: [
-		({ type: 'literal', value: string, start: number, end: number, count: number, ref: _Shared.ReferenceRange } | { type: 'literal', value: string, start: number, end: number, count: number, ref: _Shared.ReferenceRange })
+		(_Literal | _Literal)
 	]
 }
 export declare function Parse_Letter (i: string, refMapping?: boolean): _Shared.ParseError | {
@@ -94,7 +95,7 @@ export type Term_Digit = {
 	count: number,
 	ref: _Shared.ReferenceRange,
 	value: [
-		{ type: 'literal', value: string, start: number, end: number, count: number, ref: _Shared.ReferenceRange }
+		_Literal
 	]
 }
 export declare function Parse_Digit (i: string, refMapping?: boolean): _Shared.ParseError | {
@@ -111,7 +112,7 @@ export type Term_Hex = {
 	count: number,
 	ref: _Shared.ReferenceRange,
 	value: [
-		({ type: 'literal', value: string, start: number, end: number, count: number, ref: _Shared.ReferenceRange } | { type: 'literal', value: string, start: number, end: number, count: number, ref: _Shared.ReferenceRange } | { type: 'literal', value: string, start: number, end: number, count: number, ref: _Shared.ReferenceRange })
+		(_Literal | _Literal | _Literal)
 	]
 }
 export declare function Parse_Hex (i: string, refMapping?: boolean): _Shared.ParseError | {
@@ -145,7 +146,7 @@ export type Term_Frag = {
 	count: number,
 	ref: _Shared.ReferenceRange,
 	value: [
-		(Term_Escape | Term_Byte | { type: 'literal', value: string, start: number, end: number, count: number, ref: _Shared.ReferenceRange })
+		(Term_Escape | Term_Byte | _Literal)
 	]
 }
 export declare function Parse_Frag (i: string, refMapping?: boolean): _Shared.ParseError | {
@@ -162,7 +163,7 @@ export type Term_Escape = {
 	count: number,
 	ref: _Shared.ReferenceRange,
 	value: [
-		{ type: 'literal', value: string, start: number, end: number, count: number, ref: _Shared.ReferenceRange }
+		_Literal
 	]
 }
 export declare function Parse_Escape (i: string, refMapping?: boolean): _Shared.ParseError | {
@@ -179,7 +180,7 @@ export type Term_Byte = {
 	count: number,
 	ref: _Shared.ReferenceRange,
 	value: [
-		{ type: 'literal', value: string, start: number, end: number, count: number, ref: _Shared.ReferenceRange }
+		_Literal
 	]
 }
 export declare function Parse_Byte (i: string, refMapping?: boolean): _Shared.ParseError | {
@@ -196,7 +197,7 @@ export type Term_Def = {
 	count: number,
 	ref: _Shared.ReferenceRange,
 	value: [
-		{ type: 'literal', value: string, start: number, end: number, count: number, ref: _Shared.ReferenceRange },
+		_Literal,
 		Term_Expr
 	]
 }
@@ -222,7 +223,7 @@ export type Term_Expr = {
 	count: number,
 	ref: _Shared.ReferenceRange,
 	value: [
-		{ type: 'literal', value: string, start: number, end: number, count: number, ref: _Shared.ReferenceRange },
+		_Literal,
 		Term_Expr_arg
 	]
 }>, start: number, end: number, count: number, ref: _Shared.ReferenceRange }
@@ -243,8 +244,8 @@ export type Term_Expr_arg = {
 	ref: _Shared.ReferenceRange,
 	value: [
 		Term_Expr_prefix,
-		(Term_Constant | Term_Expr_brackets | { type: 'literal', value: string, start: number, end: number, count: number, ref: _Shared.ReferenceRange }),
-		{ type: 'literal', value: string, start: number, end: number, count: number, ref: _Shared.ReferenceRange }
+		(Term_Constant | Term_Expr_brackets | _Literal),
+		_Literal
 	]
 }
 export declare function Parse_Expr_arg (i: string, refMapping?: boolean): _Shared.ParseError | {
@@ -261,9 +262,9 @@ export type Term_Expr_prefix = {
 	count: number,
 	ref: _Shared.ReferenceRange,
 	value: [
-		{ type: 'literal', value: string, start: number, end: number, count: number, ref: _Shared.ReferenceRange },
-		{ type: 'literal', value: string, start: number, end: number, count: number, ref: _Shared.ReferenceRange },
-		{ type: 'literal', value: string, start: number, end: number, count: number, ref: _Shared.ReferenceRange }
+		_Literal,
+		_Literal,
+		_Literal
 	]
 }
 export declare function Parse_Expr_prefix (i: string, refMapping?: boolean): _Shared.ParseError | {
@@ -280,7 +281,7 @@ export type Term_Expr_infix = {
 	count: number,
 	ref: _Shared.ReferenceRange,
 	value: [
-		({ type: 'literal', value: '\x2d\x3e', start: number, end: number, count: number, ref: _Shared.ReferenceRange } | { type: 'literal', value: '\x7c', start: number, end: number, count: number, ref: _Shared.ReferenceRange })
+		(_Literal & {value: "\x2d\x3e"} | _Literal & {value: "\x7c"})
 	]
 }
 export declare function Parse_Expr_infix (i: string, refMapping?: boolean): _Shared.ParseError | {
@@ -297,7 +298,7 @@ export type Term_Expr_suffix = {
 	count: number,
 	ref: _Shared.ReferenceRange,
 	value: [
-		({ type: 'literal', value: '\x2a', start: number, end: number, count: number, ref: _Shared.ReferenceRange } | { type: 'literal', value: '\x3f', start: number, end: number, count: number, ref: _Shared.ReferenceRange } | { type: 'literal', value: '\x2b', start: number, end: number, count: number, ref: _Shared.ReferenceRange })
+		(_Literal & {value: "\x2a"} | _Literal & {value: "\x3f"} | _Literal & {value: "\x2b"})
 	]
 }
 export declare function Parse_Expr_suffix (i: string, refMapping?: boolean): _Shared.ParseError | {
