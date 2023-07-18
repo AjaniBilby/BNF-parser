@@ -840,6 +840,33 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#version-402" class="md-nav__link">
+    Version 4.0.2
+  </a>
+  
+    <nav class="md-nav" aria-label="Version 4.0.2">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fixes" class="md-nav__link">
+    Fixes:
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#changes" class="md-nav__link">
+    Changes:
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#version-401" class="md-nav__link">
     Version 4.0.1
   </a>
@@ -848,7 +875,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#fixes" class="md-nav__link">
+  <a href="#fixes_1" class="md-nav__link">
     Fixes:
   </a>
   
@@ -875,14 +902,14 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#changes" class="md-nav__link">
+  <a href="#changes_1" class="md-nav__link">
     Changes:
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#fixes_1" class="md-nav__link">
+  <a href="#fixes_2" class="md-nav__link">
     Fixes:
   </a>
   
@@ -962,7 +989,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#fixes_2" class="md-nav__link">
+  <a href="#fixes_3" class="md-nav__link">
     Fixes:
   </a>
   
@@ -989,7 +1016,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#fixes_3" class="md-nav__link">
+  <a href="#fixes_4" class="md-nav__link">
     Fixes:
   </a>
   
@@ -1009,7 +1036,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#fixes_4" class="md-nav__link">
+  <a href="#fixes_5" class="md-nav__link">
     Fixes:
   </a>
   
@@ -1036,7 +1063,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#changes_1" class="md-nav__link">
+  <a href="#changes_2" class="md-nav__link">
     Changes:
   </a>
   
@@ -1071,8 +1098,19 @@
 
 
 <h1 id="changelog">Changelog</h1>
-<h2 id="version-401">Version 4.0.1</h2>
+<h2 id="version-402">Version 4.0.2</h2>
 <h3 id="fixes">Fixes:</h3>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> More consistent formatting for generated artifacts</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> More concise types for repetitions (i.e. one to many will always have at least one element according to the type)</li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Consistent file formatting (everything is LF now)</li>
+</ul>
+<h3 id="changes">Changes:</h3>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Changed to MIT license from ISC</li>
+</ul>
+<h2 id="version-401">Version 4.0.1</h2>
+<h3 id="fixes_1">Fixes:</h3>
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> NPM didn't include some critical files for some reason...</li>
 </ul>
@@ -1083,12 +1121,12 @@
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Generate type definitions for the syntax tree of a given BNF</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Now able to represent characters by char code using hexadecimal in literals (wasm only) <code>\x41</code></li>
 </ul>
-<h3 id="changes">Changes:</h3>
+<h3 id="changes_1">Changes:</h3>
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> All previous APIs moved under the <code>legacy</code> namespace</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Changed package type to module</li>
 </ul>
-<h3 id="fixes_1">Fixes:</h3>
+<h3 id="fixes_2">Fixes:</h3>
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Count not working when applied directly to a range (i.e. <code>"a"-&gt;"z"+</code>)</li>
 </ul>
@@ -1114,7 +1152,7 @@
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Got ChatGPT-4 to read my homework (read over the readme and helped clarify a few things)</li>
 </ul>
 <h2 id="version-313">Version 3.1.3</h2>
-<h3 id="fixes_2">Fixes:</h3>
+<h3 id="fixes_3">Fixes:</h3>
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Fixed missing bound check on getting reach of a SyntaxNode</li>
 </ul>
@@ -1123,12 +1161,12 @@
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Clarified readme documentation</li>
 </ul>
 <h2 id="version-312">Version 3.1.2</h2>
-<h3 id="fixes_3">Fixes:</h3>
+<h3 id="fixes_4">Fixes:</h3>
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Updated readme to clarify behaviour of select statements</li>
 </ul>
 <h2 id="version-311">Version 3.1.1</h2>
-<h3 id="fixes_4">Fixes:</h3>
+<h3 id="fixes_5">Fixes:</h3>
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Incorrect referencing for syntax errors.</li>
 </ul>
@@ -1137,7 +1175,7 @@
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Documentation dictating the syntax tree structure generated</li>
 </ul>
-<h3 id="changes_1">Changes:</h3>
+<h3 id="changes_2">Changes:</h3>
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Updates to test case logging</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> New internal string parsing method</li>
@@ -1151,7 +1189,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">July 16, 2023</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">July 18, 2023</span>
       
         <br>
         Created:
