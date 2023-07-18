@@ -1885,12 +1885,12 @@ function Decode$1(ctx, heap, sharedRef) {
     return root;
 }
 function toString() {
-    return `const OFFSET = ${JSON.stringify(OFFSET$1)};` +
-        "\nexport " + InitParse$1.toString().replace(/    /gm, "\t") +
-        "\nexport " + ProgressCursor$1.toString().replace(/    /gm, "\t") +
-        "\nexport " + MapTreeRefs$1.toString().replace(/    /gm, "\t") +
-        "\nexport " + Parse$1.toString().replace(/    /gm, "\t") +
-        "\nexport " + Decode$1.toString().replace(/    /gm, "\t") + "\n\n";
+    return (`const OFFSET = ${JSON.stringify(OFFSET$1)};` +
+        "\nexport " + InitParse$1.toString() +
+        "\nexport " + ProgressCursor$1.toString() +
+        "\nexport " + MapTreeRefs$1.toString() +
+        "\nexport " + Parse$1.toString() +
+        "\nexport " + Decode$1.toString() + "\n\n").replace(/    /gm, "\t").replace(/\r\n/gm, "\n");
 }
 
 var run = /*#__PURE__*/Object.freeze({

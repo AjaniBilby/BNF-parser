@@ -222,10 +222,12 @@ function Decode(ctx: WasmParser, heap: number, sharedRef: ReferenceRange) {
 
 
 export function toString() {
-	return `const OFFSET = ${JSON.stringify(OFFSET)};` +
-		"\nexport "+InitParse.toString().replace(/    /gm, "\t")+
-		"\nexport "+ProgressCursor.toString().replace(/    /gm, "\t")+
-		"\nexport "+MapTreeRefs.toString().replace(/    /gm, "\t")+
-		"\nexport "+Parse.toString().replace(/    /gm, "\t")+
-		"\nexport "+Decode.toString().replace(/    /gm, "\t")+"\n\n";
+	return (
+		`const OFFSET = ${JSON.stringify(OFFSET)};` +
+		"\nexport "+InitParse.toString()+
+		"\nexport "+ProgressCursor.toString()+
+		"\nexport "+MapTreeRefs.toString()+
+		"\nexport "+Parse.toString()+
+		"\nexport "+Decode.toString()+"\n\n"
+	).replace(/    /gm, "\t").replace(/\r\n/gm, "\n");
 }

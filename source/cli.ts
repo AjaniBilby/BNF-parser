@@ -144,11 +144,15 @@ for (const file of files) {
 writeFileSync(`${root_dir}/shared.js`, wasm.Runner.toString());
 writeFileSync(
 	`${root_dir}/shared.d.ts`,
-	readFileSync(`${script}/artifacts/shared.d.ts`, "utf8").replace(/    /gm, "\t")
+	readFileSync(`${script}/artifacts/shared.d.ts`, "utf8")
+		.replace(/    /gm, "\t")
+		.replace(/\r\n/g, "\n")
 );
 appendFileSync(
 	`${root_dir}/shared.js`,
-	readFileSync(`${script}/artifacts/shared.js`, "utf8").replace(/    /gm, "\t")
+	readFileSync(`${script}/artifacts/shared.js`, "utf8")
+		.replace(/    /gm, "\t")
+		.replace(/\r\n/g, "\n")
 );
 
 if (failure) process.exit(1);
