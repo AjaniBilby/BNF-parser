@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 "use strict";
 
+import chalk from 'chalk';
+
 import { readdirSync, existsSync, readFileSync, writeFileSync, appendFileSync, statSync } from "fs";
 import { basename, extname, join, dirname } from "path";
 import { legacy, wasm } from "./index.js";
@@ -50,6 +52,14 @@ export { ready };\n`;
 }
 
 
+function ColorizeError(msg: string) {
+	let index = msg.indexOf(":");
+	if (index === -1) index = 0;
+
+	return chalk.red(msg.slice(0, index)) + msg.slice(index);
+}
+
+
 const root = process.argv[2] || "./";
 const isFile = statSync(root).isFile();
 const root_dir = isFile ? dirname(root) : root.slice(0, -1);
@@ -71,49 +81,50 @@ if (files.length === 0) {
 	process.exit(1);
 }
 
-console.log(`Found: ${files.join(', ')}`)
+console.log(`Found: ${files.join(', ')}\n`);
 
 let failure = false;
 for (const file of files) {
 	const name = basename(file, '.bnf');
 	const data = readFileSync(file, 'utf8');
 
+	console.log(` - Compiling ${chalk.cyan(name)}`)
+
 	// Ingest input BNF
-	const syntax = bnf.Parse_Program(data);
+	let syntax: ReturnType<typeof bnf.Parse_Program> ;
+	try {
+		syntax = bnf.Parse_Program(data);
+	} catch (e: any) {
+		console.error(`   Parsing...`);
+		console.error(`   ${ColorizeError(e.toString())}`);
+		console.error("");
+		failure = true;
+		continue;
+	}
 	if (syntax instanceof _Shared.ParseError) {
-		console.error(`Failed to parse ${name}`);
-		console.error(syntax.toString());
+		console.error(`   Parsing...`);
+		console.error(`   ${ColorizeError(syntax.toString())}`)
 		console.error("");
 		failure = true;
 		continue;
 	}
 	if (syntax.isPartial) {
-		console.error(`Failed to finish parsing ${name}`);
-		console.error(syntax.reach?.toString());
+		console.error(`   Parsing...`);
+		console.error(`   ${chalk.red("Failed")} to finish parsing at ${syntax.root.ref.end.toString()} reached ${syntax.reach?.toString()}`);
 		console.error("");
 		failure = true;
 		continue;
 	}
+
 
 
 	let lang: null | legacy.Parser = null;
 	try {
-		lang = CompileProgram(syntax.root)
-	} catch(e) {
-		if (e instanceof ParseError) {
-			console.error(e.toString());
-		} else {
-			console.error(e);
-		}
-
+		lang = CompileProgram(syntax.root);
+	} catch(e: any) {
+		console.error(`   Encoding Parser`);
+		console.error(ColorizeError(e.toString()));
 		process.exit(1);
-	}
-	if (syntax instanceof legacy.ParseError) {
-		console.error(`Compile ${file} syntax into graph`);
-		console.error(syntax.toString());
-		console.error("");
-		failure = true;
-		continue;
 	}
 
 	// Generate type headers
@@ -132,13 +143,14 @@ for (const file of files) {
 		writeFileSync(`${root_dir}/${name}.js`,
 			GenerateRunner(lang, module.emitBinary())
 		);
-	} catch (e) {
-		console.error(`Error while compiling ${file} to wasm`);
-		console.error(e);
+	} catch (e: any) {
+		console.error(`   Compiling WASM...`);
+		console.error(`   ${ColorizeError(e.toString())}`);
+		console.error("");
 		failure = true;
 	}
 
-	console.log(`  - Compiled: ${file}`);
+	console.log(`  - ${chalk.green("OK")}: ${file}`);
 }
 
 writeFileSync(`${root_dir}/shared.js`, wasm.Runner.toString());
