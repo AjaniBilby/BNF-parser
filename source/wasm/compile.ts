@@ -24,6 +24,7 @@ function IngestLiterals(m: binaryen.Module, bnf: Parser) {
 	);
 
 	m.addGlobal("input",       binaryen.i32, false, m.i32.const(literals.size));
+	m.addGlobal("inputEnd",    binaryen.i32, true,  m.i32.const(0));
 	m.addGlobal("inputLength", binaryen.i32, true,  m.i32.const(0));
 	m.addGlobal("heap",        binaryen.i32, true,  m.i32.const(0));
 	m.addGlobal("index",       binaryen.i32, true,  m.i32.const(0));
@@ -40,14 +41,18 @@ function GenerateInit(m: binaryen.Module) {
 		binaryen.none, binaryen.i32, [], m.block(null, [
 			m.global.set("index", m.i32.const(0)),
 			m.global.set("reach", m.i32.const(0)),
+			m.global.set("inputEnd",
+				m.i32.add(
+					m.global.get("input", binaryen.i32),
+					m.global.get("inputLength", binaryen.i32),
+				)
+			),
 			m.global.set("heap",
 				m.call("_roundWord", [
-					m.i32.add(
-						m.global.get("inputLength", binaryen.i32),
-						m.global.get("input", binaryen.i32),
-					)
+					m.global.get("inputEnd", binaryen.i32)
 				], binaryen.i32)
 			),
+
 			m.return(
 				m.global.get("heap", binaryen.i32)
 			)
@@ -125,16 +130,23 @@ function GenerateMemCopy(m: binaryen.Module) {
 }
 
 function GenerateMatchString(m: binaryen.Module) {
+	const input     = 0;
+	const target    = 1;
+	const targetLen = 2;
+	const count     = 3;
+
 	m.addFunction("_matchString",
 		binaryen.createType([binaryen.i32, binaryen.i32, binaryen.i32]), binaryen.i32, [
+			binaryen.i32,
 			binaryen.i32
 		],
 		m.block(null, [
-			m.local.set(0, m.i32.add(
-				m.local.get(0, binaryen.i32),
+			// Make input index point absolute memory address
+			m.local.set(input, m.i32.add(
+				m.local.get(input, binaryen.i32),
 				m.global.get("input", binaryen.i32)
 			)),
-			m.local.set(3, m.i32.const(0)),
+			m.local.set(count, m.i32.const(0)),
 
 			m.block("outer", [
 				m.loop("loop", m.block(null, [
@@ -142,35 +154,39 @@ function GenerateMatchString(m: binaryen.Module) {
 						m.i32.ne(
 							m.i32.load8_u(0, 1,
 								m.i32.add(
-									m.local.get(0, binaryen.i32),
-									m.local.get(3, binaryen.i32)
+									m.local.get(input, binaryen.i32),
+									m.local.get(count, binaryen.i32)
 								)
 							),
 							m.i32.load8_u(0, 1,
 								m.i32.add(
-									m.local.get(1, binaryen.i32),
-									m.local.get(3, binaryen.i32)
+									m.local.get(target, binaryen.i32),
+									m.local.get(count,  binaryen.i32)
 								)
 							),
 						),
 					),
-					m.local.set(3,
+
+					// Successful match, increment count
+					m.local.set(count,
 						m.i32.add(
-							m.local.get(3, binaryen.i32),
+							m.local.get(count, binaryen.i32),
 							m.i32.const(1)
 						)
 					),
+
+					// Bounds check
 					m.br_if("outer",
 						m.i32.ge_s(
-							m.local.get(3, binaryen.i32),
-							m.local.get(2, binaryen.i32)
+							m.local.get(count,     binaryen.i32),
+							m.local.get(targetLen, binaryen.i32)
 						)
 					),
 					m.br_if("outer",
 						m.i32.ge_s(
 							m.i32.add(
-								m.local.get(0, binaryen.i32),
-								m.local.get(3, binaryen.i32),
+								m.local.get(input, binaryen.i32),
+								m.local.get(count, binaryen.i32),
 							),
 							m.global.get("heap", binaryen.i32)
 						)
@@ -179,7 +195,7 @@ function GenerateMatchString(m: binaryen.Module) {
 				]))
 			]),
 
-			m.return( m.local.get(3, binaryen.i32) )
+			m.return( m.local.get(count, binaryen.i32) )
 		]
 	));
 }
