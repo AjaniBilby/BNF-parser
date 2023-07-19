@@ -4,6 +4,7 @@ import * as path from "path";
 const cwd = path.dirname(process.argv[1]);
 let tests = {
 	"BNF compilations": ['node ../bin/cli.js ./bnfs/', { cwd }],
+	"LOLcode": ['node ./lolcode.js', { cwd }],
 	"Double Parse":     ['node double-parse.js',    { cwd }],
 	// "Uniview Parse":    ['node ./uv/index.js',      { cwd }],
 };
