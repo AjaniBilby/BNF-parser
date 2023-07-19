@@ -2,15 +2,17 @@ program ::= %w* def+ ;
 w ::= comment | " " | "\t" | "\n" | "\r\n" ;
 	comment ::= "#" !"\n"* "\n" ;
 
+# test
+
 name ::= letter ( letter | digit | "_" )* ;
 	letter ::= "a"->"z" | "A"->"Z" ;
 	digit ::= "0"->"9" ;
 	hex   ::= "0"->"9" | "a"->"f" | "A"->"F" ;
 
 constant ::= %"\"" frag* %"\"" ;
-	frag   ::= escape | byte | !"\""+ ;
+	frag   ::= byte | escape | !"\""+ ;
 	escape ::= %"\\" !"" ;
-	byte   ::= %"x" ...(hex hex) ;
+	byte   ::= %"\\x" ...(hex hex) ;
 
 def ::= ...name %(w+ "::=" w*) expr %(w* ";" w*) ;
 
