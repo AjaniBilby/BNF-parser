@@ -1,38 +1,39 @@
-program ::= %( "HAI" w ) code_block %( w "KTHXBAI" ) ;
+program ::= %"HAI" %w code_block %w %"KTHXBAI" ;
 
-ok ::= %"HAI" %w "code_block" "KTHXBAI" ;
-
-w ::= ws* nlc ws* ;         # Multi-line white space
-ws ::= " " | "\t" ;         # Single line white space
-nlc ::= "\r\n" | "\n" | "," ;
-
-code_block ::= statement (nlc statement)* ;
-
-statement ::= declaration | loop | func_decl | comment | print_block | if_block | assignment | expression ;
-
-loop ::= %( "IM IN YR" ws* ) label %ws* %"WILE" expression %w code_block %( w "IM OUTTA YR" ws+ ) label ;
-
-declaration ::= %( "I HAS A" ws+ ) label ( %( ws+ "ITZ" ws+ ) expression )? ;
 
 comment ::= %(comment_single | comment_multi) ;
 	comment_single ::= "BTW" !"\n"* "\n" ;
 	comment_multi  ::= "OBTW" !"TLDR"* "TLDR" ;
+w ::= ws* nlc ws* ;       # Multi-line white space
+	ws ::= " " | "\t" ;     # Single line white space
+	nlc ::= "\r\n" | "\n" | "," ;
 
-print_block ::= %( "VISIBLE" ws* ) ( expression %ws* )+ "MKAY?" ;
+code_block ::= statement ( %nlc statement )* ;
+statement  ::= declaration | if_block | loop | func_def | comment |
+	print_block | input_block | assignment | expression ;
+
+
+declaration ::= %"I HAS A" %ws+ label ( %ws+ %"ITZ" %ws+ expression )? ;
+assignment  ::= label %ws+ %"R" %ws+ expression ;
+
+
+loop ::= %"IM IN YR" %ws* label %ws* %"WILE" expression %w code_block %w %"IM OUTTA YR" %ws+ label ;
 
 if_block ::= %("O RLY?" w "YA RLY" w) code_block %w ( else_if_block %w )? %"OIC" ;
-else_if_block ::= ( else_bounded | else_unbounded ) %w code_block ;
-	else_bounded   ::= %"MEBEE" %ws+ expression ;
-	else_unbounded ::= %"NO WAI" ;
+	else_if_block ::= ( else_bounded | else_unbounded ) %w code_block ;
+		else_bounded   ::= %"MEBEE" %ws+ expression ;
+		else_unbounded ::= %"NO WAI" ;
 
-func_decl ::= %( "HOW DUZ I" ws+ ) label func_args? %w code_block %(w "IF U SAY SO") ;
+
+func_def ::= %"HOW DUZ I" %ws+ label func_args? %w code_block %w %"IF U SAY SO" ;
 	func_args ::= func_arg ( %"AN" %ws+ func_arg )* ;
-	func_arg  ::= %("YR" ws+) label ;
+	func_arg  ::= %"YR" %ws+ label ;
 
-input_block ::= "GIMMEH" %ws+ label ;
 
-assignment ::= label %( ws+ "R" ws+ ) expression ;
-# RUNTIME ERROR: assignment ::= label %( ws* "R" ws*) expression ;
+print_block ::= %"VISIBLE" %ws* ( expression %ws* )+ "MKAY?" ;
+input_block ::= %"GIMMEH"  %ws+ label ;
+
+
 
 expression ::=
 		equals | not_equals | both | either | greater | less | # comparitors
