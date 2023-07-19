@@ -61,10 +61,15 @@ function ColorizeError(msg: string) {
 
 
 const root = process.argv[2] || "./";
+if (!existsSync(root)) {
+	console.error(`Unknown path ${root}`);
+	process.exit(1);
+}
+
 const isFile = statSync(root).isFile();
 const root_dir = isFile ? dirname(root) : root.slice(0, -1);
 
-if (!existsSync(root)) {
+if (!existsSync(root_dir)) {
 	console.error(`Unknown path ${root}`);
 	process.exit(1);
 }

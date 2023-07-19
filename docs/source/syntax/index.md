@@ -1,5 +1,7 @@
 ---
 title: BNF Syntax
+hide:
+  - navigation
 ---
 
 # Bnf Syntax
