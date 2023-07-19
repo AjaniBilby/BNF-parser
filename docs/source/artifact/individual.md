@@ -16,6 +16,10 @@ name     -> Term_Name
 expr_arg -> Term_Expr_arg
 ```
 
+#### Literal
+
+There is also an added `_Literal` type, this is mainly to help developers using this library by giving them a type they can use in function arguments, and other type hints that is shorter to type than the entire type definition for a standard literal node.
+
 ### Nodes
 
 Every node (including terms, and literals) have the following general type, which is then refined by the compiled `d.ts`
