@@ -1747,14 +1747,14 @@ function Create(wasm) {
     return bundle;
 }
 function InitParse$1(ctx, data) {
-    const bytesPerPage = 64 * 1024;
+    const memory = ctx.exports.memory;
+    const bytesPerPage = 65536;
     // Convert the string to UTF-8 bytes
     const utf8Encoder = new TextEncoder();
     const stringBytes = utf8Encoder.encode(data);
-    const memory = ctx.exports.memory;
     // ONLY grow memory if needed
-    const chunks = memory.buffer.byteLength / bytesPerPage;
-    const desireChunks = stringBytes.byteLength * 6 / bytesPerPage;
+    const chunks = Math.ceil(memory.buffer.byteLength / bytesPerPage);
+    const desireChunks = Math.ceil(stringBytes.byteLength * 10 / bytesPerPage);
     if (desireChunks > chunks) {
         memory.grow(desireChunks - chunks);
     }
@@ -1910,14 +1910,14 @@ var run = /*#__PURE__*/Object.freeze({
 
 const OFFSET = {"TYPE":0,"TYPE_LEN":4,"START":8,"END":12,"COUNT":16,"DATA":20};
 function InitParse(ctx, data) {
-	const bytesPerPage = 64 * 1024;
+	const memory = ctx.exports.memory;
+	const bytesPerPage = 65536;
 	// Convert the string to UTF-8 bytes
 	const utf8Encoder = new TextEncoder();
 	const stringBytes = utf8Encoder.encode(data);
-	const memory = ctx.exports.memory;
 	// ONLY grow memory if needed
-	const chunks = memory.buffer.byteLength / bytesPerPage;
-	const desireChunks = stringBytes.byteLength * 6 / bytesPerPage;
+	const chunks = Math.ceil(memory.buffer.byteLength / bytesPerPage);
+	const desireChunks = Math.ceil(stringBytes.byteLength * 10 / bytesPerPage);
 	if (desireChunks > chunks) {
 		memory.grow(desireChunks - chunks);
 	}
