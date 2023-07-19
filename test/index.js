@@ -4,8 +4,6 @@ import path from "node:path";
 import chalk from "chalk";
 import fs from "node:fs";
 
-import * as Shared from "./bnfs/shared.js";
-
 const cwd = path.dirname(process.argv[1]);
 
 
@@ -13,7 +11,7 @@ const cwd = path.dirname(process.argv[1]);
 function CompileBNFs(){
 	console.log("Compiling BNFs");
 	try {
-		execSync("node ../bin/cli.js ./bnfs/", { cwd })
+		console.log(execSync("node ../bin/cli.js ./bnf/", { cwd }).toString());
 	} catch (e) {
 		console.error(e.stderr);
 		console.error("Failed to compile BNFs");
@@ -25,22 +23,25 @@ function CompileBNFs(){
 
 
 async function SampleTests() {
-	const syntaxes = fs.readdirSync(`${cwd}/bnfs`)
+	const syntaxes = fs.readdirSync(`${cwd}/bnf`)
 		.filter(x => x.endsWith(".bnf"))
 		.map(x => x.slice(0, -4));
+
+	const Shared = await import(pathToFileURL(`${cwd}/bnf/shared.js`));
 
 
 	console.log("Automated Sample Tests");
 	let failure = false;
 	for (const lang of syntaxes) {
 		console.log(" ", lang);
-		const dir = `${cwd}/samples/${lang}`;
+		const dir = `${cwd}/sample/${lang}`;
 		if (!fs.existsSync(dir)) continue;
 
-		const files = fs.readdirSync(dir);
+		let files = fs.readdirSync(dir);
 		if (files.length === 0) continue;
+		files = files.filter(x => x.endsWith(".txt"));
 
-		const syntaxURL = pathToFileURL(`${cwd}/bnfs/${lang}.js`);
+		const syntaxURL = pathToFileURL(`${cwd}/bnf/${lang}.js`);
 		const Parser = await import(syntaxURL);
 
 		if (!Parser.Parse_Program) {
@@ -56,7 +57,9 @@ async function SampleTests() {
 
 				console.log(`    ${chalk.green("PASS")} ${file}`);
 			} catch (e) {
-				console.log(`    ${chalk.red("FAIL")} ${file}`);
+				console.error(`    ${chalk.red("FAIL")} ${file}`);
+				console.error(e);
+				console.error("");
 				failure = true;
 			}
 		}
@@ -104,6 +107,15 @@ function ManualTests () {
 
 
 async function Main() {
+	const testBnfSyntax = "./test/bnf/bnf.bnf";
+	if (!fs.existsSync(testBnfSyntax)) {
+		fs.linkSync("./bnf/bnf.bnf", testBnfSyntax);
+	}
+	const testBnfSample = "./test/sample/bnf/self.txt";
+	if (!fs.existsSync(testBnfSample)) {
+		fs.linkSync("./bnf/bnf.bnf", testBnfSample);
+	}
+
 	CompileBNFs();
 	await SampleTests();
 	ManualTests();
