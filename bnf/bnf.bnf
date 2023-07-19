@@ -10,9 +10,9 @@ name ::= letter ( letter | digit | "_" )* ;
 	hex   ::= "0"->"9" | "a"->"f" | "A"->"F" ;
 
 constant ::= %"\"" frag* %"\"" ;
-	frag   ::= escape | byte | !"\""+ ;
+	frag   ::= byte | escape | !"\""+ ;
 	escape ::= %"\\" !"" ;
-	byte   ::= %"x" ...(hex hex) ;
+	byte   ::= %"\\x" ...(hex hex) ;
 
 def ::= ...name %(w+ "::=" w*) expr %(w* ";" w*) ;
 

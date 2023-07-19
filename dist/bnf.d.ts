@@ -146,7 +146,7 @@ export type Term_Frag = {
 	count: number,
 	ref: _Shared.ReferenceRange,
 	value: [
-		(Term_Escape | Term_Byte | _Literal)
+		(Term_Byte | Term_Escape | _Literal)
 	]
 }
 export declare function Parse_Frag (i: string, refMapping?: boolean): _Shared.ParseError | {
