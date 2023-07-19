@@ -347,6 +347,9 @@ function GenerateInternals(m: binaryen.Module, l: LiteralMapping) {
 
 export function GenerateWasm(bnf: Parser) {
 	var m = new binaryen.Module();
+
+	m.setFeatures(binaryen.Features.MutableGlobals);
+
 	m.setMemory(1, 1);
 	m.addFunctionImport("print_i32", "js", "print_i32", binaryen.createType([binaryen.i32]), binaryen.none);
 

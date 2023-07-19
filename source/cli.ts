@@ -138,21 +138,29 @@ for (const file of files) {
 
 	// Generate web assembly
 	try {
-		const module = wasm.GenerateWasm(lang);
+		const mod = wasm.GenerateWasm(lang);
 		if (process.argv.includes("--emit-wat"))
-			writeFileSync(`${root_dir}/${name}.wat`, module.emitText());
+			writeFileSync(`${root_dir}/${name}.wat`, mod.emitText());
 
-		module.optimize();
+		if (!mod.validate()) {
+			console.error(`   Compiling WASM...`);
+			console.error(`   Failed to validate module output`);
+			failure = true;
+			continue;
+		}
+
+		mod.optimize();
 
 		// Generate JS runner
 		writeFileSync(`${root_dir}/${name}.js`,
-			GenerateRunner(lang, module.emitBinary())
+			GenerateRunner(lang, mod.emitBinary())
 		);
 	} catch (e: any) {
 		console.error(`   Compiling WASM...`);
 		console.error(`   ${ColorizeError(e.toString())}`);
 		console.error("");
 		failure = true;
+		continue;
 	}
 
 	console.log(`  - ${chalk.green("OK")}: ${file}`);

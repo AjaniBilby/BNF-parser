@@ -1448,6 +1448,7 @@ function GenerateInternals(m, l) {
 }
 function GenerateWasm(bnf) {
     var m = new binaryen.Module();
+    m.setFeatures(binaryen.Features.MutableGlobals);
     m.setMemory(1, 1);
     m.addFunctionImport("print_i32", "js", "print_i32", binaryen.createType([binaryen.i32]), binaryen.none);
     const literals = IngestLiterals(m, bnf);
