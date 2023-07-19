@@ -27,11 +27,19 @@ export function Create(wasm: BufferSource){
 
 function InitParse(ctx: WasmParser, data: string) {
 	const memory = ctx.exports.memory;
-	memory.grow(1); // grow memory if needed
+	const bytesPerPage = 65_536;
 
 	// Convert the string to UTF-8 bytes
 	const utf8Encoder = new TextEncoder();
 	const stringBytes = utf8Encoder.encode(data);
+
+
+	// ONLY grow memory if needed
+	const chunks       = Math.ceil(memory.buffer.byteLength / bytesPerPage);
+	const desireChunks = Math.ceil(stringBytes.byteLength * 10 / bytesPerPage);
+	if (desireChunks > chunks) {
+		memory.grow(desireChunks - chunks);
+	}
 
 	// Copy the string bytes to WebAssembly memory
 	const wasmMemory = new Uint8Array(memory.buffer);
