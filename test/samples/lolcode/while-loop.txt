@@ -1,0 +1,7 @@
+HAI
+	GIMMEH number
+	IM IN YR loop WILE WIN
+		number R SUM OF number AN 1
+		VISIBLE number
+	IM OUTTA YR loop
+KTHXBYE

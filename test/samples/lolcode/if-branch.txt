@@ -1,0 +1,10 @@
+HAI
+	GIMMEH number
+	I HAZ A even ITZ MOD OF number AN 2
+	O RLY? even
+		YA RLY
+			VISIBLE "ITZ EVEN"
+		NO WAI
+			VISIBLE "NOZ EVEN"
+	OIC
+KTHXBYE
