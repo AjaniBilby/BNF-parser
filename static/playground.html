@@ -15,12 +15,12 @@
 					monaco.editor.setModelMarkers(editor.getModel(), 'owner', []);
 
 					const mod = bnf_parser.wasm.Compile2Wasm(editor.getValue());
-					if (mod instanceof ParseError) {
+					if (mod.msg) {
 						console.error(mod);
 						monaco.editor.setModelMarkers(editor.getModel(), 'owner', [
 							{
-								startLineNumber: mod.ref.end.line,
-								startColumn:     mod.ref.end.col,
+								startLineNumber: mod.ref.start.line,
+								startColumn:     mod.ref.start.col,
 								endLineNumber: mod.ref.end.line,
 								endColumn:     mod.ref.end.col,
 								// severity: monaco.MarkerSeverity.Error,
