@@ -1598,7 +1598,6 @@ function FlattenConstant(syntax) {
                 str += inner.value;
                 break;
             case "byte":
-                console.log(inner.value[0].value, String.fromCharCode(parseInt(inner.value[0].value, 16)));
                 str += String.fromCharCode(parseInt(inner.value[0].value, 16));
                 break;
             case "escape":

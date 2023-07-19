@@ -1,5 +1,17 @@
 # Changelog
 
+## Version 4.0.5
+
+### Fixes:
+  - [x] Hexadecimal characters weren't encoding correctly (`\x6b` == `k`)
+  - [x] Reduced changes of wasm infinitely allocating to basically zero (as long as you don't try and parse an infinite string)
+  - [x] CLI doesn't crash when given an invalid starting path
+  - [x] Removed small chance matching could be attempted in the `0`-`7`byte gap after the input string and before the heap starts
+
+### Changes:
+  - [x] CLI now has coloured outputs
+  - [x] Binaryen now validates modules after compilation to expose any potential errors in the build chain
+
 ## Version 4.0.4
 
 ### Fixes:
