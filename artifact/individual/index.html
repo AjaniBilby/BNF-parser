@@ -626,6 +626,13 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#literal" class="md-nav__link">
+    Literal
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#nodes" class="md-nav__link">
     Nodes
   </a>
@@ -932,6 +939,13 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#literal" class="md-nav__link">
+    Literal
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#nodes" class="md-nav__link">
     Nodes
   </a>
@@ -995,6 +1009,8 @@ with the first letter of the term name capitalized. This will be a type represen
 name     -&gt; Term_Name
 expr_arg -&gt; Term_Expr_arg
 </code></pre></div></p>
+<h4 id="literal">Literal</h4>
+<p>There is also an added <code>_Literal</code> type, this is mainly to help developers using this library by giving them a type they can use in function arguments, and other type hints that is shorter to type than the entire type definition for a standard literal node.</p>
 <h3 id="nodes">Nodes</h3>
 <p>Every node (including terms, and literals) have the following general type, which is then refined by the compiled <code>d.ts</code>
 <div class="highlight"><pre><span></span><code><span class="kr">type</span><span class="w"> </span><span class="nx">SyntaxNode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
@@ -1025,7 +1041,7 @@ especially if you don't care about where the error occurred, and instead just on
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">July 12, 2023</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">July 19, 2023</span>
       
         <br>
         Created:
