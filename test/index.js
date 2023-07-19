@@ -107,14 +107,18 @@ function ManualTests () {
 
 
 async function Main() {
+	// Symbolic link to actual bnf
 	const testBnfSyntax = "./test/bnf/bnf.bnf";
 	if (!fs.existsSync(testBnfSyntax)) {
 		fs.linkSync("./bnf/bnf.bnf", testBnfSyntax);
 	}
+
+	// Update sample since it's renamed
 	const testBnfSample = "./test/sample/bnf/self.txt";
-	if (!fs.existsSync(testBnfSample)) {
-		fs.linkSync("./bnf/bnf.bnf", testBnfSample);
+	if (fs.existsSync(testBnfSample)) {
+		fs.unlinkSync(testBnfSample);
 	}
+	fs.linkSync("./bnf/bnf.bnf", testBnfSample);
 
 	CompileBNFs();
 	await SampleTests();
