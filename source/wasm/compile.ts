@@ -188,7 +188,7 @@ function GenerateMatchString(m: binaryen.Module) {
 								m.local.get(input, binaryen.i32),
 								m.local.get(count, binaryen.i32),
 							),
-							m.global.get("heap", binaryen.i32)
+							m.global.get("inputEnd", binaryen.i32)
 						)
 					),
 					m.br("loop")
