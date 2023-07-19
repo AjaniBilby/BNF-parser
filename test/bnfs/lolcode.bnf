@@ -1,0 +1,64 @@
+program ::= %( "HAI" w ) code_block %( w "KTHXBAI" ) ;
+
+ok ::= %"HAI" %w "code_block" "KTHXBAI" ;
+
+w ::= ws* nlc ws* ;         # Multi-line white space
+ws ::= " " | "\t" ;         # Single line white space
+nlc ::= "\r\n" | "\n" | "," ;
+
+code_block ::= statement (nlc statement)* ;
+
+statement ::= declaration | loop | func_decl | comment | print_block | if_block | assignment | expression ;
+
+loop ::= %( "IM IN YR" ws* ) label %ws* %"WILE" expression %w code_block %( w "IM OUTTA YR" ws+ ) label ;
+
+declaration ::= %( "I HAS A" ws+ ) label ( %( ws+ "ITZ" ws+ ) expression )? ;
+
+comment ::= %(comment_single | comment_multi) ;
+	comment_single ::= "BTW" !"\n"* "\n" ;
+	comment_multi  ::= "OBTW" !"TLDR"* "TLDR" ;
+
+print_block ::= %( "VISIBLE" ws* ) ( expression %ws* )+ "MKAY?" ;
+
+if_block ::= %("O RLY?" w "YA RLY" w) code_block %w ( else_if_block %w )? %"OIC" ;
+else_if_block ::= ( else_bounded | else_unbounded ) %w code_block ;
+	else_bounded   ::= %"MEBEE" %ws+ expression ;
+	else_unbounded ::= %"NO WAI" ;
+
+func_decl ::= %( "HOW DUZ I" ws+ ) label func_args? %w code_block %(w "IF U SAY SO") ;
+	func_args ::= func_arg ( %"AN" %ws+ func_arg )* ;
+	func_arg  ::= %("YR" ws+) label ;
+
+input_block ::= "GIMMEH" %ws+ label ;
+
+assignment ::= label %( ws+ "R" ws+ ) expression ;
+# RUNTIME ERROR: assignment ::= label %( ws* "R" ws*) expression ;
+
+expression ::=
+		equals | not_equals | both | either | greater | less | # comparitors
+		add | sub | mul | div | mod | cast |                   # dual operand
+		all | any | not |                                      # group boolean operand
+		func | label | atom ;                                  # operands
+	equals     ::= %( "BOTH SAEM" ws* )   expression %( ws* "AN" ws* ) expression ;
+	not_equals ::= %( "DIFFRINT" ws* )    expression %( ws* "AN" ws* ) expression ;
+	both       ::= %( "BOTH OF" ws* )     expression %( ws* "AN" ws* ) expression ;
+	either     ::= %( "EITHER OF" ws* )   expression %( ws* "AN" ws* ) expression ;
+	greater    ::= %( "BIGGR OF" ws* )    expression %( ws* "AN" ws* ) expression ;
+	less       ::= %( "SMALLR OF" ws* )   expression %( ws* "AN" ws* ) expression ;
+	add        ::= %( "SUM OF" ws* )      expression %( ws* "AN" ws* ) expression ;
+	sub        ::= %( "DIFF OF" ws* )     expression %( ws* "AN" ws* ) expression ;
+	mul        ::= %( "PRODUKT OF" ws* )  expression %( ws* "AN" ws* ) expression ;
+	div        ::= %( "QUOSHUNT OF" ws* ) expression %( ws* "AN" ws* ) expression ;
+	mod        ::= %( "MOD OF" ws* )      expression %( ws* "AN" ws* ) expression ;
+	cast       ::= %( "MAEK" ws* )        expression %( ws* "A"  ws* ) expression ;
+	all        ::= %("ALL OF" ws* ) expression ( %( ws* "AN" ws* ) expression )* ;
+	any        ::= %("ANY OF" ws* ) expression ( %( ws* "AN" ws* ) expression )* ;
+	not        ::= %("NOT" ws* ) expression ;
+	func  ::= label %ws* ( expression %ws* )+ %"MKAY?" ;
+	label ::= ...( letter ( letter | digit )+ ) ;
+		letter ::= "A"->"Z"+ | "a"->"z"+ ;
+		digit  ::= "0"->"9"+ ;
+	atom ::= "WIN" | "FAIL" | "NOOB" | float | integer | string ;
+		float   ::= digit+ "." digit+ ;
+		integer ::= digit+ ;
+		string  ::= %"\"" !"\""* %"\"";
