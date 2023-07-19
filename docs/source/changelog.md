@@ -11,6 +11,7 @@
 ### Changes:
   - [x] CLI now has coloured outputs
   - [x] Binaryen now validates modules after compilation to expose any potential errors in the build chain
+  - [x] A lot more automated tests to ensure past errors do not occur again, and to prevent some future ones
 
 ## Version 4.0.4
 
