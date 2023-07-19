@@ -51,9 +51,12 @@ async function SampleTests() {
 		for (const file of files) {
 			const data = fs.readFileSync(`${dir}/${file}`, "utf8");
 			try {
-				const syntax = Parser.Parse_Program(data, false);
+				const syntax = Parser.Parse_Program(data, true);
 				if (syntax instanceof Shared.ParseError) throw syntax;
-				if (syntax.isPartial) throw new Error("Partial Match");
+				if (syntax.isPartial) throw new Shared.ParseError(
+					"Partial Match",
+					new Shared.ReferenceRange(syntax.root.ref.end, syntax.reach)
+				).toString();;
 
 				console.log(`    ${chalk.green("PASS")} ${file}`);
 			} catch (e) {
