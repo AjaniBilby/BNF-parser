@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 4.0.5
+## Version 4.0.6
 
 ### Fixes:
   - [x] References generated on successful pass not having the correct start reference
