@@ -3,6 +3,11 @@
 ## Version 4.0.5
 
 ### Fixes:
+  - [x] References generated on successful pass not having the correct start reference
+
+## Version 4.0.5
+
+### Fixes:
   - [x] Hexadecimal characters weren't encoding correctly (`\x6b` == `k`)
   - [x] Reduced changes of wasm infinitely allocating to basically zero (as long as you don't try and parse an infinite string)
   - [x] CLI doesn't crash when given an invalid starting path

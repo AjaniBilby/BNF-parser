@@ -80,13 +80,13 @@ function MapTreeRefs(tree: SyntaxNode, str: string, sharedRef: ReferenceRange) {
 		bytes: 0
 	};
 
-	while (stack.length > 0) {
+	while (true) {
 		const curr = stack.pop();
-		if (!curr) continue;
+		if (!curr) break;
 
 		if (curr.ref === sharedRef) {
 			// Don't calculate forward progression if not needed
-			if (cursor.bytes !== curr.end) ProgressCursor(str, curr.end, cursor);
+			if (cursor.bytes !== curr.start) ProgressCursor(str, curr.start, cursor);
 
 			curr.ref = new ReferenceRange(
 				cursor.ref.clone(),
