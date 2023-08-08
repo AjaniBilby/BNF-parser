@@ -1794,14 +1794,14 @@ function MapTreeRefs$1(tree, str, sharedRef) {
         ref: Reference$1.blank(),
         bytes: 0
     };
-    while (stack.length > 0) {
+    while (true) {
         const curr = stack.pop();
         if (!curr)
-            continue;
+            break;
         if (curr.ref === sharedRef) {
             // Don't calculate forward progression if not needed
-            if (cursor.bytes !== curr.end)
-                ProgressCursor$1(str, curr.end, cursor);
+            if (cursor.bytes !== curr.start)
+                ProgressCursor$1(str, curr.start, cursor);
             curr.ref = new ReferenceRange$1(cursor.ref.clone(), cursor.ref // no alloc fill in
             );
             stack.push(curr); // revisit node for ref.end mapping (after children)
@@ -1956,14 +1956,14 @@ function MapTreeRefs(tree, str, sharedRef) {
 		ref: Reference.blank(),
 		bytes: 0
 	};
-	while (stack.length > 0) {
+	while (true) {
 		const curr = stack.pop();
 		if (!curr)
-			continue;
+			break;
 		if (curr.ref === sharedRef) {
 			// Don't calculate forward progression if not needed
-			if (cursor.bytes !== curr.end)
-				ProgressCursor(str, curr.end, cursor);
+			if (cursor.bytes !== curr.start)
+				ProgressCursor(str, curr.start, cursor);
 			curr.ref = new ReferenceRange(cursor.ref.clone(), cursor.ref // no alloc fill in
 			);
 			stack.push(curr); // revisit node for ref.end mapping (after children)

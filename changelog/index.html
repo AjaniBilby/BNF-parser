@@ -15,7 +15,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.19">
+      <meta name="generator" content="mkdocs-1.5.2, mkdocs-material-9.1.21">
     
     
       
@@ -854,6 +854,26 @@
   
 </li>
         
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-405_1" class="md-nav__link">
+    Version 4.0.5
+  </a>
+  
+    <nav class="md-nav" aria-label="Version 4.0.5">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#fixes_1" class="md-nav__link">
+    Fixes:
+  </a>
+  
+</li>
+        
           <li class="md-nav__item">
   <a href="#changes" class="md-nav__link">
     Changes:
@@ -875,7 +895,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#fixes_1" class="md-nav__link">
+  <a href="#fixes_2" class="md-nav__link">
     Fixes:
   </a>
   
@@ -915,7 +935,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#fixes_2" class="md-nav__link">
+  <a href="#fixes_3" class="md-nav__link">
     Fixes:
   </a>
   
@@ -942,7 +962,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#fixes_3" class="md-nav__link">
+  <a href="#fixes_4" class="md-nav__link">
     Fixes:
   </a>
   
@@ -976,7 +996,7 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#fixes_4" class="md-nav__link">
+  <a href="#fixes_5" class="md-nav__link">
     Fixes:
   </a>
   
@@ -1056,7 +1076,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#fixes_5" class="md-nav__link">
+  <a href="#fixes_6" class="md-nav__link">
     Fixes:
   </a>
   
@@ -1083,7 +1103,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#fixes_6" class="md-nav__link">
+  <a href="#fixes_7" class="md-nav__link">
     Fixes:
   </a>
   
@@ -1103,7 +1123,7 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#fixes_7" class="md-nav__link">
+  <a href="#fixes_8" class="md-nav__link">
     Fixes:
   </a>
   
@@ -1168,6 +1188,11 @@
 <h2 id="version-405">Version 4.0.5</h2>
 <h3 id="fixes">Fixes:</h3>
 <ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> References generated on successful pass not having the correct start reference</li>
+</ul>
+<h2 id="version-405_1">Version 4.0.5</h2>
+<h3 id="fixes_1">Fixes:</h3>
+<ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Hexadecimal characters weren't encoding correctly (<code>\x6b</code> == <code>k</code>)</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Reduced changes of wasm infinitely allocating to basically zero (as long as you don't try and parse an infinite string)</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> CLI doesn't crash when given an invalid starting path</li>
@@ -1180,7 +1205,7 @@
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> A lot more automated tests to ensure past errors do not occur again, and to prevent some future ones</li>
 </ul>
 <h2 id="version-404">Version 4.0.4</h2>
-<h3 id="fixes_1">Fixes:</h3>
+<h3 id="fixes_2">Fixes:</h3>
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Memory over growth: Available memory kept growing after every single parse</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Better error handling for <code>bnf-compile</code> when given a bad directory</li>
@@ -1191,7 +1216,7 @@
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <code>_Literal</code> helper type in compiled artifacts</li>
 </ul>
 <h2 id="version-402">Version 4.0.2</h2>
-<h3 id="fixes_2">Fixes:</h3>
+<h3 id="fixes_3">Fixes:</h3>
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> More consistent formatting for generated artifacts</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> More concise types for repetitions (i.e. one to many will always have at least one element according to the type)</li>
@@ -1202,7 +1227,7 @@
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Changed to MIT license from ISC</li>
 </ul>
 <h2 id="version-401">Version 4.0.1</h2>
-<h3 id="fixes_3">Fixes:</h3>
+<h3 id="fixes_4">Fixes:</h3>
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> NPM didn't include some critical files for some reason...</li>
 </ul>
@@ -1218,7 +1243,7 @@
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> All previous APIs moved under the <code>legacy</code> namespace</li>
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Changed package type to module</li>
 </ul>
-<h3 id="fixes_4">Fixes:</h3>
+<h3 id="fixes_5">Fixes:</h3>
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Count not working when applied directly to a range (i.e. <code>"a"-&gt;"z"+</code>)</li>
 </ul>
@@ -1244,7 +1269,7 @@
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Got ChatGPT-4 to read my homework (read over the readme and helped clarify a few things)</li>
 </ul>
 <h2 id="version-313">Version 3.1.3</h2>
-<h3 id="fixes_5">Fixes:</h3>
+<h3 id="fixes_6">Fixes:</h3>
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Fixed missing bound check on getting reach of a SyntaxNode</li>
 </ul>
@@ -1253,12 +1278,12 @@
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Clarified readme documentation</li>
 </ul>
 <h2 id="version-312">Version 3.1.2</h2>
-<h3 id="fixes_6">Fixes:</h3>
+<h3 id="fixes_7">Fixes:</h3>
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Updated readme to clarify behaviour of select statements</li>
 </ul>
 <h2 id="version-311">Version 3.1.1</h2>
-<h3 id="fixes_7">Fixes:</h3>
+<h3 id="fixes_8">Fixes:</h3>
 <ul class="task-list">
 <li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> Incorrect referencing for syntax errors.</li>
 </ul>
@@ -1281,7 +1306,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">July 19, 2023</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">August 8, 2023</span>
       
         <br>
         Created:
