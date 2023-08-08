@@ -1,6 +1,6 @@
 {
 	"name": "bnf-parser",
-	"version": "4.0.5",
+	"version": "4.0.6",
 	"description": "Deterministic BNF compiler/parser",
 	"homepage": "https://bnf-parser.ajanibilby.com",
 	"main": "./bin/index.js",
