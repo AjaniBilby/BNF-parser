@@ -1582,7 +1582,7 @@ function CompileRule(rule) {
         `export declare function Parse_${capName} (i: string, refMapping?: boolean): _Shared.ParseError | {\n\troot: _Shared.SyntaxNode & ${typeName},\n\treachBytes: number,\n\treach: null | _Shared.Reference,\n\tisPartial: boolean\n}\n`;
 }
 function CompileTypes(lang) {
-    return `import type _Shared from './shared.js';\n` +
+    return `import type * as _Shared from './shared.js';\n` +
         `export type _Literal = { type: "literal", value: string, start: number, end: number, count: number, ref: _Shared.ReferenceRange };\n` +
         [...lang.terms.keys()]
             .map(x => CompileRule(lang.terms.get(x))) // hush Typescript it's okay
