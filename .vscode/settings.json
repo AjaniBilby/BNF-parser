@@ -4,6 +4,7 @@
 		"files.trimTrailingWhitespace": false
 	},
 	"cSpell.words": [
-		"binaryen"
+		"binaryen",
+		"Deno"
 	]
 }

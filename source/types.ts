@@ -160,7 +160,7 @@ function CompileRule(rule: Rule) {
 
 
 export function CompileTypes(lang: Parser) {
-	return `import type _Shared from './shared.js';\n`+
+	return `import type * as _Shared from './shared.js';\n`+
 		`export type _Literal = { type: "literal", value: string, start: number, end: number, count: number, ref: _Shared.ReferenceRange };\n` +
 		[...lang.terms.keys()]
 			.map(x => CompileRule(lang.terms.get(x) as any)) // hush Typescript it's okay

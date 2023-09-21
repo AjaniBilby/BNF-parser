@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 4.0.7
+
+### Fixes:
+  - [x] Slightly altered the import of `shared.js` from `[syntax].js` to handle better with Deno compatibility
+
 ## Version 4.0.6
 
 ### Fixes:
