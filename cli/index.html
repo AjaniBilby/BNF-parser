@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.0">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.1">
     
     
       
@@ -28,10 +28,10 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.9f615399.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.72749a73.min.css">
       
         
-        <link rel="stylesheet" href="../assets/stylesheets/palette.649f08f9.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.a5377069.min.css">
       
       
   
@@ -526,6 +526,17 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    CLI
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -535,6 +546,32 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#optional-output-dir" class="md-nav__link">
+    Optional output dir
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -1003,6 +1040,21 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#optional-output-dir" class="md-nav__link">
+    Optional output dir
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -1030,13 +1082,18 @@
 <p>Once you have <code>bnf-parser</code> installed simply run <code>npx bnf-compile ./bnf/</code> where <code>./bnf/</code> is actually the folder where your bnfs are stored.
 After running this you will notice multiple artifacts will be generated which is what you will then <code>import</code>/<code>require</code> into your project.</p>
 <p>Please note that by default this command will generate javascript modules using the <code>import</code>/<code>export</code> syntax, if you are running an environment which <strong>does not support</strong> <code>import</code>/<code>export</code>, the CLI will not currently be able export artifacts useable in your project.</p>
+<h2 id="optional-output-dir">Optional output dir</h2>
+<div class="highlight"><pre><span></span><code>npx<span class="w"> </span>bnf-compile<span class="w"> </span>./bnf/<span class="w"> </span>./bin/bnf/
+</code></pre></div>
+<p>You can also add a second argument for the output directory for the artifacts.<br />
+Note: If that directory does not currently exist, the cli will attempt to recursively make the dir</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">July 16, 2023</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">September 23, 2023</span>
       
         <br>
         Created:
