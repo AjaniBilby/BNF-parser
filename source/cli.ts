@@ -3,15 +3,15 @@
 
 import chalk from 'chalk';
 
-import { readdirSync, existsSync, readFileSync, writeFileSync, appendFileSync, statSync } from "fs";
+import { readdirSync, existsSync, readFileSync, writeFileSync, appendFileSync, statSync, mkdirSync } from "fs";
 import { basename, extname, join, dirname } from "path";
 import { legacy, wasm } from "./index.js";
 
-import { ParseError } from "./artifacts/shared.js";
 import { CompileProgram } from "./compile.js";
 
 import * as _Shared from "../dist/shared.js"; // things shared between multiple pre-compiled BNFs
 import * as bnf from "../dist/bnf.js";       // pre-compiled JS with WASM embedded
+import binaryen from 'binaryen';
 
 
 const script = join(process.argv[1], "../");
@@ -68,6 +68,7 @@ if (!existsSync(root)) {
 
 const isFile = statSync(root).isFile();
 const root_dir = isFile ? dirname(root) : root.slice(0, -1);
+const out_dir = process.argv[3] ? process.argv[3].slice(0, -1) : root_dir;
 
 if (!existsSync(root_dir)) {
 	console.error(`Unknown path ${root}`);
@@ -86,7 +87,16 @@ if (files.length === 0) {
 	process.exit(1);
 }
 
-console.log(`Found: ${files.join(', ')}\n`);
+console.log(`Found: ${files.join(', ')}`);
+if (out_dir !== root_dir) {
+	if (!existsSync(out_dir)) {
+		mkdirSync(out_dir, { recursive: true });
+		console.log(`  out: ${out_dir} (made dir)`);
+	} else {
+		console.log(`  out: ${out_dir}`)
+	}
+}
+console.log(""); // blank spacer line
 
 let failure = false;
 for (const file of files) {
@@ -134,13 +144,13 @@ for (const file of files) {
 
 	// Generate type headers
 	const types = wasm.CompileTypes(lang);
-	writeFileSync(`${root_dir}/${name}.d.ts`, types);
+	writeFileSync(`${out_dir}/${name}.d.ts`, types);
 
 	// Generate web assembly
 	try {
 		const mod = wasm.GenerateWasm(lang);
 		if (process.argv.includes("--emit-wat"))
-			writeFileSync(`${root_dir}/${name}.wat`, mod.emitText());
+			writeFileSync(`${out_dir}/${name}.wat`, mod.emitText());
 
 		if (!mod.validate()) {
 			console.error(`   Compiling WASM...`);
@@ -149,10 +159,11 @@ for (const file of files) {
 			continue;
 		}
 
+		binaryen.setOptimizeLevel(2);
 		mod.optimize();
 
 		// Generate JS runner
-		writeFileSync(`${root_dir}/${name}.js`,
+		writeFileSync(`${out_dir}/${name}.js`,
 			GenerateRunner(lang, mod.emitBinary())
 		);
 	} catch (e: any) {
@@ -166,15 +177,15 @@ for (const file of files) {
 	console.log(`  - ${chalk.green("OK")}: ${file}`);
 }
 
-writeFileSync(`${root_dir}/shared.js`, wasm.Runner.toString());
+writeFileSync(`${out_dir}/shared.js`, wasm.Runner.toString());
 writeFileSync(
-	`${root_dir}/shared.d.ts`,
+	`${out_dir}/shared.d.ts`,
 	readFileSync(`${script}/artifacts/shared.d.ts`, "utf8")
 		.replace(/    /gm, "\t")
 		.replace(/\r\n/g, "\n")
 );
 appendFileSync(
-	`${root_dir}/shared.js`,
+	`${out_dir}/shared.js`,
 	readFileSync(`${script}/artifacts/shared.js`, "utf8")
 		.replace(/    /gm, "\t")
 		.replace(/\r\n/g, "\n")

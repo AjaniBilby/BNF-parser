@@ -1,6 +1,6 @@
 {
 	"name": "bnf-parser",
-	"version": "4.0.7",
+	"version": "4.1.0",
 	"description": "Deterministic BNF compiler/parser",
 	"homepage": "https://bnf-parser.ajanibilby.com",
 	"main": "./bin/index.js",
@@ -14,7 +14,7 @@
 		"build:ts": "tsc",
 		"build:syntax": "node ./tools/build-syntax.js",
 		"build:preload": "node ./tools/post-build.js",
-		"build:bnfs": "node ./bin/cli.js ./bnf/",
+		"build:bnfs": "node ./bin/cli.js ./bnf/ ./dist/",
 		"build:bundle": "npx rollup -c"
 	},
 	"repository": {

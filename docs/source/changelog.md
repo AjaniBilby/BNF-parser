@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 4.1.0
+
+### Added:
+  - [x] Added the optional extra argument for an output dir to the cli
+
 ## Version 4.0.7
 
 ### Fixes:
