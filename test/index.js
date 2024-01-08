@@ -13,8 +13,9 @@ function CompileBNFs(){
 	try {
 		console.log(execSync("node ../bin/cli.js ./bnf/", { cwd }).toString());
 	} catch (e) {
-		console.error(e.stderr);
-		console.error("Failed to compile BNFs");
+		console.error(e.stdout.toString());
+		console.error("Failed to compile BNFs\n\n");
+		console.error(e.stderr.toString());
 		process.exit(1);
 	}
 }
@@ -110,18 +111,18 @@ function ManualTests () {
 
 
 async function Main() {
-	// Symbolic link to actual bnf
-	const testBnfSyntax = "./test/bnf/bnf.bnf";
-	if (!fs.existsSync(testBnfSyntax)) {
-		fs.linkSync("./bnf/bnf.bnf", testBnfSyntax);
-	}
+	// // Symbolic link to actual bnf
+	// const testBnfSyntax = "./test/bnf/bnf.bnf";
+	// if (!fs.existsSync(testBnfSyntax)) {
+	// 	fs.linkSync("./bnf/bnf.bnf", testBnfSyntax);
+	// }
 
-	// Update sample since it's renamed
-	const testBnfSample = "./test/sample/bnf/self.txt";
-	if (fs.existsSync(testBnfSample)) {
-		fs.unlinkSync(testBnfSample);
-	}
-	fs.linkSync("./bnf/bnf.bnf", testBnfSample);
+	// // Update sample since it's renamed
+	// const testBnfSample = "./test/sample/bnf/self.txt";
+	// if (fs.existsSync(testBnfSample)) {
+	// 	fs.unlinkSync(testBnfSample);
+	// }
+	// fs.linkSync("./bnf/bnf.bnf", testBnfSample);
 
 	CompileBNFs();
 	await SampleTests();
