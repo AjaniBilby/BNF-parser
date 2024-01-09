@@ -2,8 +2,6 @@ program ::= %w* def+ ;
 w ::= comment | " " | "\t" | "\n" | "\r\n" ;
 	comment ::= "#" !"\n"* "\n" ;
 
-# test
-
 name ::= letter ( letter | digit | "_" )* ;
 	letter ::= "a"->"z" | "A"->"Z" ;
 	digit ::= "0"->"9" ;
