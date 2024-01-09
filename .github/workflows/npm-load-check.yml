@@ -5,8 +5,8 @@ concurrency:
   cancel-in-progress: true
 
 on:
-  push:
-    branches: [ main ]
+  release:
+    types: [ published ]
   workflow_dispatch:
 
 jobs:
@@ -36,5 +36,5 @@ jobs:
         run: npm install bnf-parser -g
 
       - name: Automated tests
-        run: node ./temp-repo/test/index.js
+        run: node index.js
         working-directory: ./temp-repo/test
