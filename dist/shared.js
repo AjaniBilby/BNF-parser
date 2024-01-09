@@ -1,13 +1,15 @@
 const OFFSET = {"TYPE":0,"TYPE_LEN":4,"START":8,"END":12,"COUNT":16,"DATA":20};
 export function InitParse(ctx, data) {
+	const offset = ctx.exports.input.value;
 	const memory = ctx.exports.memory;
 	const bytesPerPage = 65536;
 	// Convert the string to UTF-8 bytes
 	const utf8Encoder = new TextEncoder();
 	const stringBytes = utf8Encoder.encode(data);
 	// ONLY grow memory if needed
+	const desireChunks = Math.ceil((stringBytes.byteLength * 10 + offset) / bytesPerPage);
 	const chunks = Math.ceil(memory.buffer.byteLength / bytesPerPage);
-	const desireChunks = Math.ceil(stringBytes.byteLength * 10 / bytesPerPage);
+	console.log(`est: ${stringBytes.byteLength * 10 + offset} of ${memory.buffer.byteLength}`);
 	if (desireChunks > chunks) {
 		memory.grow(desireChunks - chunks);
 	}

@@ -490,10 +490,11 @@ class Sequence extends Select {
     }
 }
 class Rule {
-    constructor(name, json) {
+    constructor(name, json, ref = null) {
         this.name = name;
         this.seq = ParseExpression(json);
         this.verbose = false;
+        this.ref = ref;
     }
     parse(input, ctx, cursor) {
         if (this.verbose) {
@@ -1268,7 +1269,7 @@ function CompileRepeat$1(ctx, innerWasm, repetitions) {
         ctx.m.i32.store(OFFSET$1.COUNT, 4, ctx.m.local.get(rewind, binaryen.i32), ctx.m.local.get(count, binaryen.i32)),
     ]);
 }
-function CompileRule$1(m, literals, rule) {
+function CompileRule$1(m, literals, rule, fileID) {
     const ctx = new CompilerContext(m, literals, rule);
     // Function input
     const error = ctx.declareVar(binaryen.i32);
@@ -1292,11 +1293,14 @@ function CompileRule$1(m, literals, rule) {
         inner.exprs = [rule.seq];
     }
     const innerWasm = CompileExpression$1(ctx, inner, rule.name);
-    ctx.m.addFunction(rule.name, binaryen.createType([]), binaryen.i32, ctx.vars, ctx.m.block(null, [
+    const entry = ctx.m.block(null, [
         ctx.m.local.set(error, ctx.m.i32.const(0)),
         innerWasm,
         ctx.m.return(ctx.m.local.get(error, binaryen.i32))
-    ]));
+    ]);
+    const funcID = ctx.m.addFunction(rule.name, binaryen.createType([]), binaryen.i32, ctx.vars, entry);
+    if (rule.ref)
+        ctx.m.setDebugLocation(funcID, entry, fileID, rule.ref.line, rule.ref.col);
     ctx.m.addFunctionExport(rule.name, rule.name);
 }
 
@@ -1449,12 +1453,13 @@ function GenerateInternals(m, l) {
 function GenerateWasm(bnf) {
     var m = new binaryen.Module();
     m.setFeatures(binaryen.Features.MutableGlobals);
+    const fileID = m.addDebugInfoFileName("source.bnf");
     m.setMemory(1, 1);
     m.addFunctionImport("print_i32", "js", "print_i32", binaryen.createType([binaryen.i32]), binaryen.none);
     const literals = IngestLiterals(m, bnf);
     GenerateInternals(m, literals);
     for (let [_, rule] of bnf.terms) {
-        CompileRule$1(m, literals, rule);
+        CompileRule$1(m, literals, rule, fileID);
     }
     return m;
 }
@@ -1735,7 +1740,7 @@ function BuildExpr(syntax, namespace) {
 function CompileDefinition(syntax, namespace) {
     const name = syntax.value[0].value;
     const expr = BuildExpr(syntax.value[1], namespace);
-    return new Rule(name, expr);
+    return new Rule(name, expr, syntax.ref.start);
 }
 function CompileProgram(syntax) {
     const ctx = new Parser({});
@@ -1758,14 +1763,16 @@ function Create(wasm) {
     return bundle;
 }
 function InitParse$1(ctx, data) {
+    const offset = ctx.exports.input.value;
     const memory = ctx.exports.memory;
     const bytesPerPage = 65536;
     // Convert the string to UTF-8 bytes
     const utf8Encoder = new TextEncoder();
     const stringBytes = utf8Encoder.encode(data);
     // ONLY grow memory if needed
+    const desireChunks = Math.ceil((stringBytes.byteLength * 10 + offset) / bytesPerPage);
     const chunks = Math.ceil(memory.buffer.byteLength / bytesPerPage);
-    const desireChunks = Math.ceil(stringBytes.byteLength * 10 / bytesPerPage);
+    console.log(`est: ${stringBytes.byteLength * 10 + offset} of ${memory.buffer.byteLength}`);
     if (desireChunks > chunks) {
         memory.grow(desireChunks - chunks);
     }
@@ -1921,14 +1928,16 @@ var run = /*#__PURE__*/Object.freeze({
 
 const OFFSET = {"TYPE":0,"TYPE_LEN":4,"START":8,"END":12,"COUNT":16,"DATA":20};
 function InitParse(ctx, data) {
+	const offset = ctx.exports.input.value;
 	const memory = ctx.exports.memory;
 	const bytesPerPage = 65536;
 	// Convert the string to UTF-8 bytes
 	const utf8Encoder = new TextEncoder();
 	const stringBytes = utf8Encoder.encode(data);
 	// ONLY grow memory if needed
+	const desireChunks = Math.ceil((stringBytes.byteLength * 10 + offset) / bytesPerPage);
 	const chunks = Math.ceil(memory.buffer.byteLength / bytesPerPage);
-	const desireChunks = Math.ceil(stringBytes.byteLength * 10 / bytesPerPage);
+	console.log(`est: ${stringBytes.byteLength * 10 + offset} of ${memory.buffer.byteLength}`);
 	if (desireChunks > chunks) {
 		memory.grow(desireChunks - chunks);
 	}

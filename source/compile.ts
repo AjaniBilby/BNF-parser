@@ -161,7 +161,7 @@ function CompileDefinition(syntax: bnf.Term_Def, namespace: string[]) {
 	const name = syntax.value[0].value;
 	const expr = BuildExpr(syntax.value[1], namespace);
 
-	return new legacy.Rule(name, expr);
+	return new legacy.Rule(name, expr, syntax.ref.start);
 }
 
 

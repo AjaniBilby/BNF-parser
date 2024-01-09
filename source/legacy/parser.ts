@@ -61,10 +61,12 @@ function CountCheck(count: number, mode: Count): boolean {
 export class Literal {
 	value: string;
 	count: Count;
+	ref?: Reference;
 
 	constructor(json: any) {
 		this.value = json['value'];
 		this.count = ParseCount(json['count']);
+		this.ref = json['ref'] || undefined;
 	}
 
 	parse(input: string, ctx: Parser, cursor: Reference): SyntaxNode | ParseError {
@@ -161,9 +163,11 @@ export class CharRange extends Literal {
 
 export class Gather {
 	expr: Expression;
+	ref: Reference | undefined;
 
 	constructor(json: any) {
 		this.expr = ParseExpression(json['expr']);
+		this.ref = json['ref'] || undefined;
 	}
 
 	parse(input: string, ctx: Parser, cursor: Reference): SyntaxNode | ParseError {
@@ -209,10 +213,12 @@ export class Omit extends Gather {
 export class Not {
 	expr: Expression;
 	count: Count;
+	ref?: Reference;
 
 	constructor(json: any) {
 		this.expr = ParseExpression(json['expr']);
 		this.count = ParseCount(json['count']);
+		this.ref = json['ref'] || undefined;
 	}
 
 	parse(input: string, ctx: Parser, cursor: Reference): SyntaxNode | ParseError {
@@ -256,11 +262,13 @@ export class Not {
 
 export class Term {
 	value: string;
-	count: Count
+	count: Count;
+	ref?: Reference;
 
 	constructor(json: any) {
 		this.value = json['value'];
 		this.count = ParseCount(json['count']);
+		this.ref = json['ref'] || undefined;
 	}
 
 	parse(input: string, ctx: Parser, cursor: Reference): SyntaxNode | ParseError {
@@ -325,10 +333,12 @@ export class Term {
 export class Select {
 	exprs: Expression[];
 	count: Count;
+	ref?: Reference;
 
 	constructor(json: any) {
 		this.exprs = [];
 		this.count = ParseCount(json['count']);
+		this.ref = json['ref'] || undefined;
 
 		for (let value of json['exprs']) {
 			this.exprs.push(ParseExpression(value))
@@ -492,8 +502,9 @@ export class Rule {
 	name: string;
 	seq: Expression;
 	verbose: boolean;
+	ref?: Reference;
 
-	constructor(name: string, json: any){
+	constructor(name: string, json: any, ref?: Reference){
 		this.name = name;
 		this.seq = ParseExpression(json);
 		this.verbose = false;

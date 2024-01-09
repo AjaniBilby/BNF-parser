@@ -349,6 +349,7 @@ export function GenerateWasm(bnf: Parser) {
 	var m = new binaryen.Module();
 
 	m.setFeatures(binaryen.Features.MutableGlobals);
+	const fileID = m.addDebugInfoFileName("source.bnf");
 
 	m.setMemory(1, 1);
 	m.addFunctionImport("print_i32", "js", "print_i32", binaryen.createType([binaryen.i32]), binaryen.none);
@@ -357,7 +358,7 @@ export function GenerateWasm(bnf: Parser) {
 	GenerateInternals(m, literals);
 
 	for (let [_, rule] of bnf.terms) {
-		CompileRule(m, literals, rule);
+		CompileRule(m, literals, rule, fileID);
 	}
 
 	return m;

@@ -1,55 +1,12 @@
 import binaryen from "binaryen";
 
-import { CharRange, Count, Expression, Gather, Literal, Not, Omit, Rule, Select, Sequence, Term } from "../legacy/parser.js";
-import LiteralMapping from "./literal-mapping.js";
-import { OFFSET } from "./layout.js";
+import LiteralMapping from "~/wasm/literal-mapping.js";
+import { CharRange, Count, Expression, Gather, Literal, Not, Omit, Rule, Select, Sequence, Term } from "~/legacy/parser.js";
+import { CompilerContext } from "~/wasm/context.js";
+import { OFFSET } from "~/wasm/layout.js";
 
 const SHARED = {
 	ERROR: 0, // local variable for error flag
-}
-
-// Using OO because of better V8 memory optimisations
-class CompilerContext {
-	readonly m: binaryen.Module;
-	readonly l: LiteralMapping;
-	vars: number[];
-
-	_blocks: string[];
-	_bID: number
-
-	constructor(m: binaryen.Module, literals: LiteralMapping, rule: Rule) {
-		this.m = m;
-		this.l = literals;
-		this.vars = [];
-		this._blocks = [];
-		this._bID = 1;
-	}
-
-
-	pushBlock(label?: string) {
-		if (!label) label = this.reserveBlock();
-		this._blocks.push(label);
-
-		return label;
-	}
-
-	reserveBlock() {
-		return `_bb${(this._bID++).toString()}`;
-	}
-
-	popBlock() {
-		const out = this._blocks.pop();
-		if (!out) throw new Error("Attempting to pop block when no blocks remain in context");
-		return out;
-	}
-
-
-	declareVar(type: number) {
-		const index = this.vars.length;
-		this.vars.push(type);
-
-		return index;
-	}
 }
 
 
@@ -96,7 +53,7 @@ function CompileSequenceOnce(ctx: CompilerContext, expr: Sequence, name?: string
 
 	const lblBody = ctx.reserveBlock();
 
-	return ctx.m.block(null, [
+	const out = ctx.m.block(null, [
 		ctx.m.local.set(rewind, ctx.m.global.get("heap", binaryen.i32)),
 
 		ctx.m.i32.store(
@@ -164,6 +121,9 @@ function CompileSequenceOnce(ctx: CompilerContext, expr: Sequence, name?: string
 			])
 		)
 	]);
+
+	if (expr.ref) ctx.bindDebug(out, expr.ref);
+	return out;
 }
 
 
@@ -199,18 +159,24 @@ function CompileSelectOnce(ctx: CompilerContext, expr: Select): number {
 		]))
 	)
 
-	return ctx.m.block(null, body);
+	const out = ctx.m.block(null, body);
+
+	if (expr.ref) ctx.bindDebug(out, expr.ref);
+	return out;
 }
 
 
 function CompileOmit(ctx: CompilerContext, expr: Omit): number {
 	const rewind = ctx.declareVar(binaryen.i32);
 
-	return ctx.m.block(null, [
+	const out = ctx.m.block(null, [
 		ctx.m.local.set(rewind, ctx.m.global.get("heap", binaryen.i32)),
 		CompileExpression(ctx, expr.expr),
 		ctx.m.global.set("heap", ctx.m.local.get(rewind, binaryen.i32)),
 	]);
+
+	if (expr.ref) ctx.bindDebug(out, expr.ref);
+	return out;
 }
 
 function CompileGather(ctx: CompilerContext, expr: Omit): number {
@@ -219,7 +185,7 @@ function CompileGather(ctx: CompilerContext, expr: Omit): number {
 
 	const literal = ctx.l.getKey("literal");
 
-	return ctx.m.block(null, [
+	const out = ctx.m.block(null, [
 		ctx.m.local.set(rewind, ctx.m.global.get("heap", binaryen.i32)),
 
 		// All meta set after the fact
@@ -276,6 +242,9 @@ function CompileGather(ctx: CompilerContext, expr: Omit): number {
 			]),
 		)
 	]);
+
+	if (expr.ref) ctx.bindDebug(out, expr.ref);
+	return out;
 }
 
 
@@ -294,7 +263,7 @@ function CompileTermOnce(ctx: CompilerContext, expr: Term): number {
 	const error  = SHARED.ERROR;
 	const rewind = ctx.declareVar(binaryen.i32);
 
-	return ctx.m.block(null, [
+	const out = ctx.m.block(null, [
 		ctx.m.local.set(rewind, ctx.m.global.get("heap", binaryen.i32)),
 
 		// Forward processing to child
@@ -302,6 +271,9 @@ function CompileTermOnce(ctx: CompilerContext, expr: Term): number {
 			ctx.m.call(expr.value, [], binaryen.i32)
 		)
 	]);
+
+	if (expr.ref) ctx.bindDebug(out, expr.ref);
+	return out;
 }
 
 
@@ -316,7 +288,7 @@ function CompileNot(ctx: CompilerContext, expr: Not): number {
 	const block = ctx.reserveBlock();
 	const loop  = ctx.reserveBlock();
 
-	return ctx.m.block(outer, [
+	const out = ctx.m.block(outer, [
 		// Store information for failure reversion
 		ctx.m.local.set(rewind, ctx.m.global.get("heap", binaryen.i32)),
 		ctx.m.local.set(count,  ctx.m.i32.const(0)),
@@ -488,6 +460,9 @@ function CompileNot(ctx: CompilerContext, expr: Not): number {
 			], binaryen.i32)
 		),
 	]);
+
+	if (expr.ref) ctx.bindDebug(out, expr.ref);
+	return out;
 }
 
 function CompileRange(ctx: CompilerContext, expr: CharRange): number {
@@ -501,7 +476,7 @@ function CompileRange(ctx: CompilerContext, expr: CharRange): number {
 	const block = ctx.reserveBlock();
 	const loop  = ctx.reserveBlock();
 
-	return ctx.m.block(outer, [
+	const out = ctx.m.block(outer, [
 		// Store information for failure reversion
 		ctx.m.local.set(rewind,  ctx.m.global.get("heap", binaryen.i32)),
 		ctx.m.local.set(count, ctx.m.i32.const(0)),
@@ -653,6 +628,9 @@ function CompileRange(ctx: CompilerContext, expr: CharRange): number {
 			], binaryen.i32)
 		),
 	]);
+
+	if (expr.ref) ctx.bindDebug(out, expr.ref);
+	return out;
 }
 
 
@@ -685,7 +663,7 @@ function CompileLiteralOnce(ctx: CompilerContext, expr: Literal): number {
 
 	const block = ctx.pushBlock();
 
-	return ctx.m.block(block, [
+	const out = ctx.m.block(block, [
 		// Store information for failure reversion
 		ctx.m.local.set(rewind,
 			ctx.m.global.get("heap", binaryen.i32)
@@ -781,6 +759,9 @@ function CompileLiteralOnce(ctx: CompilerContext, expr: Literal): number {
 			], binaryen.i32)
 		),
 	]);
+
+	if (expr.ref) ctx.bindDebug(out, expr.ref);
+	return out;
 }
 
 
@@ -910,8 +891,9 @@ function CompileRepeat(ctx: CompilerContext, innerWasm: number, repetitions: Cou
 
 
 
-export function CompileRule(m: binaryen.Module, literals: LiteralMapping, rule: Rule) {
+export function CompileRule(m: binaryen.Module, literals: LiteralMapping, rule: Rule, fileID: number) {
 	const ctx = new CompilerContext(m, literals, rule);
+
 	// Function input
 	const error = ctx.declareVar(binaryen.i32);
 
@@ -935,18 +917,22 @@ export function CompileRule(m: binaryen.Module, literals: LiteralMapping, rule: 
 	}
 
 	const innerWasm = CompileExpression(ctx, inner, rule.name);
+	const entry = ctx.m.block(null, [
+		ctx.m.local.set(error, ctx.m.i32.const(0)),
 
-	ctx.m.addFunction(
+		innerWasm,
+
+		ctx.m.return(ctx.m.local.get(error, binaryen.i32))
+	]);
+	if (rule.ref) ctx.bindDebug(entry, rule.ref);
+
+	const funcID = ctx.m.addFunction(
 		rule.name,
 		binaryen.createType([]), binaryen.i32,
 		ctx.vars,
-		ctx.m.block(null, [
-			ctx.m.local.set(error, ctx.m.i32.const(0)),
-
-			innerWasm,
-
-			ctx.m.return(ctx.m.local.get(error, binaryen.i32))
-		])
+		entry
 	);
+
 	ctx.m.addFunctionExport(rule.name, rule.name);
+	ctx.applyDebugInfo(funcID, fileID);
 }
