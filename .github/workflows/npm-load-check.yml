@@ -33,7 +33,7 @@ jobs:
           node-version: 20
 
       - name: Install NPM Dependencies
-        run: npm install bnf-parser -g
+        run: npm install bnf-parser chalk -g
 
       - name: Automated tests
         run: node index.js
