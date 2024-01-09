@@ -3,12 +3,8 @@
 !bin/*
 !bin/artifacts/*
 !bin/legacy/*
-!bin/lib/*
 !bin/wasm/*
 !dist/*
 !changelog.md
 !package.json
 !readme.md
-
-bin/tools/*
-bin/*test*

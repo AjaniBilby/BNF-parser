@@ -5,7 +5,7 @@
 
 		/* Modules */
 		"module": "ESNext",
-		"moduleResolution": "node",
+		"moduleResolution": "Node",
 		"resolveJsonModule": true,
 		"esModuleInterop": true,
 
@@ -29,7 +29,7 @@
 		"paths": {
 			"~/*": ["./source/*"]
 		},
-		"outDir": "./bin",
+		"outDir": "./bin/",
 	},
 	"include": ["./source/cli.ts", "./source/index.ts"],
 	"exclude": ["node_modules"]
