@@ -2276,4 +2276,4 @@ var index = /*#__PURE__*/Object.freeze({
     Runner: run
 });
 
-export { shared as _shared, bnf, index as wasm };
+export { CompileProgram, shared as _shared, bnf, index as wasm };

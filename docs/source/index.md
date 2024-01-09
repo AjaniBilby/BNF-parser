@@ -9,16 +9,10 @@ hide:
 
 # BNF Parser
 
-!!! warning "Migrating from v3.0"
-
-    If you are looking for the documentation for the older version of the api go [here](/legacy)  
-    Overwise if you are attempting to migrate from `3.0`->`4.0` we recommend reading this [migration guide](/migrate/v4)
-
 !!! note "Built to not be a dependency"
 
     If you use the included cli tool to generate your syntax parser you don't need to include this library as your dependency, you can just import those artifacts.
 
-[![Reflection Test](https://github.com/AjaniBilby/BNF-parser/actions/workflows/npm-load-check.yml/badge.svg?branch=master)](https://github.com/AjaniBilby/BNF-parser/actions/workflows/npm-load-check.yml)
 [![Test](https://github.com/AjaniBilby/BNF-parser/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/AjaniBilby/BNF-parser/actions/workflows/test.yml)
 
 Compile your bnfs down to WebAssembly for maximum parsing speed; with generated type definitions to make using the syntax tree outputs a breeze. The compiled output from this library is platform agnostic, so it can run anywhere `new WebAssembly.Instance()` is a valid function. It bundles the WebAssembly module inside of a single js file so it can be easily incorporated into any bundler. The type definitions for a given bnf are just that, a definitions file - so if you don't want to use typescript or type hints you can go wild by ignoring it.

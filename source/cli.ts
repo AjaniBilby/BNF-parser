@@ -3,14 +3,11 @@
 
 import binaryen from 'binaryen';
 import chalk from 'chalk';
-
-import * as _Shared from "~/../dist/shared.js"; // things shared between multiple pre-compiled BNFs
-import * as bnf from "~/../dist/bnf.js";       // pre-compiled JS with WASM embedded
-import * as legacy from "~/legacy";
 import { readdirSync, existsSync, readFileSync, writeFileSync, appendFileSync, statSync, mkdirSync } from "fs";
 import { basename, extname, join, dirname } from "path";
-import { CompileProgram } from "~/compile.js";
-import { wasm } from "~/index.js";
+
+import type * as legacy from "~/legacy";
+import { CompileProgram, wasm, bnf, _shared } from "./index.js";
 
 const script = join(process.argv[1], "../");
 
@@ -115,7 +112,7 @@ for (const file of files) {
 		failure = true;
 		continue;
 	}
-	if (syntax instanceof _Shared.ParseError) {
+	if (syntax instanceof _shared.ParseError) {
 		console.error(`   Parsing...`);
 		console.error(`   ${ColorizeError(syntax.toString())}`)
 		console.error("");
