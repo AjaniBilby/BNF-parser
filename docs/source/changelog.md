@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 4.1.1
+
+### Fixes:
+  - [x] Fixed an issue where wasm memory usage exceeded predicted usage - the module now checks if it's about to run out of memory on the start of every rule being parsed.
+
 ## Version 4.1.0
 
 ### Added:
