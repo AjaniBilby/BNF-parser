@@ -1,10 +1,9 @@
 import binaryen from "binaryen";
 
-import LiteralMapping from "./literal-mapping.js";
-import { CompileRule } from "./rule.js";
-import { Parser } from "../legacy/parser.js";
-
-import { OFFSET } from "./layout.js";
+import LiteralMapping from "~/wasm/literal-mapping.js";
+import { CompileRule } from "~/wasm/rule.js";
+import { Parser } from "~/legacy/parser.js";
+import { OFFSET } from "~/wasm/layout.js";
 
 
 

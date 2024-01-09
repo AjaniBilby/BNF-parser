@@ -1,15 +1,13 @@
 const OFFSET = {"TYPE":0,"TYPE_LEN":4,"START":8,"END":12,"COUNT":16,"DATA":20};
 export function InitParse(ctx, data) {
-	const offset = ctx.exports.input.value;
 	const memory = ctx.exports.memory;
 	const bytesPerPage = 65536;
 	// Convert the string to UTF-8 bytes
 	const utf8Encoder = new TextEncoder();
 	const stringBytes = utf8Encoder.encode(data);
 	// ONLY grow memory if needed
-	const desireChunks = Math.ceil((stringBytes.byteLength * 10 + offset) / bytesPerPage);
 	const chunks = Math.ceil(memory.buffer.byteLength / bytesPerPage);
-	console.log(`est: ${stringBytes.byteLength * 10 + offset} of ${memory.buffer.byteLength}`);
+	const desireChunks = Math.ceil(stringBytes.byteLength * 10 / bytesPerPage);
 	if (desireChunks > chunks) {
 		memory.grow(desireChunks - chunks);
 	}
@@ -151,6 +149,9 @@ export function Decode(ctx, heap, sharedRef) {
 }
 
 export class ParseError {
+	stack;
+	msg;
+	ref;
 	constructor(msg, ref) {
 		this.stack = [];
 		this.msg = msg;
@@ -168,6 +169,12 @@ export class ParseError {
 	}
 }
 export class SyntaxNode {
+	type;
+	start;
+	end;
+	count;
+	value;
+	ref;
 	constructor(type, start, end, count, ref) {
 		this.type = type;
 		this.start = start;
@@ -178,6 +185,9 @@ export class SyntaxNode {
 	}
 }
 export class Reference {
+	line;
+	col;
+	index;
 	constructor(line, col, index) {
 		this.line = line;
 		this.col = col;
@@ -208,6 +218,8 @@ export class Reference {
 	}
 }
 export class ReferenceRange {
+	start;
+	end;
 	constructor(from, to) {
 		this.start = from;
 		this.end = to;

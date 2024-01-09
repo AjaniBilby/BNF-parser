@@ -31,6 +31,6 @@
 		},
 		"outDir": "./bin",
 	},
-	"include": ["source", "tools"],
+	"include": ["./source/cli.ts", "./source/index.ts"],
 	"exclude": ["node_modules"]
 }

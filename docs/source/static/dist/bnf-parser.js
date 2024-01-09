@@ -1,6 +1,9 @@
 import binaryen from 'https://unpkg.com/binaryen@113.0.0/index.js';
 
 let ParseError$1 = class ParseError {
+    stack;
+    msg;
+    ref;
     constructor(msg, ref) {
         this.stack = [];
         this.msg = msg;
@@ -18,6 +21,12 @@ let ParseError$1 = class ParseError {
     }
 };
 let SyntaxNode$2 = class SyntaxNode {
+    type;
+    start;
+    end;
+    count;
+    value;
+    ref;
     constructor(type, start, end, count, ref) {
         this.type = type;
         this.start = start;
@@ -28,6 +37,9 @@ let SyntaxNode$2 = class SyntaxNode {
     }
 };
 let Reference$1 = class Reference {
+    line;
+    col;
+    index;
     constructor(line, col, index) {
         this.line = line;
         this.col = col;
@@ -58,6 +70,8 @@ let Reference$1 = class Reference {
     }
 };
 let ReferenceRange$1 = class ReferenceRange {
+    start;
+    end;
     constructor(from, to) {
         this.start = from;
         this.end = to;
@@ -99,6 +113,10 @@ function AssertUnreachable$1(x) {
 }
 
 let SyntaxNode$1 = class SyntaxNode {
+    type;
+    value;
+    ref;
+    reach;
     constructor(type, value, ref) {
         this.type = type;
         this.ref = ref;
@@ -173,9 +191,13 @@ function CountCheck(count, mode) {
     }
 }
 class Literal {
+    value;
+    count;
+    ref;
     constructor(json) {
         this.value = json['value'];
         this.count = ParseCount(json['count']);
+        this.ref = json['ref'] || undefined;
     }
     parse(input, ctx, cursor) {
         let start = cursor.clone();
@@ -223,6 +245,7 @@ class Literal {
     }
 }
 class CharRange extends Literal {
+    to;
     constructor(json) {
         super(json);
         this.to = json['to'];
@@ -248,8 +271,11 @@ class CharRange extends Literal {
     }
 }
 class Gather {
+    expr;
+    ref;
     constructor(json) {
         this.expr = ParseExpression(json['expr']);
+        this.ref = json['ref'] || undefined;
     }
     parse(input, ctx, cursor) {
         let res = this.expr.parse(input, ctx, cursor);
@@ -281,9 +307,13 @@ class Omit extends Gather {
     }
 }
 class Not {
+    expr;
+    count;
+    ref;
     constructor(json) {
         this.expr = ParseExpression(json['expr']);
         this.count = ParseCount(json['count']);
+        this.ref = json['ref'] || undefined;
     }
     parse(input, ctx, cursor) {
         let start = cursor.clone();
@@ -319,9 +349,13 @@ class Not {
     }
 }
 class Term {
+    value;
+    count;
+    ref;
     constructor(json) {
         this.value = json['value'];
         this.count = ParseCount(json['count']);
+        this.ref = json['ref'] || undefined;
     }
     parse(input, ctx, cursor) {
         let expr = ctx.getRule(this.value);
@@ -359,7 +393,7 @@ class Term {
             return err;
         }
         let out = new SyntaxNode$1(this.value + this.count, nodes, range);
-        out.reach = (err === null || err === void 0 ? void 0 : err.ref) || null;
+        out.reach = err?.ref || null;
         return out;
     }
     serialize() {
@@ -371,9 +405,13 @@ class Term {
     }
 }
 class Select {
+    exprs;
+    count;
+    ref;
     constructor(json) {
         this.exprs = [];
         this.count = ParseCount(json['count']);
+        this.ref = json['ref'] || undefined;
         for (let value of json['exprs']) {
             this.exprs.push(ParseExpression(value));
         }
@@ -490,11 +528,14 @@ class Sequence extends Select {
     }
 }
 class Rule {
-    constructor(name, json, ref = null) {
+    name;
+    seq;
+    verbose;
+    ref;
+    constructor(name, json, ref) {
         this.name = name;
         this.seq = ParseExpression(json);
         this.verbose = false;
-        this.ref = ref;
     }
     parse(input, ctx, cursor) {
         if (this.verbose) {
@@ -514,6 +555,7 @@ class Rule {
     }
 }
 class Parser {
+    terms;
     constructor(json) {
         this.terms = new Map();
         for (let key in json) {
@@ -545,9 +587,8 @@ class Parser {
         return res;
     }
     setVerbose(mode) {
-        var _a;
         for (let key of this.terms.keys()) {
-            (_a = this.terms.get(key)) === null || _a === void 0 ? void 0 : _a.setVerbose(mode);
+            this.terms.get(key)?.setVerbose(mode);
         }
     }
     serialize() {
@@ -566,7 +607,6 @@ function BuildRule(rule) {
     return new Rule(rule.value[0].value, BuildExpr$1(rule.value[1]));
 }
 function BuildExpr$1(expr) {
-    var _a;
     if (expr.type != "expr") {
         throw new Error(`Unknown internal error, expected "expr" got "${expr.type}"`);
     }
@@ -583,7 +623,7 @@ function BuildExpr$1(expr) {
             case "|":
                 let desire = operator.value == "|" ? "select" : "sequence";
                 if (base.type != desire) {
-                    if (base.type == "range" || ((_a = base.exprs) === null || _a === void 0 ? void 0 : _a.length) != 1) {
+                    if (base.type == "range" || base.exprs?.length != 1) {
                         base = {
                             type: desire,
                             count: "1",
@@ -732,32 +772,21 @@ function Compile(tree) {
     return syntax;
 }
 
-const bnf_json={"program":{"type":"sequence","count":"1","exprs":[{"type":"omit","expr":{"type":"term","value":"w","count":"*"}},{"type":"sequence","count":"+","exprs":[{"type":"term","value":"def","count":"1"},{"type":"omit","expr":{"type":"term","value":"w","count":"*"}}]}]},"any":{"type":"sequence","count":"1","exprs":[{"type":"not","count":"1","expr":{"type":"literal","value":"","count":"1"}}]},"w":{"type":"select","count":"1","exprs":[{"type":"term","value":"comment","count":"1"},{"type":"literal","value":" ","count":"1"},{"type":"literal","value":"\t","count":"1"},{"type":"literal","value":"\n","count":"1"},{"type":"literal","value":"\r","count":"1"}]},"comment":{"type":"sequence","count":"1","exprs":[{"type":"literal","value":"#","count":"1"},{"type":"not","count":"*","expr":{"type":"literal","value":"\n","count":"1"}},{"type":"literal","value":"\n","count":"1"}]},"name":{"type":"sequence","count":"1","exprs":[{"type":"gather","expr":{"type":"select","count":"+","exprs":[{"type":"term","value":"letter","count":"1"},{"type":"term","value":"digit","count":"1"},{"type":"literal","value":"_","count":"1"}]}}]},"letter":{"type":"select","count":"1","exprs":[{"type":"range","value":"a","count":"1","to":"z"},{"type":"range","value":"A","count":"1","to":"Z"}]},"digit":{"type":"range","value":"0","count":"1","to":"9"},"constant":{"type":"select","count":"1","exprs":[{"type":"term","value":"single","count":"1"},{"type":"term","value":"double","count":"1"}]},"double":{"type":"sequence","count":"1","exprs":[{"type":"omit","expr":{"type":"literal","value":"\"","count":"1"}},{"type":"select","count":"*","exprs":[{"type":"sequence","count":"1","exprs":[{"type":"literal","value":"\\","count":"1"},{"type":"gather","expr":{"type":"term","value":"any","count":"1"}}]},{"type":"not","count":"+","expr":{"type":"literal","value":"\"","count":"1"}}]},{"type":"omit","expr":{"type":"literal","value":"\"","count":"1"}}]},"single":{"type":"sequence","count":"1","exprs":[{"type":"omit","expr":{"type":"literal","value":"'","count":"1"}},{"type":"select","count":"*","exprs":[{"type":"sequence","count":"1","exprs":[{"type":"literal","value":"\\","count":"1"},{"type":"gather","expr":{"type":"term","value":"any","count":"1"}}]},{"type":"not","count":"+","expr":{"type":"literal","value":"'","count":"1"}}]},{"type":"omit","expr":{"type":"literal","value":"'","count":"1"}}]},"def":{"type":"sequence","count":"1","exprs":[{"type":"gather","expr":{"type":"term","value":"name","count":"1"}},{"type":"omit","expr":{"type":"term","value":"w","count":"+"}},{"type":"omit","expr":{"type":"literal","value":"::=","count":"1"}},{"type":"omit","expr":{"type":"term","value":"w","count":"*"}},{"type":"term","value":"expr","count":"1"},{"type":"omit","expr":{"type":"term","value":"w","count":"*"}},{"type":"omit","expr":{"type":"literal","value":";","count":"1"}}]},"expr":{"type":"sequence","count":"1","exprs":[{"type":"term","value":"expr_arg","count":"1"},{"type":"omit","expr":{"type":"term","value":"w","count":"*"}},{"type":"sequence","count":"*","exprs":[{"type":"gather","expr":{"type":"term","value":"expr_infix","count":"?"}},{"type":"omit","expr":{"type":"term","value":"w","count":"*"}},{"type":"term","value":"expr_arg","count":"1"},{"type":"omit","expr":{"type":"term","value":"w","count":"*"}}]}]},"expr_arg":{"type":"sequence","count":"1","exprs":[{"type":"term","value":"expr_prefix","count":"1"},{"type":"select","count":"1","exprs":[{"type":"term","value":"constant","count":"1"},{"type":"term","value":"expr_brackets","count":"1"},{"type":"gather","expr":{"type":"term","value":"name","count":"1"}}]},{"type":"gather","expr":{"type":"term","value":"expr_suffix","count":"?"}}]},"expr_prefix":{"type":"sequence","count":"1","exprs":[{"type":"literal","value":"%","count":"?"},{"type":"literal","value":"...","count":"?"},{"type":"literal","value":"!","count":"?"}]},"expr_infix":{"type":"select","count":"1","exprs":[{"type":"literal","value":"->","count":"1"},{"type":"literal","value":"|","count":"1"}]},"expr_suffix":{"type":"select","count":"1","exprs":[{"type":"literal","value":"*","count":"1"},{"type":"literal","value":"?","count":"1"},{"type":"literal","value":"+","count":"1"}]},"expr_brackets":{"type":"sequence","count":"1","exprs":[{"type":"omit","expr":{"type":"literal","value":"(","count":"1"}},{"type":"omit","expr":{"type":"term","value":"w","count":"*"}},{"type":"term","value":"expr","count":"1"},{"type":"omit","expr":{"type":"term","value":"w","count":"*"}},{"type":"omit","expr":{"type":"literal","value":")","count":"1"}}]}};
-
-const BNF = new Parser(bnf_json);
-const helper = {
-    Compile: (bnf) => {
-        const syntax = BNF.parse(bnf);
-        if (syntax instanceof ParseError$1)
-            return syntax;
-        return Compile(syntax);
-    }
-};
-
 var index$1 = /*#__PURE__*/Object.freeze({
     __proto__: null,
-    BNF: BNF,
     Compile: Compile,
     ParseError: ParseError$1,
     Parser: Parser,
     Reference: Reference$1,
     ReferenceRange: ReferenceRange$1,
-    SyntaxNode: SyntaxNode$1,
-    helper: helper
+    SyntaxNode: SyntaxNode$1
 });
 
 // Using a class for better V8 performance
 class Mapping {
+    value;
+    bytes;
+    offset;
     constructor(value, bytes, offset) {
         this.value = value;
         this.bytes = bytes;
@@ -766,6 +795,9 @@ class Mapping {
     }
 }
 class LiteralMapping {
+    encoder;
+    values;
+    size;
     constructor() {
         this.encoder = new TextEncoder();
         this.values = [];
@@ -818,26 +850,35 @@ class LiteralMapping {
     }
 }
 
-const OFFSET$1 = {
-    TYPE: 0 * 4,
-    TYPE_LEN: 1 * 4,
-    START: 2 * 4,
-    END: 3 * 4,
-    COUNT: 4 * 4,
-    DATA: 5 * 4, // offset for first child
-};
-
-const SHARED = {
-    ERROR: 0, // local variable for error flag
-};
+// Using OO because of better V8 memory optimisations
+class DebugInfoLine {
+    expr;
+    ref;
+    constructor(expr, ref) {
+        this.expr = expr;
+        this.ref = ref;
+    }
+}
 // Using OO because of better V8 memory optimisations
 class CompilerContext {
+    m;
+    l;
+    vars;
+    _blocks;
+    _bID;
+    _debugInfo;
+    _debugEnabled;
     constructor(m, literals, rule) {
         this.m = m;
         this.l = literals;
         this.vars = [];
         this._blocks = [];
         this._bID = 1;
+        this._debugEnabled = true;
+        this._debugInfo = [];
+    }
+    enableDebugging(state) {
+        this._debugEnabled = state;
     }
     pushBlock(label) {
         if (!label)
@@ -859,7 +900,32 @@ class CompilerContext {
         this.vars.push(type);
         return index;
     }
+    bindDebug(expr, ref) {
+        if (!this._debugEnabled)
+            return;
+        this._debugInfo.push(new DebugInfoLine(expr, ref));
+    }
+    applyDebugInfo(funcID, fileID) {
+        if (!this._debugEnabled)
+            return;
+        for (const binding of this._debugInfo) {
+            this.m.setDebugLocation(funcID, binding.expr, fileID, binding.ref.line, binding.ref.col);
+        }
+    }
 }
+
+const OFFSET$1 = {
+    TYPE: 0 * 4,
+    TYPE_LEN: 1 * 4,
+    START: 2 * 4,
+    END: 3 * 4,
+    COUNT: 4 * 4,
+    DATA: 5 * 4, // offset for first child
+};
+
+const SHARED = {
+    ERROR: 0, // local variable for error flag
+};
 function CompileExpression$1(ctx, expr, name) {
     switch (expr.constructor.name) {
         case "Sequence": return CompileSequence$1(ctx, expr, name);
@@ -896,7 +962,7 @@ function CompileSequenceOnce$1(ctx, expr, name) {
         return s + 1;
     }, 0);
     const lblBody = ctx.reserveBlock();
-    return ctx.m.block(null, [
+    const out = ctx.m.block(null, [
         ctx.m.local.set(rewind, ctx.m.global.get("heap", binaryen.i32)),
         ctx.m.i32.store(OFFSET$1.START, 4, ctx.m.local.get(rewind, binaryen.i32), ctx.m.global.get("index", binaryen.i32)),
         ctx.m.global.set("heap", ctx.m.i32.add(ctx.m.local.get(rewind, binaryen.i32), ctx.m.i32.const(OFFSET$1.DATA))),
@@ -920,6 +986,9 @@ function CompileSequenceOnce$1(ctx, expr, name) {
             ctx.m.i32.store(OFFSET$1.COUNT, 4, ctx.m.local.get(rewind, binaryen.i32), ctx.m.i32.const(visibleChildren))
         ]))
     ]);
+    if (expr.ref)
+        ctx.bindDebug(out, expr.ref);
+    return out;
 }
 function CompileSelect$1(ctx, expr) {
     const once = CompileSelectOnce$1(ctx, expr);
@@ -942,21 +1011,27 @@ function CompileSelectOnce$1(ctx, expr) {
         // Stop parsing if child succeeded to parse
         ctx.m.br(lblBody, ctx.m.i32.eq(ctx.m.local.get(error, binaryen.i32), ctx.m.i32.const(0)))
     ])));
-    return ctx.m.block(null, body);
+    const out = ctx.m.block(null, body);
+    if (expr.ref)
+        ctx.bindDebug(out, expr.ref);
+    return out;
 }
 function CompileOmit$1(ctx, expr) {
     const rewind = ctx.declareVar(binaryen.i32);
-    return ctx.m.block(null, [
+    const out = ctx.m.block(null, [
         ctx.m.local.set(rewind, ctx.m.global.get("heap", binaryen.i32)),
         CompileExpression$1(ctx, expr.expr),
         ctx.m.global.set("heap", ctx.m.local.get(rewind, binaryen.i32)),
     ]);
+    if (expr.ref)
+        ctx.bindDebug(out, expr.ref);
+    return out;
 }
 function CompileGather$1(ctx, expr) {
     const error = SHARED.ERROR;
     const rewind = ctx.declareVar(binaryen.i32);
     const literal = ctx.l.getKey("literal");
-    return ctx.m.block(null, [
+    const out = ctx.m.block(null, [
         ctx.m.local.set(rewind, ctx.m.global.get("heap", binaryen.i32)),
         // All meta set after the fact
         CompileExpression$1(ctx, expr.expr),
@@ -977,6 +1052,9 @@ function CompileGather$1(ctx, expr) {
             ], binaryen.i32))
         ]))
     ]);
+    if (expr.ref)
+        ctx.bindDebug(out, expr.ref);
+    return out;
 }
 function CompileTerm$1(ctx, expr) {
     const once = CompileTermOnce$1(ctx, expr);
@@ -991,11 +1069,14 @@ function CompileTermOnce$1(ctx, expr) {
     // const index  = SHARED.INDEX;
     const error = SHARED.ERROR;
     const rewind = ctx.declareVar(binaryen.i32);
-    return ctx.m.block(null, [
+    const out = ctx.m.block(null, [
         ctx.m.local.set(rewind, ctx.m.global.get("heap", binaryen.i32)),
         // Forward processing to child
         ctx.m.local.set(error, ctx.m.call(expr.value, [], binaryen.i32))
     ]);
+    if (expr.ref)
+        ctx.bindDebug(out, expr.ref);
+    return out;
 }
 function CompileNot$1(ctx, expr) {
     const error = SHARED.ERROR;
@@ -1005,7 +1086,7 @@ function CompileNot$1(ctx, expr) {
     const outer = ctx.reserveBlock();
     const block = ctx.reserveBlock();
     const loop = ctx.reserveBlock();
-    return ctx.m.block(outer, [
+    const out = ctx.m.block(outer, [
         // Store information for failure reversion
         ctx.m.local.set(rewind, ctx.m.global.get("heap", binaryen.i32)),
         ctx.m.local.set(count, ctx.m.i32.const(0)),
@@ -1075,6 +1156,9 @@ function CompileNot$1(ctx, expr) {
             ctx.m.i32.add(ctx.m.local.get(rewind, binaryen.i32), ctx.m.i32.add(ctx.m.local.get(count, binaryen.i32), ctx.m.i32.const(OFFSET$1.DATA)))
         ], binaryen.i32)),
     ]);
+    if (expr.ref)
+        ctx.bindDebug(out, expr.ref);
+    return out;
 }
 function CompileRange$1(ctx, expr) {
     const error = SHARED.ERROR;
@@ -1084,7 +1168,7 @@ function CompileRange$1(ctx, expr) {
     const outer = ctx.reserveBlock();
     const block = ctx.reserveBlock();
     const loop = ctx.reserveBlock();
-    return ctx.m.block(outer, [
+    const out = ctx.m.block(outer, [
         // Store information for failure reversion
         ctx.m.local.set(rewind, ctx.m.global.get("heap", binaryen.i32)),
         ctx.m.local.set(count, ctx.m.i32.const(0)),
@@ -1142,6 +1226,9 @@ function CompileRange$1(ctx, expr) {
             ctx.m.i32.add(ctx.m.local.get(rewind, binaryen.i32), ctx.m.i32.add(ctx.m.local.get(count, binaryen.i32), ctx.m.i32.const(OFFSET$1.DATA)))
         ], binaryen.i32)),
     ]);
+    if (expr.ref)
+        ctx.bindDebug(out, expr.ref);
+    return out;
 }
 function CompileLiteral$1(ctx, expr) {
     const once = CompileLiteralOnce$1(ctx, expr);
@@ -1165,7 +1252,7 @@ function CompileLiteralOnce$1(ctx, expr) {
     const progress = ctx.declareVar(binaryen.i32);
     const type = ctx.l.getKey("literal");
     const block = ctx.pushBlock();
-    return ctx.m.block(block, [
+    const out = ctx.m.block(block, [
         // Store information for failure reversion
         ctx.m.local.set(rewind, ctx.m.global.get("heap", binaryen.i32)),
         // Start index
@@ -1205,6 +1292,9 @@ function CompileLiteralOnce$1(ctx, expr) {
             ctx.m.i32.add(ctx.m.local.get(rewind, binaryen.i32), ctx.m.i32.const(OFFSET$1.DATA + literal.bytes.byteLength))
         ], binaryen.i32)),
     ]);
+    if (expr.ref)
+        ctx.bindDebug(out, expr.ref);
+    return out;
 }
 function CompileRepeat$1(ctx, innerWasm, repetitions) {
     if (repetitions === "1")
@@ -1298,10 +1388,11 @@ function CompileRule$1(m, literals, rule, fileID) {
         innerWasm,
         ctx.m.return(ctx.m.local.get(error, binaryen.i32))
     ]);
-    const funcID = ctx.m.addFunction(rule.name, binaryen.createType([]), binaryen.i32, ctx.vars, entry);
     if (rule.ref)
-        ctx.m.setDebugLocation(funcID, entry, fileID, rule.ref.line, rule.ref.col);
+        ctx.bindDebug(entry, rule.ref);
+    const funcID = ctx.m.addFunction(rule.name, binaryen.createType([]), binaryen.i32, ctx.vars, entry);
     ctx.m.addFunctionExport(rule.name, rule.name);
+    ctx.applyDebugInfo(funcID, fileID);
 }
 
 function IngestLiterals(m, bnf) {
@@ -1686,7 +1777,6 @@ function BuildOperand(syntax, namespace) {
     return base;
 }
 function BuildExpr(syntax, namespace) {
-    var _a, _b, _c, _d;
     let base = {
         type: "sequence",
         count: "1",
@@ -1704,24 +1794,24 @@ function BuildExpr(syntax, namespace) {
                         type: desire,
                         count: "1",
                         exprs: [
-                            base.type === "sequence" && ((_a = base.exprs) === null || _a === void 0 ? void 0 : _a.length) === 1 ? base.exprs[0] : base,
+                            base.type === "sequence" && base.exprs?.length === 1 ? base.exprs[0] : base,
                             operand
                         ]
                     };
                 }
                 else {
-                    (_b = base.exprs) === null || _b === void 0 ? void 0 : _b.push(operand);
+                    base.exprs?.push(operand);
                 }
                 break;
             case "->":
-                const a = (_c = base.exprs) === null || _c === void 0 ? void 0 : _c.pop();
-                if ((a === null || a === void 0 ? void 0 : a.type) != "literal" || operand.type != "literal") {
+                const a = base.exprs?.pop();
+                if (a?.type != "literal" || operand.type != "literal") {
                     throw new ParseError$1("Attempting to make a range between two non literals", pair.value[0].ref || ReferenceRange$1.blank());
                 }
-                if ((a === null || a === void 0 ? void 0 : a.type) != "literal" || operand.type != "literal") {
+                if (a?.type != "literal" || operand.type != "literal") {
                     throw new ParseError$1("Attempting to make a range non single characters", pair.value[0].ref || ReferenceRange$1.blank());
                 }
-                if ((a === null || a === void 0 ? void 0 : a.count) != "1") {
+                if (a?.count != "1") {
                     throw new ParseError$1("Unexpected count on left-hand-side of range", pair.value[0].ref || ReferenceRange$1.blank());
                 }
                 let action = {
@@ -1730,7 +1820,7 @@ function BuildExpr(syntax, namespace) {
                     to: operand.value,
                     count: operand.count
                 };
-                (_d = base.exprs) === null || _d === void 0 ? void 0 : _d.push(action);
+                base.exprs?.push(action);
                 break;
             default: throw new ParseError$1(`Unknown operator "${infix}"`, pair.value[0].ref || ReferenceRange$1.blank());
         }
@@ -1763,16 +1853,14 @@ function Create(wasm) {
     return bundle;
 }
 function InitParse$1(ctx, data) {
-    const offset = ctx.exports.input.value;
     const memory = ctx.exports.memory;
     const bytesPerPage = 65536;
     // Convert the string to UTF-8 bytes
     const utf8Encoder = new TextEncoder();
     const stringBytes = utf8Encoder.encode(data);
     // ONLY grow memory if needed
-    const desireChunks = Math.ceil((stringBytes.byteLength * 10 + offset) / bytesPerPage);
     const chunks = Math.ceil(memory.buffer.byteLength / bytesPerPage);
-    console.log(`est: ${stringBytes.byteLength * 10 + offset} of ${memory.buffer.byteLength}`);
+    const desireChunks = Math.ceil(stringBytes.byteLength * 10 / bytesPerPage);
     if (desireChunks > chunks) {
         memory.grow(desireChunks - chunks);
     }
@@ -1928,16 +2016,14 @@ var run = /*#__PURE__*/Object.freeze({
 
 const OFFSET = {"TYPE":0,"TYPE_LEN":4,"START":8,"END":12,"COUNT":16,"DATA":20};
 function InitParse(ctx, data) {
-	const offset = ctx.exports.input.value;
 	const memory = ctx.exports.memory;
 	const bytesPerPage = 65536;
 	// Convert the string to UTF-8 bytes
 	const utf8Encoder = new TextEncoder();
 	const stringBytes = utf8Encoder.encode(data);
 	// ONLY grow memory if needed
-	const desireChunks = Math.ceil((stringBytes.byteLength * 10 + offset) / bytesPerPage);
 	const chunks = Math.ceil(memory.buffer.byteLength / bytesPerPage);
-	console.log(`est: ${stringBytes.byteLength * 10 + offset} of ${memory.buffer.byteLength}`);
+	const desireChunks = Math.ceil(stringBytes.byteLength * 10 / bytesPerPage);
 	if (desireChunks > chunks) {
 		memory.grow(desireChunks - chunks);
 	}
@@ -2076,6 +2162,9 @@ function Decode(ctx, heap, sharedRef) {
 }
 
 class ParseError {
+	stack;
+	msg;
+	ref;
 	constructor(msg, ref) {
 		this.stack = [];
 		this.msg = msg;
@@ -2093,6 +2182,12 @@ class ParseError {
 	}
 }
 class SyntaxNode {
+	type;
+	start;
+	end;
+	count;
+	value;
+	ref;
 	constructor(type, start, end, count, ref) {
 		this.type = type;
 		this.start = start;
@@ -2103,6 +2198,9 @@ class SyntaxNode {
 	}
 }
 class Reference {
+	line;
+	col;
+	index;
 	constructor(line, col, index) {
 		this.line = line;
 		this.col = col;
@@ -2133,6 +2231,8 @@ class Reference {
 	}
 }
 class ReferenceRange {
+	start;
+	end;
 	constructor(from, to) {
 		this.start = from;
 		this.end = to;
@@ -2309,7 +2409,6 @@ var bnf = /*#__PURE__*/Object.freeze({
 });
 
 function Compile2Wasm(inputBnf) {
-    var _a;
     const syntax = Parse_Program(inputBnf, true);
     if (syntax instanceof ParseError) {
         const convert = new ParseError$1(syntax.msg, syntax.ref);
@@ -2317,7 +2416,7 @@ function Compile2Wasm(inputBnf) {
         return convert;
     }
     if (syntax.isPartial) {
-        return new ParseError$1("Unexpected syntax at", new ReferenceRange$1(((_a = syntax.root.ref) === null || _a === void 0 ? void 0 : _a.end) || new Reference$1(0, 0, 0), new Reference$1(0, 0, syntax.reachBytes)));
+        return new ParseError$1("Unexpected syntax at", new ReferenceRange$1(syntax.root.ref?.end || new Reference$1(0, 0, 0), new Reference$1(0, 0, syntax.reachBytes)));
     }
     try {
         const lang = CompileProgram(syntax.root);

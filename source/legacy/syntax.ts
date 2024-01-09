@@ -1,4 +1,4 @@
-import { ParseError, Reference, ReferenceRange } from "../artifacts/shared.js";
+import { ParseError, Reference, ReferenceRange } from "~/artifacts/shared.js";
 
 export {
 	ParseError,

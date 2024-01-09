@@ -1,7 +1,7 @@
 import {
 	SyntaxNode, ParseError,
 	Reference, ReferenceRange
-} from "./syntax.js";
+} from "~/legacy/syntax.js";
 
 export type Expression = Literal | CharRange | Term | Not | Omit | Gather | Select | Sequence;
 
