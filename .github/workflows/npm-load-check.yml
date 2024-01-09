@@ -1,7 +1,5 @@
 name: Reflection Test (via NPM)
 
-# This configuration cancels previous runs if a new run is started on the same branch/PR. Only one run at a time per PR.
-# from https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#example-using-a-fallback-value
 concurrency:
   group: ${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
@@ -18,15 +16,25 @@ jobs:
     timeout-minutes: 10
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          path: 'temp-repo'
+
+      - name: Sparse Checkout
+        run: |
+          cd temp-repo
+          git sparse-checkout init --cone
+          git sparse-checkout set test
 
       - name: Setup NodeJS
         uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 20
 
       - name: Install NPM Dependencies
         run: npm install bnf-parser -g
 
       - name: Automated tests
-        run: npm run test
+        run: node ./temp-repo/test/index.js
+        working-directory: ./temp-repo/test
