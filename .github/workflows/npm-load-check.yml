@@ -25,7 +25,7 @@ jobs:
         run: |
           cd temp-repo
           git sparse-checkout init --cone
-          git sparse-checkout set test
+          git sparse-checkout set bnf test
 
       - name: Setup NodeJS
         uses: actions/setup-node@v3
@@ -34,9 +34,9 @@ jobs:
 
       - name: Install NPM Dependencies
         run: |
-          cd ./temp-repo/test
-          npm install bnf-parser chalk -g
+          cd ./temp-repo
+          npm install bnf-parser chalk
 
       - name: Automated tests
-        run: node index.js
-        working-directory: ./temp-repo/test
+        run: node ./test/index.js
+        working-directory: ./temp-repo

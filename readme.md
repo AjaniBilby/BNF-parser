@@ -1,7 +1,6 @@
 # BNF-Parser <!-- no toc -->
 
-[![Test](https://github.com/AjaniBilby/BNF-parser/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/AjaniBilby/BNF-parser/actions/workflows/test.yml) 
-[![Reflection Test (via NPM)](https://github.com/AjaniBilby/BNF-parser/actions/workflows/npm-load-check.yml/badge.svg?branch=main)](https://github.com/AjaniBilby/BNF-parser/actions/workflows/npm-load-check.yml)
+[![Test](https://github.com/AjaniBilby/BNF-parser/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/AjaniBilby/BNF-parser/actions/workflows/test.yml)
 
 Compile your bnfs down to WebAssembly for maximum parsing speed; with generated type definitions to make using the syntax tree outputs a breeze. The compiled output from this library is platform agnostic, so it can run anywhere `new WebAssembly.Instance()` is a valid function. It bundles the WebAssembly module inside of a single js file so it can be easily incorporated into any bundler. The type definitions for a given bnf are just that, a definitions file - so if you don't want to use typescript or type hints you can go wild by ignoring it.
 
