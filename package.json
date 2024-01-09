@@ -1,6 +1,6 @@
 {
 	"name": "bnf-parser",
-	"version": "4.1.1",
+	"version": "5.0.0",
 	"description": "Deterministic BNF compiler/parser",
 	"homepage": "https://bnf-parser.ajanibilby.com",
 	"main": "./bin/index.js",
@@ -37,11 +37,11 @@
 		"npm-run-all": "^4.1.5",
 		"rollup": "^3.26.2",
 		"ts-node": "^10.9.1",
+		"tsc-alias": "^1.8.8",
 		"typescript": "^4.9.5"
 	},
 	"dependencies": {
 		"binaryen": "^113.0.0",
-		"chalk": "^5.3.0",
-		"tsc-alias": "^1.8.8"
+		"chalk": "^5.3.0"
 	}
 }

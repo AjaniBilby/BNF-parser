@@ -27,13 +27,7 @@ jobs:
           node-version: 16
 
       - name: Install NPM Dependencies
-        run: npm install
-
-      - name: Install bnf-parser
-        run: npm install . -g
-
-      - name: Link local package
-        run: npm link bnf-parser
+        run: npm ci
 
       - name: Build the library
         run: npm run build
