@@ -1,5 +1,5 @@
-import { ParseCount, Parser, Rule } from "./parser.js";
-import { SyntaxNode } from "./syntax.js";
+import { ParseCount, Parser, Rule } from "~/legacy/parser.js";
+import { SyntaxNode } from "~/legacy/syntax.js";
 
 
 

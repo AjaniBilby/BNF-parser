@@ -1,18 +1,16 @@
 #!/usr/bin/env node
 "use strict";
 
+import binaryen from 'binaryen';
 import chalk from 'chalk';
 
+import * as _Shared from "~/../dist/shared.js"; // things shared between multiple pre-compiled BNFs
+import * as bnf from "~/../dist/bnf.js";       // pre-compiled JS with WASM embedded
+import * as legacy from "~/legacy";
 import { readdirSync, existsSync, readFileSync, writeFileSync, appendFileSync, statSync, mkdirSync } from "fs";
 import { basename, extname, join, dirname } from "path";
-import { legacy, wasm } from "./index.js";
-
-import { CompileProgram } from "./compile.js";
-
-import * as _Shared from "../dist/shared.js"; // things shared between multiple pre-compiled BNFs
-import * as bnf from "../dist/bnf.js";       // pre-compiled JS with WASM embedded
-import binaryen from 'binaryen';
-
+import { CompileProgram } from "~/compile.js";
+import { wasm } from "~/index.js";
 
 const script = join(process.argv[1], "../");
 

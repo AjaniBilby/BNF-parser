@@ -1,7 +1,7 @@
 import {
 	Expression, Parser,
 	Literal, Not, Omit, Gather, Select, Sequence
-} from "../legacy/parser.js";
+} from "~/legacy/parser.js";
 
 
 // Using a class for better V8 performance

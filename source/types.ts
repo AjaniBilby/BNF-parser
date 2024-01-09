@@ -1,5 +1,5 @@
-import type { Count, Expression, Literal, Parser, Rule, Select, Term } from './legacy/parser.js';
-import { Sequence } from './legacy/parser.js';
+import type { Count, Expression, Literal, Parser, Rule, Select, Term } from '~/legacy/parser.js';
+import { Sequence } from '~/legacy/parser.js';
 
 
 

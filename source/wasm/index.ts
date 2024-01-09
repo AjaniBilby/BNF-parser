@@ -1,13 +1,13 @@
-import { GenerateWasm } from "./compile.js";
-import { CompileTypes } from "../types.js";
-import { CompileProgram } from "../compile.js";
-import * as Runner from "./run.js";
+import { GenerateWasm } from "~/wasm/compile.js";
+import { CompileTypes } from "~/types.js";
+import { CompileProgram } from "~/compile.js";
+import * as Runner from "~/wasm/run.js";
 
-import { ParseError, ReferenceRange, Reference } from "../artifacts/shared.js";
+import { ParseError, ReferenceRange, Reference } from "~/artifacts/shared.js";
 
 // Pre-compiled bnf parser components
-import * as Shared from "../../dist/shared.js"; // things shared between multiple pre-compiled BNFs
-import * as bnf from "../../dist/bnf.js";       // pre-compiled JS with WASM embedded
+import * as Shared from "~/../dist/shared.js"; // things shared between multiple pre-compiled BNFs
+import * as bnf from "~/../dist/bnf.js";       // pre-compiled JS with WASM embedded
 
 export function Compile2Wasm(inputBnf: string) {
 	const syntax = bnf.Parse_Program(inputBnf, true);

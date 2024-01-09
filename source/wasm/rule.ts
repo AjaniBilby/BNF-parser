@@ -1,7 +1,15 @@
 import binaryen from "binaryen";
 
 import LiteralMapping from "~/wasm/literal-mapping.js";
-import { CharRange, Count, Expression, Gather, Literal, Not, Omit, Rule, Select, Sequence, Term } from "~/legacy/parser.js";
+import {
+	Rule,
+	Expression,
+	Select, Sequence,
+	Gather,
+	Not, Omit, Term, Literal,
+	CharRange,
+	Count
+} from "~/legacy/parser.js";
 import { CompilerContext } from "~/wasm/context.js";
 import { OFFSET } from "~/wasm/layout.js";
 

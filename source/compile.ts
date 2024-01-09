@@ -1,9 +1,6 @@
-import type * as bnf from "../dist/bnf.js";       // pre-compiled JS with WASM embedded
-
-import * as legacy from "./legacy/parser.js";
-
-import { ParseError, ReferenceRange, AssertUnreachable } from "./artifacts/shared.js";
-
+import type * as bnf from "~/../dist/bnf.js";       // pre-compiled JS with WASM embedded
+import * as legacy from "~/legacy/parser.js";
+import { ParseError, ReferenceRange, AssertUnreachable } from "~/artifacts/shared.js";
 
 type ExpressionJSON = {
 	type: string;

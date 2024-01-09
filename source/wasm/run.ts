@@ -1,5 +1,5 @@
-import { ParseError, Reference, ReferenceRange, SyntaxNode } from "../artifacts/shared.js";
-import { OFFSET } from "./layout.js";
+import { ParseError, Reference, ReferenceRange, SyntaxNode } from "~/artifacts/shared.js";
+import { OFFSET } from "~/wasm/layout.js";
 
 
 export type WasmParser = WebAssembly.Instance & {
