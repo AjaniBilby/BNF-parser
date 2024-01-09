@@ -1,26 +1,42 @@
 name: Reflection Test (via NPM)
 
+concurrency:
+  group: ${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
 on:
-  push:
-    branches: [ main ]
+  release:
+    types: [ published ]
+  workflow_dispatch:
 
 jobs:
   run-linux:
-    if: ${{ false }}  # disable for now
 
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          path: 'temp-repo'
+
+      - name: Sparse Checkout
+        run: |
+          cd temp-repo
+          git sparse-checkout init --cone
+          git sparse-checkout set bnf test
 
       - name: Setup NodeJS
         uses: actions/setup-node@v3
         with:
-          node-version: 16
+          node-version: 20
 
       - name: Install NPM Dependencies
-        run: npm install bnf-parser
+        run: |
+          cd ./temp-repo
+          npm install bnf-parser chalk
 
       - name: Automated tests
-        run: npm run test
+        run: node ./test/index.js
+        working-directory: ./temp-repo
