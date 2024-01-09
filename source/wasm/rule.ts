@@ -899,8 +899,9 @@ function CompileRepeat(ctx: CompilerContext, innerWasm: number, repetitions: Cou
 
 
 
-export function CompileRule(m: binaryen.Module, literals: LiteralMapping, rule: Rule, fileID: number) {
+export function CompileRule(m: binaryen.Module, literals: LiteralMapping, rule: Rule, fileID?: number) {
 	const ctx = new CompilerContext(m, literals, rule);
+	ctx.enableDebugging(!!fileID);
 
 	// Function input
 	const error = ctx.declareVar(binaryen.i32);
@@ -928,6 +929,34 @@ export function CompileRule(m: binaryen.Module, literals: LiteralMapping, rule: 
 	const entry = ctx.m.block(null, [
 		ctx.m.local.set(error, ctx.m.i32.const(0)),
 
+		// Auto grow if 1kb from end of memory
+		ctx.m.if(
+			ctx.m.i32.lt_s(
+				ctx.m.i32.mul(
+					ctx.m.memory.size(),
+					ctx.m.i32.const(65_536) // bytes per page
+				),
+				ctx.m.i32.add(
+					ctx.m.global.get("heap", binaryen.i32),
+					ctx.m.i32.const(1024) // 1kb
+				)
+			),
+			ctx.m.block(null, [
+				rule.name === "expr_arg"
+					? ctx.m.call("print_i32", [
+						ctx.m.i32.sub(
+							ctx.m.i32.mul(
+								ctx.m.memory.size(),
+								ctx.m.i32.const(65_536) // bytes per page
+							),
+							ctx.m.global.get("heap", binaryen.i32)
+						)
+					], binaryen.none)
+					: ctx.m.nop(),
+				ctx.m.drop( ctx.m.memory.grow(ctx.m.i32.const(1)) )
+			])
+		),
+
 		innerWasm,
 
 		ctx.m.return(ctx.m.local.get(error, binaryen.i32))
@@ -940,7 +969,7 @@ export function CompileRule(m: binaryen.Module, literals: LiteralMapping, rule: 
 		ctx.vars,
 		entry
 	);
-
 	ctx.m.addFunctionExport(rule.name, rule.name);
-	ctx.applyDebugInfo(funcID, fileID);
+
+	if (fileID) ctx.applyDebugInfo(funcID, fileID);
 }

@@ -67,6 +67,7 @@ if (!existsSync(root)) {
 const isFile = statSync(root).isFile();
 const root_dir = isFile ? dirname(root) : root.slice(0, -1);
 const out_dir = process.argv[3] ? process.argv[3].slice(0, -1) : root_dir;
+const isDebug = process.argv.includes("--debug");
 
 if (!existsSync(root_dir)) {
 	console.error(`Unknown path ${root}`);
@@ -146,7 +147,7 @@ for (const file of files) {
 
 	// Generate web assembly
 	try {
-		const mod = wasm.GenerateWasm(lang);
+		const mod = wasm.GenerateWasm(lang, isDebug);
 		if (process.argv.includes("--emit-wat"))
 			writeFileSync(`${out_dir}/${name}.wat`, mod.emitText());
 
@@ -157,8 +158,10 @@ for (const file of files) {
 			continue;
 		}
 
-		binaryen.setOptimizeLevel(2);
-		mod.optimize();
+		if (!isDebug) {
+			binaryen.setOptimizeLevel(2);
+			mod.optimize();
+		}
 
 		// Generate JS runner
 		writeFileSync(`${out_dir}/${name}.js`,

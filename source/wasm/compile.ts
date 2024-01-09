@@ -23,14 +23,21 @@ function IngestLiterals(m: binaryen.Module, bnf: Parser) {
 	);
 
 	m.addGlobal("input",       binaryen.i32, false, m.i32.const(literals.size));
-	m.addGlobal("inputEnd",    binaryen.i32, true,  m.i32.const(0));
-	m.addGlobal("inputLength", binaryen.i32, true,  m.i32.const(0));
-	m.addGlobal("heap",        binaryen.i32, true,  m.i32.const(0));
-	m.addGlobal("index",       binaryen.i32, true,  m.i32.const(0));
 	m.addGlobal("reach",       binaryen.i32, true,  m.i32.const(0));
+	m.addGlobal("inputLength", binaryen.i32, true,  m.i32.const(0));
 	m.addGlobalExport("input", "input");
 	m.addGlobalExport("reach", "reach");
 	m.addGlobalExport("inputLength", "inputLength");
+
+	m.addGlobal("heap",        binaryen.i32, true,  m.i32.const(0));
+	m.addGlobal("index",       binaryen.i32, true,  m.i32.const(0));
+	m.addGlobal("inputEnd",    binaryen.i32, true,  m.i32.const(0));
+
+	if (true) {
+		m.addGlobalExport("heap", "heap");
+		m.addGlobalExport("index", "index");
+		m.addGlobalExport("inputEnd", "inputEnd");
+	}
 
 	return literals;
 }
@@ -344,11 +351,13 @@ function GenerateInternals(m: binaryen.Module, l: LiteralMapping) {
 
 
 
-export function GenerateWasm(bnf: Parser) {
+export function GenerateWasm(bnf: Parser, debug = false) {
 	var m = new binaryen.Module();
 
 	m.setFeatures(binaryen.Features.MutableGlobals);
-	const fileID = m.addDebugInfoFileName("source.bnf");
+	const fileID = debug
+		? m.addDebugInfoFileName("source.bnf")
+		: undefined;
 
 	m.setMemory(1, 1);
 	m.addFunctionImport("print_i32", "js", "print_i32", binaryen.createType([binaryen.i32]), binaryen.none);
