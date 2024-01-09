@@ -76,11 +76,11 @@ async function TestSyntax(lang, Shared) {
 
 	if (failed) {
 		console.error(log);
+		return false
 	} else {
 		console.log(log);
+		return true;
 	}
-
-	return failed;
 }
 
 

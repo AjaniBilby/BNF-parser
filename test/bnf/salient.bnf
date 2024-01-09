@@ -1,0 +1,107 @@
+program ::= %w* ( stmt_top %w* )* ;
+	stmt_top ::= function ;
+
+
+#=============================
+#  Helper patterns
+#=============================
+w ::= " " | "\t" | nl | comment ;
+nl ::= "\r\n" | "\n" ;
+
+digit ::= "0" -> "9" ;
+	digit_nz ::= "1" -> "9" ;
+letter ::= "a" -> "z" | "A" -> "Z" ;
+
+
+
+#=============================
+#  Comments
+#=============================
+comment ::= comment_single | comment_multi ;
+	comment_single ::= "//" !( nl )* nl? ; # Optional as the comment might be on a EOF
+	comment_multi  ::= "/*" ( "\\*" | !( "*/" )+ )* "*/" ;
+
+
+
+#=============================
+#  Constants
+#=============================
+constant ::= boolean
+	| string
+	| float | integer ;
+
+string ::= string_text ;
+	string_text ::= %"\'" ( ( "\\" !"" ) | !( "\'" ) )* %"\'" ;
+
+boolean ::= "true" | "false" ;
+
+void ::= "void" ;
+
+integer ::= ...integer_u ;
+	integer_u ::= ( digit_nz digit* ) | zero ;
+	zero ::= "0" ;
+float ::= ...( integer "." integer_u ( "e" integer )? ) ;
+
+
+
+#=============================
+#  Variables
+#=============================
+name ::= ...(( letter | "_" )+ ( letter | digit | "_" )*) ;
+
+access ::= name ( %w* accessor )* ;
+	accessor ::= access_static | access_dynamic | access_comp ;
+	access_static  ::= %"." ...name ;
+	access_dynamic ::= %"[]" ;
+	access_comp    ::= %"#[]";
+
+declare ::= %( "let" w* ) name %w* (%":" %w* access %w*)? ( %("=" w*) expr )? %(w* ";" w*) ;
+assign  ::= name %( w* "=" w*) expr %( w* ";" w* ) ;
+
+
+
+#=============================
+#  Storage
+#=============================
+struct ::= %("struct" w*) ...name %( w* "{" w* ) struct_attr+ %( w* "}" w* );
+	struct_attr ::= ...name %( w* ":" w* ) access %( w* ";" w* ) ;
+
+
+#=============================
+#  Function
+#=============================
+function ::= func_head %w* ( block | ";" ) ;
+	func_head ::= %("fn" w+) ...name %( w* "(" w* ) func_args %(w* ")" w* ":" w*) access ;
+	func_args ::= ( func_arg %w* ( %( "," w* ) func_arg )* )? ;
+		func_arg ::= ...name %( w* ":" w* ) access ;
+
+block ::= %( "{" w* ) block_stmt* %( w* "}" w* ) ;
+	block_stmt ::= declare | assign | return | raise | statement ;
+
+func_call ::= access func_call_body;
+	func_call_body ::= %( w* "(" w* ) ( expr %w* ( %( "," w* ) expr %w* )* )? %( ")" w* ) ;
+
+return ::= %"return" "_tail"? %w+ expr %( ";" w* );
+raise  ::= %"raise" %w+ expr %( ";" w* );
+
+#=============================
+#  Expression
+#=============================
+expr ::= expr_arg %w* ( ...expr_infix %w* expr_arg %w* )* ;
+	expr_prefix ::= "!" | "-" | "return" ;
+	expr_infix ::= "&&" | "||" | "^" | "==" | "!=" | "<=" | ">=" | "<" | ">"
+		| "%" | "*" | "/" | "+" | "-"
+		| "as" | "instanceof"
+		| "->" ;
+	expr_postfix ::= expr_call | expr_get | expr_param ;
+		expr_param ::= %"#[" %w* arg_list  %w* %"]" ;
+		expr_call  ::=  %"(" %w* arg_list  %w* %")" ;
+		expr_get   ::=  %"[" %w* arg_list  %w* %"]" ;
+	expr_arg ::= expr_prefix? %w* ( constant | expr_brackets | if | name | block ) %w* expr_postfix* ;
+	expr_brackets ::= %( "(" w* ) expr %( w* ")" ) ;
+
+arg_list ::= ( expr %w* ","? %w* )* ;
+
+if ::= %("if" w*) expr %w* expr %w* ( %"else" %w* expr )? ;
+
+statement ::= expr %(w* ";"? w*) ;
