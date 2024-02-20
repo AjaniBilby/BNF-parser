@@ -31,7 +31,7 @@ chunk ::= "a"+ "b"+ ;
 import * as syntax from "./bnf/example.js";
 
 const tree  /*(1)!*/ = syntax.Parse_Program("abbaabab").root;
-const block /*(2)!*/ = program.value[0];
+const chunk /*(2)!*/ = program.value[0];
 const firstBs   = program.value[1];
 const bCount: number = firstBs.value.length; // (3)!
 ```

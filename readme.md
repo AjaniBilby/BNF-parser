@@ -6,18 +6,19 @@ Compile your bnfs down to WebAssembly for maximum parsing speed; with generated 
 
 
 ```bnf
-program ::= %w* statement+ ;
-block ::= %("block" w+) ...name %(w* "{" w*) seq_stmt* %("}" w*) ;
+program ::= chunk+ ;
+chunk ::= "a"+ "b"+ ;
 ```
 ```bash
 npx bnf-compile ./syntax.bnf
 ```
 ```ts
-import * as syntax from "syntax.js";
+import * as syntax from "./bnf/syntax.js";
 
-const tree = syntax.Parse_Program(input).root;
-const block = program.value[0];
-const name: string = block.value[0]; // typescript knows this **will** be a string
+const tree  /*(1)!*/ = syntax.Parse_Program("abbaabab").root;
+const block /*(2)!*/ = program.value[0];
+const firstBs   = program.value[1];
+const bCount: number = firstBs.value.length; // typescript knows this **will** be a number
 ```
 
 **Built to be a devDependency** - if you use the included cli tool to generate your syntax parser you don't need to include this library as your dependency, you can just import those artifacts.
