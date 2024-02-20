@@ -6,10 +6,7 @@ import { Parser } from "~/legacy/parser.js";
 import { OFFSET } from "~/wasm/layout.js";
 
 
-
-
-
-function IngestLiterals(m: binaryen.Module, bnf: Parser) {
+function IngestLiterals(m: binaryen.Module, bnf: Parser, debug = false) {
 	const literals = new LiteralMapping();
 	literals.ingestBnf(bnf);
 
@@ -33,7 +30,7 @@ function IngestLiterals(m: binaryen.Module, bnf: Parser) {
 	m.addGlobal("index",       binaryen.i32, true,  m.i32.const(0));
 	m.addGlobal("inputEnd",    binaryen.i32, true,  m.i32.const(0));
 
-	if (true) {
+	if (debug) {
 		m.addGlobalExport("heap", "heap");
 		m.addGlobalExport("index", "index");
 		m.addGlobalExport("inputEnd", "inputEnd");
@@ -362,7 +359,7 @@ export function GenerateWasm(bnf: Parser, debug = false) {
 	m.setMemory(1, 1);
 	m.addFunctionImport("print_i32", "js", "print_i32", binaryen.createType([binaryen.i32]), binaryen.none);
 
-	const literals = IngestLiterals(m, bnf);
+	const literals = IngestLiterals(m, bnf, debug);
 	GenerateInternals(m, literals);
 
 	for (let [_, rule] of bnf.terms) {
