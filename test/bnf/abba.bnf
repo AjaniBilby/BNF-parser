@@ -1,0 +1,2 @@
+program ::= chunk+ ;
+chunk ::= "a"+ "b"+ ;
