@@ -21,7 +21,8 @@ function FlattenConstant(syntax: bnf.Term_Constant) {
 		const inner = frag.value[0];
 		switch (inner.type) {
 			case "literal": str += inner.value; break;
-			case "byte": str += String.fromCharCode(parseInt(inner.value[0].value, 16)); break;
+			case "byte": 
+			case "unicode": str += String.fromCharCode(parseInt(inner.value[0].value, 16)); break;
 			case "escape":
 				switch(inner.value[0].value) {
 					case "b": str += "\b"; break;

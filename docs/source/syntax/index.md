@@ -88,6 +88,7 @@ Literals also allow certain escape characters to help with encoding certain char
 | `\t` | Horizontal Tab |
 | `\v` | Vertical Tab |
 | `\x??` | The two characters following the `\x` must be hexadecimal digits, these digits represent the character code of the character you want to match at this point (`\x6b` = `k`)|
+| `\u????` | The four characters following the `\u` must be hexidecimal digits, these digits represent the character code of the character you want to match at this point (`\u4f60` = `你`)
 | - | Unrecognised escapes will result in just the character after the slash |
 
 ## Range
