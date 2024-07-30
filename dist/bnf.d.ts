@@ -146,7 +146,7 @@ export type Term_Frag = {
 	count: number,
 	ref: _Shared.ReferenceRange,
 	value: [
-		(Term_Byte | Term_Escape | _Literal)
+		(Term_Unicode | Term_Byte | Term_Escape | _Literal)
 	]
 }
 export declare function Parse_Frag (i: string, refMapping?: boolean): _Shared.ParseError | {
@@ -185,6 +185,23 @@ export type Term_Byte = {
 }
 export declare function Parse_Byte (i: string, refMapping?: boolean): _Shared.ParseError | {
 	root: _Shared.SyntaxNode & Term_Byte,
+	reachBytes: number,
+	reach: null | _Shared.Reference,
+	isPartial: boolean
+}
+
+export type Term_Unicode = {
+	type: 'unicode',
+	start: number,
+	end: number,
+	count: number,
+	ref: _Shared.ReferenceRange,
+	value: [
+		_Literal
+	]
+}
+export declare function Parse_Unicode (i: string, refMapping?: boolean): _Shared.ParseError | {
+	root: _Shared.SyntaxNode & Term_Unicode,
 	reachBytes: number,
 	reach: null | _Shared.Reference,
 	isPartial: boolean
