@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 4.1.3
+
+### Added:
+  - [x] Support for unicode hexes `\uXXXX` [#20](https://github.com/AjaniBilby/BNF-parser/pull/20) by [@zanerock](https://github.com/zanerock)
+
 ## Version 4.1.1
 
 ### Fixes:
